@@ -1,0 +1,141 @@
+@viewport {
+  width: device-width;
+  min-width: 480px;
+  zoom: 1.0 ;
+}
+
+@-ms-viewport {
+  width: device-width;
+  min-width: 480px;
+}
+
+html, body {
+	padding: 0 1em;
+	font-family: "Arial", "Helvetica", "sans-serif";
+	font-size: calc(10px + (18 - 10) * ((100vw - 300px) / (1600 - 300)));
+	line-height: calc(1.3em + (1.5 - 1.2) * ((100vw - 300px)/(1600 - 300)));
+}
+
+img.th:hover {
+	transform: scale(1.5);
+	cursor: pointer;
+}
+
+img.th {
+	height: 75px;
+}
+
+#orig,
+#redu {
+	white-space: nowrap;
+}
+
+th {
+	text-align: left;
+}
+
+input[type="text"] {
+	font-size: calc(10px + (18 - 10) * ((100vw - 300px) / (1600 - 300)));
+	font-family: "Arial, Times New Roman, Times, serif";
+	padding: 0;
+	border: none;
+	color: blue;
+	background: WhiteSmoke;
+}
+
+#tbl_showcase {
+	border: 1px solid silver;
+	border-collapse: collapse;
+}
+
+#tbl_showcase tr > * {
+	padding: 5px 15px;
+}
+
+#tbl_showcase tr:nth-child(odd) {
+	border-radius: 0.5em;
+	background: linear-gradient(to left, MintCream, Lavender);
+	background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+#btn_upd {
+	cursor: pointer;
+	font-size: calc(10px + (18 - 10) * ((100vw - 300px) / (1600 - 300)));
+	font-family: "Arial, Times New Roman, Times, serif";
+}
+
+.box {
+	float: left;
+	min-height: 165px;
+	min-width: 150px;	
+}
+
+.box img,
+.box canvas {
+	vertical-align: middle;
+}
+
+.box h4 {
+	background: linear-gradient(to right, LightYellow, Bisque);
+	font-size: calc(10px + (18 - 10) * ((100vw - 300px) / (1600 - 300)));
+	padding: 2px 5px;
+	margin: 0;
+}
+
+.box h5 {
+	background: linear-gradient(to right, LightYellow, Bisque);
+	border-top-right-radius: 0.5em;
+	font-size: calc(10px + (18 - 10) * ((100vw - 300px) / (1600 - 300)));
+	padding: 2px 5px;
+	margin: 0;
+}
+
+#footer {
+    position: fixed;	
+	border-radius: 0.5em;
+	box-shadow: 5px 5px rgba(128, 128, 128, 0.6);
+	background: linear-gradient(45deg, rgba(222, 222, 222, 0.4), rgba(168, 168, 168, 0.6));	
+	margin: 0.5em;
+    bottom: 0;
+	right: 0;
+}
+
+#palt {
+	align-content: flex-end;
+	align-items: flex-end;
+	bottom: 0.1vw;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin: 0.5vw 0.5vw;
+	min-width: 280px;
+	height: 8vh;
+}
+
+.custom_cfg {
+	cursor: pointer;
+	font-family: "Arial, Times New Roman, Times, serif";
+	float: left;
+	font-weight: bold;
+	margin-top: 3px;
+}
+
+.custom_cfg > * {
+	vertical-align: middle;
+}
+
+pre {
+	margin: 10px 0 0  0;
+}
+
+#wrapfabtest {
+	opacity: 0;
+	overflow: hidden;
+}
+
+.adBanner {
+	background-color: transparent;	
+	height: 1px;
+	width: 1px;
+}

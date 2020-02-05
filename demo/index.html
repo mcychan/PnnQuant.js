@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="description" content="PnnQuant.js">
+	<meta name="keywords" content="PnnQuant.js,ImgV64,Webworker,color-quantization,quantization-algorithms,error-diffusion,image-processing,cielab,dithering,unsupervised-clustering,transparency,quality">
+	<meta name="author" content="Miller Cy Chan">
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>PnnQuant.js Playground</title>
+
+	<link rel="stylesheet" href="css/demo.css">
+
+	<script src="js/jquery-2.2.4.min.js"></script>
+	<script src="../src/pnnquant.js"></script>
+	<script src="../src/pnnLABquant.js"></script>
+	<script src="js/helpers.js"></script>
+	<script src="js/preCode.js"></script>
+	<script src="js/timer.js"></script>
+	<script src="js/demo.js"></script>
+</head>
+<meta name="google-site-verification" content="uaVZxe8V55rvkhFV7liiebPRTTfOZhFySiFN97A11qw" />
+<body>
+	<h2>PnnQuant.js</h2>	
+
+	<div style="overflow: auto;">
+		<div class="box" style="margin: 0 auto; max-width: 49%; max-height: 35%;">			
+			<div id="orig" style="overflow: auto;" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+				<h4 style="display: none">Original</h4>
+				<img crossorigin="" />
+			</div>
+		</div>
+		
+		<div class="box" style="margin: 0 auto; max-width: 49%; max-height: 35%;">
+			<div id="redu" style="overflow: auto;"></div>
+		</div>				
+	</div>	
+	
+	<div id="footer" style="min-width: 575px">
+		<div class="box" style="padding-right: 1em; max-width: 100vw;">
+			<ul>
+				<li><b>Click an image to quantize it.</b></li>
+				<li><b>Please input number of colors wanted.</b></li>
+				<li><b>Config</b> values can be edited &amp; re-processed via <b>update</b>.</li>
+				<li>If your browser can't load an image fully, just try again.</li>
+			</ul>
+			<div id="palt"></div>
+		</div>
+		
+		<div class="box">
+			<h5>Config</h5>
+			<pre id="config" style="padding-left: 1em;">
+				var opts = {
+					colors: <input id="colors" type="text" value="256" class="autosize">,
+					<input id="dithering" type="checkbox" checked="checked"> <span>dithering</span>,
+				};
+			</pre>
+			<span style="padding-left: 1em; padding-bottom: 1em;">Quality: <input type="radio" name="quality" value="N" checked="checked" />
+			Normal <input type="radio" id="radHQ" name="quality" value="B" /> High</span>
+			<div style="padding: 0 1em 0.5em 13em;"><button id="btn_upd">Update</button></div>			
+		</div>		
+	</div>
+
+	<table id="tbl_showcase">
+		<tr>
+			<th>Art</th>
+			<td>
+				<img class="th" src="img/baseball_th.jpg" srcset="img/baseball_th.jpg 1x,img/baseball.jpg 4x" />
+				<img class="th" src="img/compcube_th.jpg" srcset="img/compcube_th.jpg 1x,img/compcube.jpg 4x" />
+				<img class="th" src="img/house_th.jpg" srcset="img/house_th.jpg 1x,img/house.jpg 4x" />
+				<img class="th" src="img/island_th.jpg" srcset="img/island_th.jpg 1x,img/island.jpg 4x" />
+				<img class="th" src="img/legend_th.jpg" srcset="img/legend_th.jpg 1x,img/legend.png 4x" />
+				<img class="th" src="img/monaLisa_th.jpg" srcset="img/monaLisa_th.jpg 1x,img/monaLisa.jpg 4x" />
+				<img class="th" src="img/old-HK_th.jpg" srcset="img/old-HK_th.jpg 1x,img/old-HK.jpg 4x" />
+				<img class="th" src="img/scream_th.jpg" srcset="img/scream_th.jpg 1x,img/scream.jpg 4x" />
+				<img class="th" src="img/venus_th.jpg" srcset="img/venus_th.jpg 1x,img/venus.jpg 4x" />
+			</td>
+		</tr>
+		<tr>
+			<th>Photos</th>
+			<td>
+				<img class="th" src="img/airline_th.jpg" srcset="img/airline_th.jpg 1x,img/airline.jpg 4x" />
+				<img class="th" src="img/araras_th.jpg" srcset="img/araras_th.jpg 1x,img/araras.jpg 4x" />
+				<img class="th" src="img/biking_th.jpg" srcset="img/biking_th.jpg 1x,img/biking.jpg 4x" />
+				<img class="th" src="img/bluff_th.jpg" srcset="img/bluff_th.jpg 1x,img/bluff.jpg 4x" />
+				<img class="th" src="img/casa_th.jpg" srcset="img/casa_th.jpg 1x,img/casa.jpg 4x" />
+				<img class="th" src="img/dog_th.jpg" srcset="img/dog_th.jpg 1x,img/dog.jpg 4x" />
+				<img class="th" src="img/HKView_th.jpg" srcset="img/HKView_th.jpg 1x,img/HKView.jpg 4x" />
+				<img class="th" src="img/lily-pond_th.jpg" srcset="img/lily-pond_th.jpg 1x,img/lily-pond.jpg 4x" />
+				<img class="th" src="img/pool_th.jpg" srcset="img/pool_th.jpg 1x,img/pool.jpg 4x" />
+				<img class="th" src="img/quantfrog_th.jpg" srcset="img/quantfrog_th.jpg 1x,img/quantfrog.png 4x" />
+				<img class="th" src="img/scotts_th.jpg" srcset="img/scotts_th.jpg 1x,img/scotts.jpg 4x" />
+				<img class="th" src="img/sky_sea_th.jpg" srcset="img/sky_sea_th.jpg 1x,img/sky_sea.jpg 4x" />
+				<img class="th" src="img/tree_th.jpg" srcset="img/tree_th.jpg 1x,img/tree.jpg 4x" />
+			</td>
+		</tr>
+		<tr>
+			<th>Colorful</th>
+			<td>
+				<img class="th" src="img/fish_th.jpg" srcset="img/fish_th.jpg 1x,img/fish.jpg 4x" />
+				<img class="th" src="img/fruit-market_th.jpg" srcset="img/fruit-market_th.jpg 1x,img/fruit-market.jpg 4x" />
+				<img class="th" src="img/papers_th.jpg" srcset="img/papers_th.jpg 1x,img/papers.jpg 4x" />
+				<img class="th" src="img/rainbow-illusions_th.jpg" srcset="img/rainbow-illusions_th.jpg 1x,img/rainbow-illusions.jpg 4x" />
+				<img class="th" src="img/SE5x9_th.jpg" srcset="img/SE5x9_th.jpg 1x,img/SE5x9.jpg 4x" />
+				<img class="th" src="img/significado-color_th.jpg" srcset="img/significado-color_th.jpg 1x,img/significado-color.jpg 4x" />
+			</td>
+		</tr>
+		<tr>
+			<th>Partial Transparent</th>
+			<td>
+				<img class="th" src="img/cup_th.png" srcset="img/cup_th.png 1x,img/cup.png 640w" />
+				<img class="th" src="img/rainbow-shadow_th.png" srcset="img/rainbow-shadow_th.png 1x,img/rainbow-shadow.png 1024w" />
+			</td>
+		</tr>
+	</table>
+	
+	<div id="wrapfabtest">
+		<div class="adBanner">
+			ImgV64 Copyright © 2016-2020
+		</div>
+	</div>
+</body>
+</html>
