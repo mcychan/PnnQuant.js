@@ -1,5 +1,5 @@
-importScripts('../../src/pnnquant.js');
-importScripts('../../src/pnnLABquant.js');
+importScripts('pnnquant.min.js');
+importScripts('pnnLABquant.min.js');
 
 function quantizeImage(opts) {				
 	var	quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);
