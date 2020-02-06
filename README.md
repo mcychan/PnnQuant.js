@@ -1,5 +1,5 @@
 # PnnQuant.js
-Fast pairwise nearest neighbor based algorithm with javascript
+Fast pairwise nearest neighbor based algorithm with javascript. PnnQuant.js is a port of <a href="https://github.com/mcychan/nQuantCpp">nQuantCpp lib</a> in js. PnnQuant.js can reduce your images right in your browser without any server requirements. PNG is useful because it's the only widely supported format which can store partially transparent images. The format uses compression, but the files can still be large. Use PnnQuant.js to shrink images for your apps and sites.  Based on the quality options you chosen, an optimal strategy is executed. The result is a quality image which use less bandwidth and load faster.
 
 <b>Demo:</b> https://mcychan.github.io/PnnQuant.js/demo/
 
@@ -17,7 +17,8 @@ var opts = {
 let bestQuality = false;
 var quant = bestQuality ? new PnnLABQuant(opts) : new PnnQuant(opts);
 
-// reduce images
-var img8 = quant.quantizeImage(img, opts.colors, opts.dithering);
+// reduce image
+var img8 = quant.quantizeImage();
+var pal8 = quant.getPalette();
 ```
 
