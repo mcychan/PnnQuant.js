@@ -328,6 +328,7 @@ Copyright (c) 2018 Miller Cy Chan
 			bins[i].Lc *= d;
 			bins[i].Ac *= d;
 			bins[i].Bc *= d;
+			bins[i].cnt = Math.sqrt(bins[i].cnt);
 			bins[maxbins++] = bins[i];
 		}
 

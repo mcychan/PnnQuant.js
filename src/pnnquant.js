@@ -63,7 +63,7 @@ Copyright (c) 2018 Miller Cy Chan
 		bin1.nn = nn;
 	}
 	
-	PnnQuant.prototype.pnnquan = function pnnquan(pixels, nMaxColors, quan_sqrt) {
+	PnnQuant.prototype.pnnquan = function pnnquan(pixels, nMaxColors) {
 		var bins = new Array(65536);
 
 		/* Build histogram */
@@ -99,8 +99,7 @@ Copyright (c) 2018 Miller Cy Chan
 			bins[i].rc *= d;
 			bins[i].gc *= d;
 			bins[i].bc *= d;
-			if (quan_sqrt)
-				bins[i].cnt = Math.sqrt(bins[i].cnt);
+			bins[i].cnt = Math.sqrt(bins[i].cnt);
 			bins[maxbins++] = bins[i];
 		}
 
@@ -440,9 +439,8 @@ Copyright (c) 2018 Miller Cy Chan
 		var qPixels = new Uint32Array(pixels.length);
 
 		this.palette = new Uint32Array(nMaxColors);
-		var quan_sqrt = nMaxColors > 0xff;
 		if (nMaxColors > 2)
-			this.pnnquan(pixels, nMaxColors, quan_sqrt);
+			this.pnnquan(pixels, nMaxColors);
 		else {
 			if (this.m_transparentPixelIndex >= 0)
 			{
