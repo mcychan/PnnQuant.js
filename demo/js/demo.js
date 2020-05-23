@@ -111,14 +111,16 @@ function process(srcs) {
 			img.crossOrigin = '';			
 		});
 
-		var opts = getOpts(id);
-		opts.isHQ = $("#radHQ").is(":checked");
-		
-		ti.start();
-		
-		$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();
-		readImageData(img, opts);
-		doProcess(ti, opts);
+		img.onload = function() {
+			var opts = getOpts(id);
+			opts.isHQ = $("#radHQ").is(":checked");
+			
+			ti.start();
+			
+			$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();
+			readImageData(img, opts);
+			doProcess(ti, opts);
+		};
 	});
 }
 
