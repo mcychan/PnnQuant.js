@@ -94,34 +94,32 @@ function readImageData(img, opts) {
 	}	
 }
 
-function process(srcs) {		
+function process(imgUrl) {		
 	$("#btn_upd").prop("disabled", true).text("Please wait...");
-	$.getImgs(srcs, function() {
-		var ti = new Timer();
-		ti.start();	
-		ti.mark("image(s) loaded");
-		var $orig = $("#orig");
-		$orig.html("<h4>Original</h4>");
+	var ti = new Timer();
+	ti.start();	
+	ti.mark("image(s) loaded");
+	var $orig = $("#orig");
+	$orig.html("<h4>Original</h4>");
+	
+	var img = document.createElement("img");
+	img.addEventListener("load", function() {
+		var opts = getOpts(id);
+		opts.isHQ = $("#radHQ").is(":checked");
 		
-		var img = arguments[0];
-		var id = baseName(img.src)[0];		
+		ti.start();
 		
-		ti.mark("'" + id + "' -> DOM", function() {
-			$orig.append(img);			
-			img.crossOrigin = '';			
-		});
-
-		img.onload = function() {
-			var opts = getOpts(id);
-			opts.isHQ = $("#radHQ").is(":checked");
-			
-			ti.start();
-			
-			$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();
-			readImageData(img, opts);
-			doProcess(ti, opts);
-		};
-	});
+		$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();
+		readImageData(img, opts);
+		doProcess(ti, opts);
+	}, false);
+	
+	var id = baseName(imgUrl)[0];
+	img.src = imgUrl;
+	ti.mark("'" + id + "' -> DOM", function() {
+		$orig.append(img);			
+		img.crossOrigin = '';			
+	});	
 }
 
 function dragLeave(ev) {
@@ -140,8 +138,7 @@ function createImage(id, imgUrl, ev) {
 	ti.start();	
 	ti.mark("image(s) loaded");
 	var $orig = $("#orig");
-	$orig.html("<h4>Original</h4>");
-	
+	$orig.html("<h4>Original</h4>");	
 	
 	var opts = getOpts(id);
 	opts.isHQ = $("#radHQ").is(":checked");
@@ -152,11 +149,11 @@ function createImage(id, imgUrl, ev) {
 	ti.mark("'" + id + "' -> DOM", function() {
 		img.crossOrigin = '';
 		$orig.append(img);
-		img.onload = function() {
+		img.addEventListener("load", function() {
 			$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();		
 			readImageData(img, opts);
 			doProcess(ti, opts);
-		};
+		}, false);
 		
 		// convert image file to base64 string
 		img.src = imgUrl;		
@@ -189,8 +186,8 @@ function download(imgUrl, ev) {
 		var rootUrl = location.href.substr(0, location.href.lastIndexOf("/") + 1);
 		var imgSrc = imgUrl.replace(rootUrl, "");
 		var srcSet = $("img[srcset][src$='" + imgSrc + "']");
-		var srcs = [srcSet.length > 0 ? srcSet.attr("srcset").split(",").pop().trim().split(" ")[0] : imgSrc];
-		process(srcs);
+		var imgUrl = srcSet.length > 0 ? srcSet.attr("srcset").split(",").pop().trim().split(" ")[0] : imgSrc;
+		process(imgUrl);
 		dragLeave(ev);
 		return;
 	}	
@@ -312,20 +309,20 @@ $(document).on("click", "img.th", function() {
 	if(!$("#btn_upd").is(":disabled")) {
 		var id = baseName(this.src)[0];
 
-		var srcs = [$(this).attr("srcset").split(",").pop().trim().split(" ")[0]];
+		var imgUrl = $(this).attr("srcset").split(",").pop().trim().split(" ")[0];
 
-		process(srcs);
+		process(imgUrl);
 	}
 }).on("click", "#btn_upd", function(){
 	
 	$("#redu").empty();
-	var srcs = [$("#orig img").prop("src")];
-	process(srcs);
+	var imgUrl = $("#orig img").prop("src");
+	process(imgUrl);
 
 }).on("change", "input, textarea, select", function() {
 	cfg_edited = true;
 }).ready(function(){
 	$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("img.th").on("dragstart", dragStart);
-	process(["img/SE5x9.jpg"]);
+	process("img/SE5x9.jpg");
 });
