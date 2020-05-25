@@ -111,7 +111,7 @@ function process(imgUrl) {
 			
 			ti.start();
 			
-			$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();
+			$("#orig h4").css("width", (img.naturalWidth | img.width) + "px");
 			readImageData(img, opts);
 			doProcess(ti, opts);
 		}, false);
@@ -153,7 +153,7 @@ function createImage(id, imgUrl, ev) {
 		img.crossOrigin = '';
 		$orig.append(img);
 		img.addEventListener("load", function() {
-			$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();		
+			$("#orig h4").css("width", (img.naturalWidth | img.width) + "px");		
 			readImageData(img, opts);
 			doProcess(ti, opts);
 		}, false);
