@@ -98,21 +98,24 @@ function process(imgUrl) {
 	$("#btn_upd").prop("disabled", true).text("Please wait...");
 	var ti = new Timer();
 	ti.start();	
-	ti.mark("image(s) loaded");
+	ti.mark("image loaded");
 	var $orig = $("#orig");
-	$orig.html("<h4>Original</h4>");
-	
-	var img = document.createElement("img");
-	img.addEventListener("load", function() {
-		var opts = getOpts(id);
-		opts.isHQ = $("#radHQ").is(":checked");
+	var img = $orig.find("img")[0];
+	if(!img) {
+		$orig.html("<h4>Original</h4>");
 		
-		ti.start();
-		
-		$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();
-		readImageData(img, opts);
-		doProcess(ti, opts);
-	}, false);
+		img = document.createElement("img");
+		img.addEventListener("load", function() {
+			var opts = getOpts(id);
+			opts.isHQ = $("#radHQ").is(":checked");
+			
+			ti.start();
+			
+			$("#orig h4").css("width", ($orig[0].scrollWidth - 10) + "px").show();
+			readImageData(img, opts);
+			doProcess(ti, opts);
+		}, false);
+	}
 	
 	var id = baseName(imgUrl)[0];
 	img.src = imgUrl;
@@ -136,7 +139,7 @@ function allowDrop(ev) {
 function createImage(id, imgUrl, ev) {
 	var ti = new Timer();
 	ti.start();	
-	ti.mark("image(s) loaded");
+	ti.mark("image loaded");
 	var $orig = $("#orig");
 	$orig.html("<h4>Original</h4>");	
 	
