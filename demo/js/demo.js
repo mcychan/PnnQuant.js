@@ -122,25 +122,25 @@ function createImage(id, imgUrl, ev) {
 	var $orig = $("#orig");
 	var img = $orig.find("img")[0];
 	if(!img) {
-		$orig.html("<h4>Original</h4>");
-		
-		img = document.createElement("img");
-		img.onload = function() {
-			var opts = getOpts(id);
-			opts.isHQ = $("#radHQ").is(":checked");
-			
-			ti.start();
-			
-			$("#orig h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
-			readImageData(img, opts);
-			doProcess(ti, opts);
-			
-			if(ev)
-				dragLeave(ev);
-		};
+		$orig.html("<h4>Original</h4>");		
+		img = document.createElement("img");	
 	}
 	
+	img.onload = function() {
+		var opts = getOpts(id);
+		opts.isHQ = $("#radHQ").is(":checked");
+		
+		ti.start();
+		
+		$("#orig h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
+		readImageData(img, opts);
+		doProcess(ti, opts);
+		
+		if(ev)
+			dragLeave(ev);
+	};
 	img.src = imgUrl;
+	
 	ti.mark("'" + id + "' -> DOM", function() {
 		$orig.append(img);			
 		img.crossOrigin = '';			
