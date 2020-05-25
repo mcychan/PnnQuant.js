@@ -43,14 +43,14 @@ function quantizeImage(result, width) {
 		$redu.html("<h4>Quantized</h4>");	
 		
 		var img = document.createElement("img");
+		img.onload = function() {		
+			img.width = can.width, img.height = can.height;
+			
+			$("#redu h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
+		};
 		$redu.append(img);
-	}
+	}	
 	
-	img.onload = function() {		
-		img.width = can.width, img.height = can.height;
-		
-		$("#redu h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
-	};
 	img.src = can.toDataURL();
 	
 	var pal = new Uint32Array(result.pal8);
@@ -122,29 +122,29 @@ function createImage(id, imgUrl, ev) {
 	var $orig = $("#orig");
 	var img = $orig.find("img")[0];
 	if(!img) {
-		$orig.html("<h4>Original</h4>");		
-		img = document.createElement("img");	
+		$orig.html("<h4>Original</h4>");
+		
+		img = document.createElement("img");
+		img.onload = function() {
+			var opts = getOpts(id);
+			opts.isHQ = $("#radHQ").is(":checked");
+			
+			ti.start();			
+			$("#orig h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
+			ti.mark("'" + id + "' -> DOM", function() {
+				$orig.append(img);			
+				img.crossOrigin = '';			
+			});	
+	
+			readImageData(img, opts);
+			doProcess(ti, opts);
+			
+			if(ev)
+				dragLeave(ev);
+		};
 	}
 	
-	img.onload = function() {
-		var opts = getOpts(id);
-		opts.isHQ = $("#radHQ").is(":checked");
-		
-		ti.start();
-		
-		$("#orig h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
-		readImageData(img, opts);
-		doProcess(ti, opts);
-		
-		if(ev)
-			dragLeave(ev);
-	};
-	img.src = imgUrl;
-	
-	ti.mark("'" + id + "' -> DOM", function() {
-		$orig.append(img);			
-		img.crossOrigin = '';			
-	});	
+	img.src = imgUrl;	
 }
 
 function process(imgUrl) {		
@@ -303,12 +303,9 @@ $(document).on("click", "img.th", function() {
 
 		process(imgUrl);
 	}
-}).on("click", "#btn_upd", function(){
-	
-	$("#redu").empty();
+}).on("click", "#btn_upd", function(){	
 	var imgUrl = $("#orig img").prop("src");
 	process(imgUrl);
-
 }).on("change", "input, textarea, select", function() {
 	cfg_edited = true;
 }).ready(function(){
