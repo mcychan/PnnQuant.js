@@ -36,12 +36,22 @@ function getOpts(id) {
 }
 
 function quantizeImage(result, width) {				
+	var	can = drawPixels(result.img8, width);
 	var $redu = $("#redu");
-	$redu.html("<h4>Quantized</h4>");	
-
-	var	ican = drawPixels(result.img8, width);
-	$redu.append(ican);
-	$("#redu h4").css("width", ($redu[0].scrollWidth - 10) + "px");
+	var img = $redu.find("img")[0];
+	if(!img) {
+		$redu.html("<h4>Quantized</h4>");	
+		
+		var img = document.createElement("img");
+		$redu.append(img);
+	}
+	
+	img.onload = function() {		
+		img.width = can.width, img.height = can.height;
+		
+		$("#redu h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
+	};
+	img.src = can.toDataURL();
 	
 	var pal = new Uint32Array(result.pal8);
 	var $palt = $("#palt");
@@ -115,7 +125,7 @@ function createImage(id, imgUrl, ev) {
 		$orig.html("<h4>Original</h4>");
 		
 		img = document.createElement("img");
-		img.addEventListener("load", function() {
+		img.onload = function() {
 			var opts = getOpts(id);
 			opts.isHQ = $("#radHQ").is(":checked");
 			
@@ -127,10 +137,9 @@ function createImage(id, imgUrl, ev) {
 			
 			if(ev)
 				dragLeave(ev);
-		}, false);
+		};
 	}
 	
-	var id = baseName(imgUrl)[0];
 	img.src = imgUrl;
 	ti.mark("'" + id + "' -> DOM", function() {
 		$orig.append(img);			

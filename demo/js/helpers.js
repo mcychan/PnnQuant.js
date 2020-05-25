@@ -63,11 +63,8 @@ function drawPixels(idxi32, width0, maxWidth, maxHeight, cols) {
 		}
 		return divContent;
 	}
-	
-	var img = new Image();
-	img.src = can.toDataURL();
-	img.width = can.width, img.height = can.height;
-	return img;
+
+	return can;
 }
 
 (function() {
