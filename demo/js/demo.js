@@ -43,14 +43,13 @@ function quantizeImage(result, width) {
 		$redu.html("<h4>Quantized</h4>");	
 		
 		var img = document.createElement("img");
-		img.onload = function() {		
-			img.width = can.width, img.height = can.height;
-			
+		img.onload = function() {			
 			$("#redu h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
 		};
 		$redu.append(img);
 	}	
 	
+	img.width = can.width, img.height = can.height;
 	img.src = can.toDataURL();
 	
 	var pal = new Uint32Array(result.pal8);
