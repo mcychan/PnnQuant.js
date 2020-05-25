@@ -94,8 +94,18 @@ function readImageData(img, opts) {
 	}	
 }
 
-function process(imgUrl) {		
-	$("#btn_upd").prop("disabled", true).text("Please wait...");
+function dragLeave(ev) {
+	$(ev.target).css("border", "");
+}
+
+function allowDrop(ev) {
+	ev.stopPropagation();
+	ev.preventDefault();
+	
+	$(ev.target).css("border", "4px dashed silver");
+}
+
+function createImage(id, imgUrl, ev) {
 	var ti = new Timer();
 	ti.start();	
 	ti.mark("image loaded");
@@ -114,6 +124,9 @@ function process(imgUrl) {
 			$("#orig h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
 			readImageData(img, opts);
 			doProcess(ti, opts);
+			
+			if(ev)
+				dragLeave(ev);
 		}, false);
 	}
 	
@@ -125,45 +138,10 @@ function process(imgUrl) {
 	});	
 }
 
-function dragLeave(ev) {
-	$(ev.target).css("border", "");
-}
-
-function allowDrop(ev) {
-	ev.stopPropagation();
-	ev.preventDefault();
-	
-	$(ev.target).css("border", "4px dashed silver");
-}
-
-function createImage(id, imgUrl, ev) {
-	var ti = new Timer();
-	ti.start();	
-	ti.mark("image loaded");
-	var $orig = $("#orig");
-	$orig.html("<h4>Original</h4>");	
-	
-	var opts = getOpts(id);
-	opts.isHQ = $("#radHQ").is(":checked");
-	
-	ti.start();			
-	var img = document.createElement("img");	
-	
-	ti.mark("'" + id + "' -> DOM", function() {
-		img.crossOrigin = '';
-		$orig.append(img);
-		img.addEventListener("load", function() {
-			$("#orig h4").css("width", ((img.naturalWidth | img.width) - 10) + "px").show();		
-			readImageData(img, opts);
-			doProcess(ti, opts);
-		}, false);
-		
-		// convert image file to base64 string
-		img.src = imgUrl;		
-		
-		if(ev)
-			dragLeave(ev);
-	});
+function process(imgUrl) {		
+	$("#btn_upd").prop("disabled", true).text("Please wait...");
+	var id = baseName(imgUrl)[0];
+	createImage(id, imgUrl, null);
 }
 
 function loadImage(id, blob, ev) {	
