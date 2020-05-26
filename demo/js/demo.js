@@ -306,12 +306,22 @@ function retrieveImageFromClipboardAsBase64(pasteEvent){
     }
 }
 
+function keyBoardListener(evt) {
+    if (evt.ctrlKey) {
+		switch(evt.keyCode) {
+            case 86: // v
+                handlePaste();
+                break;
+        }
+    }
+}
+
 function handlePaste(){
 	if($("#btn_upd").is(":disabled"))
 		return;
 
 	var items = window.clipboardData.files;
-	if (!items) {
+	if (!items.length) {
 		var imgUrl = window.clipboardData.getData('Text');
 		pasteUrl(imgUrl);
 		return;
@@ -344,7 +354,7 @@ $(document).on("click", "img.th", function() {
 	cfg_edited = true;
 }).ready(function(){
 	if(window.clipboardData)
-		$("#orig").on("paste", handlePaste);
+		document.body.addEventListener("keyup", keyBoardListener);
 	else
 		$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("img.th").on("dragstart", dragStart);
