@@ -180,9 +180,16 @@ function download(imgUrl, ev) {
 		process(imgUrl);
 		dragLeave(ev);
 		return;
-	}	
-	if(imgUrl.indexOf("<svg ") > -1)
-		imgUrl = "data:image/svg+xml;utf8," + imgUrl.substring(imgUrl.indexOf("<svg ")).split("\"").join("'");
+	}
+	
+	var svgTag = "<svg ";
+	var svgIndex = imgUrl.indexOf(svgTag);
+	if(svgIndex > -1) {
+		var svg = imgUrl.substring(svgIndex).split("\"").join("'");
+		if(svg.indexOf(" xmlns=") < 0)
+			svg = svg.replace(svgTag, svgTag + " xmlns='http://www.w3.org/2000/svg' ");
+		imgUrl = "data:image/svg+xml;utf8," + svg;
+	}
 
 	imgUrl = imgUrl.replace("http:", location.protocol);	
 	if(imgUrl.indexOf("data:") == 0) {
