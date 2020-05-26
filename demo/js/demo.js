@@ -306,7 +306,7 @@ function retrieveImageFromClipboardAsBase64(pasteEvent){
     }
 }
 
-function handlePaste(pasteEvent){
+function handlePaste(){
 	if($("#btn_upd").is(":disabled"))
 		return;
 
@@ -321,8 +321,10 @@ function handlePaste(pasteEvent){
         // Skip content if not image
         if (items[i].type.indexOf("image") == -1)
 			continue;
-
-        loadImage(new Date().getTime(), items[i], null);
+		// Retrieve image on clipboard as blob
+        var blob = items[i].getAsFile();
+		
+        loadImage(new Date().getTime(), blob, null);
 		return;
     }	
 }
@@ -342,7 +344,7 @@ $(document).on("click", "img.th", function() {
 	cfg_edited = true;
 }).ready(function(){
 	if(window.clipboardData)
-		document.body.addEventListener("paste", handlePaste, false);
+		$("#orig").on("paste", handlePaste);
 	else
 		$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("img.th").on("dragstart", dragStart);
