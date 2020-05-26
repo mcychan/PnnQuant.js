@@ -256,21 +256,21 @@ function drop(ev) {
 }
 
 function pasteUrl(imgUrl) {
-			if(/<.+>/g.exec(imgUrl)) {
-				var domContext = $('<div>').append(imgUrl);
-				var hyperlink = $(domContext).find("img");
-				if(hyperlink.length > 0)
-					imgUrl = hyperlink.attr("srcset") ? hyperlink.attr("srcset").split(",").pop().trim().split(" ")[0] : hyperlink.prop("src");
-				else {
-					hyperlink = $(domContext).find("a");
-					if(hyperlink.length > 0)
-						imgUrl = hyperlink.prop("href");
-				}
-			}
-			
-			if(imgUrl.trim() != "")
-				download(imgUrl, null);				
+	if(/<.+>/g.exec(imgUrl)) {
+		var domContext = $('<div>').append(imgUrl);
+		var hyperlink = $(domContext).find("img");
+		if(hyperlink.length > 0)
+			imgUrl = hyperlink.attr("srcset") ? hyperlink.attr("srcset").split(",").pop().trim().split(" ")[0] : hyperlink.prop("src");
+		else {
+			hyperlink = $(domContext).find("a");
+			if(hyperlink.length > 0)
+				imgUrl = hyperlink.prop("href");
 		}
+	}
+	
+	if(imgUrl.trim() != "")
+		download(imgUrl, null);				
+}
 
 /**
  * This handler retrieves the images from the clipboard as a base64 string
@@ -278,19 +278,13 @@ function pasteUrl(imgUrl) {
  * @param pasteEvent 
  */
 function retrieveImageFromClipboardAsBase64(pasteEvent){
-	var clipboardData = pasteEvent.clipboardData || window.clipboardData || pasteEvent.originalEvent.clipboardData;
+	var clipboardData = pasteEvent.clipboardData || pasteEvent.originalEvent.clipboardData;
 	if(!clipboardData || $("#btn_upd").is(":disabled"))
 		return;
 	
     var items = clipboardData.items;
-    if(items == undefined) {
-		if(window.clipboardData){
-			var imgUrl = clipboardData.getData('Text');
-			pasteUrl(imgUrl);
-			return;
-		}
+    if(items == undefined)
 		return;
-	}
 
     for (var i = 0; i < items.length; ++i) {
         // Skip content if not image
@@ -312,6 +306,27 @@ function retrieveImageFromClipboardAsBase64(pasteEvent){
     }
 }
 
+function handlePaste(pasteEvent){
+	if(!window.clipboardData || $("#btn_upd").is(":disabled"))
+		return;
+
+	var items = window.clipboardData.files;
+	if (!items) {
+		var imgUrl = window.clipboardData.getData('Text');
+		pasteUrl(imgUrl);
+		return;
+	}
+	
+    for (var i = 0; i < items.length; ++i) {
+        // Skip content if not image
+        if (items[i].type.indexOf("image") == -1)
+			continue;
+
+        loadImage(new Date().getTime(), items[i], null);
+		return;
+    }	
+}
+
 $(document).on("click", "img.th", function() {
 	if(!$("#btn_upd").is(":disabled")) {
 		var id = baseName(this.src)[0];
@@ -326,7 +341,10 @@ $(document).on("click", "img.th", function() {
 }).on("change", "input, textarea, select", function() {
 	cfg_edited = true;
 }).ready(function(){
-	$("body").on("paste", retrieveImageFromClipboardAsBase64);
+	if(window.clipboardData)
+		document.addEventListener("paste", handlePaste, false);
+	else
+		$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("img.th").on("dragstart", dragStart);
 	process("img/SE5x9.jpg");
 });
