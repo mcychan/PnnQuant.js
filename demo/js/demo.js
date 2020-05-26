@@ -172,13 +172,17 @@ function isExternal(url) {
 
 function download(imgUrl, ev) {
 	if(!isExternal(imgUrl)) {
-		var rootUrl = location.href.substr(0, location.href.lastIndexOf("/") + 1);
-		var imgSrc = imgUrl.replace(rootUrl, "");
-		var srcSet = $("img[srcset][src$='" + imgSrc + "']");
-		var imgUrl = srcSet.length > 0 ? srcSet.attr("srcset").split(",").pop().trim().split(" ")[0] : imgSrc;
-		process(imgUrl);
-		dragLeave(ev);
-		return;
+		if(imgUrl.indexOf("<svg ") > -1)
+			imgUrl = "data:image/svg+xml;utf8," + imgUrl.substring(imgUrl.indexOf("<svg ")).split("\"").join("'");
+		else {
+			var rootUrl = location.href.substr(0, location.href.lastIndexOf("/") + 1);
+			var imgSrc = imgUrl.replace(rootUrl, "");
+			var srcSet = $("img[srcset][src$='" + imgSrc + "']");
+			imgUrl = srcSet.length > 0 ? srcSet.attr("srcset").split(",").pop().trim().split(" ")[0] : imgSrc;
+			process(imgUrl);
+			dragLeave(ev);
+			return;
+		}
 	}	
 
 	imgUrl = imgUrl.replace("http:", location.protocol);	
