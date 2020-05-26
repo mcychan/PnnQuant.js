@@ -255,6 +255,23 @@ function drop(ev) {
 	}
 }
 
+function pasteUrl(imgUrl) {
+			if(/<.+>/g.exec(imgUrl)) {
+				var domContext = $('<div>').append(imgUrl);
+				var hyperlink = $(domContext).find("img");
+				if(hyperlink.length > 0)
+					imgUrl = hyperlink.attr("srcset") ? hyperlink.attr("srcset").split(",").pop().trim().split(" ")[0] : hyperlink.prop("src");
+				else {
+					hyperlink = $(domContext).find("a");
+					if(hyperlink.length > 0)
+						imgUrl = hyperlink.prop("href");
+				}
+			}
+			
+			if(imgUrl.trim() != "")
+				download(imgUrl, null);				
+		}
+
 /**
  * This handler retrieves the images from the clipboard as a base64 string
  * 
@@ -264,11 +281,16 @@ function retrieveImageFromClipboardAsBase64(pasteEvent){
 	var clipboardData = pasteEvent.clipboardData || window.clipboardData || pasteEvent.originalEvent.clipboardData;
 	if(!clipboardData || $("#btn_upd").is(":disabled"))
 		return;
-
+	
     var items = clipboardData.items;
-
-    if(items == undefined)
+    if(items == undefined) {
+		if(window.clipboardData){
+			var imgUrl = clipboardData.getData('Text');
+			pasteUrl(imgUrl);
+			return;
+		}
 		return;
+	}
 
     for (var i = 0; i < items.length; ++i) {
         // Skip content if not image
@@ -286,22 +308,7 @@ function retrieveImageFromClipboardAsBase64(pasteEvent){
         if (items[i].kind != "string")
 			continue;
 
-        items[i].getAsString(function(imgUrl) {
-			if(/<.+>/g.exec(imgUrl)) {
-				var domContext = $('<div>').append(imgUrl);
-				var hyperlink = $(domContext).find("img");
-				if(hyperlink.length > 0)
-					imgUrl = hyperlink.attr("srcset") ? hyperlink.attr("srcset").split(",").pop().trim().split(" ")[0] : hyperlink.prop("src");
-				else {
-					hyperlink = $(domContext).find("a");
-					if(hyperlink.length > 0)
-						imgUrl = hyperlink.prop("href");
-				}
-			}
-			
-			if(imgUrl.trim() != "")
-				download(imgUrl, null);				
-		});
+        items[i].getAsString(pasteUrl);
     }
 }
 
