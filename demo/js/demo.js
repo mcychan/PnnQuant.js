@@ -181,6 +181,8 @@ function download(imgUrl, ev) {
 		dragLeave(ev);
 		return;
 	}
+
+	imgUrl = imgUrl.replace("http:", location.protocol);
 	
 	var svgTag = "<svg ";
 	var svgIndex = imgUrl.indexOf(svgTag);
@@ -189,9 +191,7 @@ function download(imgUrl, ev) {
 		if(svg.indexOf(" xmlns=") < 0)
 			svg = svg.replace(svgTag, svgTag + "xmlns='http://www.w3.org/2000/svg' ");
 		imgUrl = "data:image/svg+xml;utf8," + svg;
-	}
-
-	imgUrl = imgUrl.replace("http:", location.protocol);	
+	}	
 	if(imgUrl.indexOf("data:") == 0) {
 		createImage(new Date().getTime(), imgUrl, ev);
 		return;
