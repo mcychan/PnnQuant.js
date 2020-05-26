@@ -187,7 +187,7 @@ function download(imgUrl, ev) {
 	if(svgIndex > -1) {
 		var svg = imgUrl.substring(svgIndex).split("\"").join("'");
 		if(svg.indexOf(" xmlns=") < 0)
-			svg = svg.replace(svgTag, svgTag + " xmlns='http://www.w3.org/2000/svg' ");
+			svg = svg.replace(svgTag, svgTag + "xmlns='https://www.w3.org/2000/svg' ");
 		imgUrl = "data:image/svg+xml;utf8," + svg;
 	}
 
