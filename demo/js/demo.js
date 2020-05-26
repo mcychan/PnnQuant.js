@@ -307,7 +307,7 @@ function retrieveImageFromClipboardAsBase64(pasteEvent){
 }
 
 function handlePaste(pasteEvent){
-	if(!window.clipboardData || $("#btn_upd").is(":disabled"))
+	if($("#btn_upd").is(":disabled"))
 		return;
 
 	var items = window.clipboardData.files;
@@ -342,7 +342,7 @@ $(document).on("click", "img.th", function() {
 	cfg_edited = true;
 }).ready(function(){
 	if(window.clipboardData)
-		document.addEventListener("paste", handlePaste, false);
+		document.body.addEventListener("paste", handlePaste, false);
 	else
 		$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("img.th").on("dragstart", dragStart);
