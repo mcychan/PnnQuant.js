@@ -28,6 +28,7 @@ img.th {
 #orig,
 #redu {
 	white-space: nowrap;
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAAGElEQVR4AWP8xwABX6D0QAl8gjJ4BlYAAP2qF5G/BQUyAAAAAElFTkSuQmCC);
 }
 
 th {
