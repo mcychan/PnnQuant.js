@@ -284,11 +284,12 @@ function retrieveImageFromClipboardAsBase64(pasteEvent){
 			if(/<.+>/g.exec(imgUrl)) {
 				var domContext = $('<div>').append(imgUrl);
 				var hyperlink = $(domContext).find("img");
-				if(hyperlink)
+				if(hyperlink.length > 0)
 					imgUrl = hyperlink.attr("srcset") ? hyperlink.attr("srcset").split(",").pop().trim().split(" ")[0] : hyperlink.prop("src");
 				else {
 					hyperlink = $(domContext).find("a");
-					imgUrl = hyperlink.prop("href");
+					if(hyperlink.length > 0)
+						imgUrl = hyperlink.prop("href");
 				}
 			}
 			
