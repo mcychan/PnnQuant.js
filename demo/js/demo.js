@@ -104,7 +104,8 @@ function readImageData(img, opts) {
 }
 
 function dragLeave(ev) {
-	$(ev.target).css("border", "");
+	if(ev)
+		$(ev.target).css("border", "");
 }
 
 function allowDrop(ev) {
@@ -172,18 +173,16 @@ function isExternal(url) {
 
 function download(imgUrl, ev) {
 	if(!isExternal(imgUrl)) {
-		if(imgUrl.indexOf("<svg ") > -1)
-			imgUrl = "data:image/svg+xml;utf8," + imgUrl.substring(imgUrl.indexOf("<svg ")).split("\"").join("'");
-		else {
-			var rootUrl = location.href.substr(0, location.href.lastIndexOf("/") + 1);
-			var imgSrc = imgUrl.replace(rootUrl, "");
-			var srcSet = $("img[srcset][src$='" + imgSrc + "']");
-			imgUrl = srcSet.length > 0 ? srcSet.attr("srcset").split(",").pop().trim().split(" ")[0] : imgSrc;
-			process(imgUrl);
-			dragLeave(ev);
-			return;
-		}
+		var rootUrl = location.href.substr(0, location.href.lastIndexOf("/") + 1);
+		var imgSrc = imgUrl.replace(rootUrl, "");
+		var srcSet = $("img[srcset][src$='" + imgSrc + "']");
+		imgUrl = srcSet.length > 0 ? srcSet.attr("srcset").split(",").pop().trim().split(" ")[0] : imgSrc;
+		process(imgUrl);
+		dragLeave(ev);
+		return;
 	}	
+	if(imgUrl.indexOf("<svg ") > -1)
+		imgUrl = "data:image/svg+xml;utf8," + imgUrl.substring(imgUrl.indexOf("<svg ")).split("\"").join("'");
 
 	imgUrl = imgUrl.replace("http:", location.protocol);	
 	if(imgUrl.indexOf("data:") == 0) {
