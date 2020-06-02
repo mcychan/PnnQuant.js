@@ -1,6 +1,6 @@
 /* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
 Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
-Copyright (c) 2018 Miller Cy Chan
+Copyright (c) 2018-2020 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function(){
@@ -25,11 +25,9 @@ Copyright (c) 2018 Miller Cy Chan
 		this.err = 0.0;
 	}
 	
-	function getARGBIndex(a, r, g, b, hasSemiTransparency, transparentPixelIndex) {
+	function getARGBIndex(a, r, g, b, hasSemiTransparency) {
 		if (hasSemiTransparency)
 			return (a & 0xF0) << 8 | (r & 0xF0) << 4 | (g & 0xF0) | (b >> 4);
-		if (transparentPixelIndex >= 0)
-			return (a & 0x80) << 8 | (r & 0xF8) << 7 | (g & 0xF8) << 2 | (b >> 3);
 		return (r & 0xF8) << 8 | (g & 0xFC) << 3 | (b >> 3);
 	}
 	
@@ -76,7 +74,7 @@ Copyright (c) 2018 Miller Cy Chan
 			b = (pixels[i] >>> 16) & 0xff,
 			a = (pixels[i] >>> 24) & 0xff;
 			
-			var index = getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex);
+			var index = getARGBIndex(a, r, g, b, this.hasSemiTransparency);
 			if (bins[index] == null)
 				bins[index] = new Pnnbin();
 			bins[index].ac += a;
@@ -287,6 +285,24 @@ Copyright (c) 2018 Miller Cy Chan
 		return k;
 	}
 	
+	function CalcDitherPixel(a, r, g, b, clamp, rowerr, cursor, hasSemiTransparency)
+	{
+		var ditherPixel = [];
+		if (hasSemiTransparency) {
+			ditherPixel[0] = clamp[((rowerr[cursor] + 0x1008) >> 4) + r];
+			ditherPixel[1] = clamp[((rowerr[cursor + 1] + 0x1008) >> 4) + g];
+			ditherPixel[2] = clamp[((rowerr[cursor + 2] + 0x1008) >> 4) + b];
+			ditherPixel[3] = clamp[((rowerr[cursor + 3] + 0x1008) >> 4) + a];
+			return ditherPixel;
+		}
+
+		ditherPixel[0] = clamp[((rowerr[cursor] + 0x2010) >> 5) + r];
+		ditherPixel[1] = clamp[((rowerr[cursor + 1] + 0x4020) >> 6) + g];
+		ditherPixel[2] = clamp[((rowerr[cursor + 2] + 0x2010) >> 5) + b];
+		ditherPixel[3] = a;
+		return ditherPixel;
+	}
+	
 	PnnQuant.prototype.quantize_image = function quantize_image(pixels, nMaxColors, qPixels, width, height, dither) {
 		var pixelIndex = 0;
 		if (dither)
@@ -340,13 +356,14 @@ Copyright (c) 2018 Miller Cy Chan
 					b = (pixels[pixelIndex] >>> 16) & 0xff,
 					a = (pixels[pixelIndex] >>> 24) & 0xff;
 
-					var r_pix = clamp[((row0[cursor0] + 0x1008) >> 4) + r];
-					var g_pix = clamp[((row0[cursor0 + 1] + 0x1008) >> 4) + g];
-					var b_pix = clamp[((row0[cursor0 + 2] + 0x1008) >> 4) + b];
-					var a_pix = clamp[((row0[cursor0 + 3] + 0x1008) >> 4) + a];
+					var ditherPixel = CalcDitherPixel(a, r, g, b, clamp, row0, cursor0, this.hasSemiTransparency);
+					var r_pix = ditherPixel[0];
+					var g_pix = ditherPixel[1];
+					var b_pix = ditherPixel[2];
+					var a_pix = ditherPixel[3];
 
 					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
-					var offset = getARGBIndex(a_pix, r_pix, g_pix, b_pix, this.hasSemiTransparency, this.m_transparentPixelIndex);
+					var offset = getARGBIndex(a_pix, r_pix, g_pix, b_pix, this.hasSemiTransparency);
 					if (lookup[offset] == 0)
 						lookup[offset] = nearestColorIndex(this.palette, nMaxColors, c1) + 1;
 					qPixels[pixelIndex] = lookup[offset] - 1;
