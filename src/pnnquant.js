@@ -297,7 +297,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		}
 
 		ditherPixel[0] = clamp[((rowerr[cursor] + 0x2010) >> 5) + r];
-		ditherPixel[1] = clamp[((rowerr[cursor + 1] + 0x4020) >> 6) + g];
+		ditherPixel[1] = clamp[((rowerr[cursor + 1] + 0x1008) >> 4) + g];
 		ditherPixel[2] = clamp[((rowerr[cursor + 2] + 0x2010) >> 5) + b];
 		ditherPixel[3] = a;
 		return ditherPixel;
