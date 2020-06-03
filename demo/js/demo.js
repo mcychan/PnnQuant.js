@@ -104,8 +104,7 @@ function readImageData(img, opts) {
 }
 
 function dragLeave(ev) {
-	if(ev)
-		$(ev.target).removeAttr("style");
+	$("#orig").removeAttr("style");
 }
 
 function allowDrop(ev) {
