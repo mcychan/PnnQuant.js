@@ -104,7 +104,10 @@ function readImageData(img, opts) {
 }
 
 function dragLeave(ev) {
-	$("#orig").css("border", "");
+	if(ev)
+		$(ev.target).css("border", "");
+	else
+		$("#orig img").css("border", "");
 }
 
 function allowDrop(ev) {
