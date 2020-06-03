@@ -105,7 +105,7 @@ function readImageData(img, opts) {
 
 function dragLeave(ev) {
 	if(ev)
-		$(ev.target).css("border", "");
+		$(ev.target).removeAttr("style");
 }
 
 function allowDrop(ev) {
@@ -139,8 +139,7 @@ function createImage(id, imgUrl, ev) {
 			readImageData(img, opts);
 			doProcess(ti, opts);
 			
-			if(ev)
-				dragLeave(ev);
+			dragLeave(ev);
 		};
 	}
 	
