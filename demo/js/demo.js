@@ -89,6 +89,9 @@ function readImageData(img, opts) {
 	var can = document.createElement("canvas");
 	can.width = img.naturalWidth | img.width;
 	can.height = img.naturalHeight | img.height;
+	if(can.width == 0 || can.height == 0)
+		return;
+
 	var ctx = can.getContext('2d');
 	ctx.drawImage(img, 0, 0);
 				
