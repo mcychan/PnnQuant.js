@@ -493,6 +493,10 @@ Copyright (c) 2018-2020 Miller Cy Chan
 	PnnQuant.prototype.getPalette = function getPalette() {
 		return this.palette.buffer;
 	};
+	
+	PnnQuant.prototype.getImgType = function getImgType() {
+		return this.hasSemiTransparency ? "image/png" : "image/gif";
+	};
 
 	// expose
 	this.PnnQuant = PnnQuant;

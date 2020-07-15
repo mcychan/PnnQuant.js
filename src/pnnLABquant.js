@@ -753,6 +753,10 @@ Copyright (c) 2018-2020 Miller Cy Chan
 	PnnLABQuant.prototype.getPalette = function getPalette() {
 		return this.palette.buffer;
 	};
+	
+	PnnLABQuant.prototype.getImgType = function getImgType() {
+		return this.hasSemiTransparency ? "image/png" : "image/gif";
+	};
 
 	// expose
 	this.PnnLABQuant = PnnLABQuant;
