@@ -50,7 +50,7 @@ function quantizeImage(result, width) {
 	}	
 	
 	img.width = can.width, img.height = can.height;
-	img.src = can.toDataURL();
+	img.src = can.toDataURL(result.type);
 	
 	var pal = new Uint32Array(result.pal8);
 	var $palt = $("#palt");
@@ -77,7 +77,7 @@ function doProcess(ti, opts) {
 		setTimeout(function(){
 			ti.mark("reduced -> DOM", function() {
 				var	quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);
-				quantizeImage({ img8: quant.quantizeImage(), pal8: quant.getPalette() }, opts.width);
+				quantizeImage({ img8: quant.quantizeImage(), pal8: quant.getPalette(), type: quant.getImgType() }, opts.width);
 				
 				$("#btn_upd").prop("disabled", false).text("Update");
 			});
