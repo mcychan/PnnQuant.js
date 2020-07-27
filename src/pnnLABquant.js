@@ -259,7 +259,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			if (nerr >= err)
 				continue;
 
-			if (nMaxColors > 32) {
+			if (Math.random() < nMaxColors / 256.0) {
 				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
 				nerr += nerr2 * sqr(deltaL_prime_div_k_L_S_L);
 				if (nerr >= err)
@@ -452,7 +452,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			if (curdist > mindist)
 				continue;
 
-			if (nMaxColors > 32) {
+			if (Math.random() < nMaxColors / 256.0) {
 				curdist += PR * sqr(r2 - r);
 				if (curdist > mindist)
 					continue;
@@ -709,7 +709,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
-		var quan_sqrt = nMaxColors > 0xff;
+		var quan_sqrt = nMaxColors <= 64;
 		if (nMaxColors > 2)
 			this.pnnquan(pixels, nMaxColors, quan_sqrt);
 		else {
