@@ -709,7 +709,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
-		var quan_sqrt = nMaxColors <= 64;
+		var quan_sqrt = nMaxColors >= 64;
 		if (nMaxColors > 2)
 			this.pnnquan(pixels, nMaxColors, quan_sqrt);
 		else {
