@@ -452,7 +452,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			if (curdist > mindist)
 				continue;
 
-			if (Math.random() < nMaxColors / 256.0) {
+			if (nMaxColors > 32) {
 				curdist += PR * sqr(r2 - r);
 				if (curdist > mindist)
 					continue;
