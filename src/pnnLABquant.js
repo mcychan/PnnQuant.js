@@ -247,6 +247,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		var n1 = bin1.cnt;
 		var lab1 = new Lab();
 		lab1.alpha = bin1.ac; lab1.L = bin1.Lc; lab1.A = bin1.Ac; lab1.B = bin1.Bc;
+		var crossover = Math.random() < nMaxColors / 256.0;
 		for (var i = bin1.fw; i != 0; i = bins[i].fw) {
 			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
 			if (nerr2 >= err)
@@ -259,7 +260,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			if (nerr >= err)
 				continue;
 
-			if (Math.random() < nMaxColors / 256.0) {
+			if (crossover) {
 				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
 				nerr += nerr2 * sqr(deltaL_prime_div_k_L_S_L);
 				if (nerr >= err)
