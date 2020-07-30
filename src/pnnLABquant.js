@@ -337,6 +337,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			bins[i].Lc *= d;
 			bins[i].Ac *= d;
 			bins[i].Bc *= d;
+			quan_sqrt = Math.random() < nMaxColors / 64.0;
 			if (quan_sqrt)
 				bins[i].cnt = Math.sqrt(bins[i].cnt);
 			bins[maxbins++] = bins[i];
