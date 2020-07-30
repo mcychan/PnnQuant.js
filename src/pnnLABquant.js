@@ -247,7 +247,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		var n1 = bin1.cnt;
 		var lab1 = new Lab();
 		lab1.alpha = bin1.ac; lab1.L = bin1.Lc; lab1.A = bin1.Ac; lab1.B = bin1.Bc;
-		var crossover = Math.random() < nMaxColors / 256.0;
+		var crossover = Math.random() < nMaxColors / 320.0;
 		for (var i = bin1.fw; i != 0; i = bins[i].fw) {
 			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
 			if (nerr2 >= err)
@@ -710,7 +710,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
-		var quan_sqrt = nMaxColors >= 64;
+		var quan_sqrt = true;
 		if (nMaxColors > 2)
 			this.pnnquan(pixels, nMaxColors, quan_sqrt);
 		else {
