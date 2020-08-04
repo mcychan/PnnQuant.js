@@ -457,9 +457,8 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		var qPixels = new Uint32Array(pixels.length);
 
 		this.palette = new Uint32Array(nMaxColors);
-		var quan_sqrt = nMaxColors >= 64;
 		if (nMaxColors > 2)
-			this.pnnquan(pixels, nMaxColors, quan_sqrt);
+			this.pnnquan(pixels, nMaxColors, true);
 		else {
 			if (this.m_transparentPixelIndex >= 0)
 			{
