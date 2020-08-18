@@ -23,6 +23,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 	}
 	
 	var PR = .2126, PG = .7152, PB = .0722;
+	var ratio = 320.0;
 	var closestMap = [], pixelMap = [];
 	
 	function Lab() {
@@ -247,7 +248,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		var n1 = bin1.cnt;
 		var lab1 = new Lab();
 		lab1.alpha = bin1.ac; lab1.L = bin1.Lc; lab1.A = bin1.Ac; lab1.B = bin1.Bc;
-		var crossover = Math.random() < nMaxColors / 320.0;
+		var crossover = Math.random() < nMaxColors / ratio;
 		for (var i = bin1.fw; i != 0; i = bins[i].fw) {
 			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
 			if (nerr2 >= err)
@@ -337,7 +338,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			bins[i].Lc *= d;
 			bins[i].Ac *= d;
 			bins[i].Bc *= d;
-			quan_sqrt = Math.random() < nMaxColors / 64.0;
+			
 			if (quan_sqrt)
 				bins[i].cnt = Math.sqrt(bins[i].cnt);
 			bins[maxbins++] = bins[i];
@@ -349,6 +350,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		}
 
 		var h, l, l2;
+		ratio = quan_sqrt ? 320.0 : 256.0;
 		/* Initialize nearest neighbors and build heap of them */
 		for (var i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
@@ -711,7 +713,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
-		var quan_sqrt = true;
+		var quan_sqrt = Math.random() < nMaxColors / 64.0;
 		if (nMaxColors > 2)
 			this.pnnquan(pixels, nMaxColors, quan_sqrt);
 		else {
