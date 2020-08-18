@@ -23,7 +23,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 	}
 	
 	var PR = .2126, PG = .7152, PB = .0722;
-	var ratio = 320.0;
+	var ratio = 1.0;
 	var closestMap = [], pixelMap = [];
 	
 	function Lab() {
@@ -248,7 +248,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		var n1 = bin1.cnt;
 		var lab1 = new Lab();
 		lab1.alpha = bin1.ac; lab1.L = bin1.Lc; lab1.A = bin1.Ac; lab1.B = bin1.Bc;
-		var crossover = Math.random() < nMaxColors / ratio;
+		var crossover = Math.random() < ratio;
 		for (var i = bin1.fw; i != 0; i = bins[i].fw) {
 			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
 			if (nerr2 >= err)
@@ -350,7 +350,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		}
 
 		var h, l, l2;
-		ratio = quan_sqrt ? 320.0 : 256.0;
+		ratio = quan_sqrt ? 0.5 : 1.0;
 		/* Initialize nearest neighbors and build heap of them */
 		for (var i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
