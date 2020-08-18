@@ -350,7 +350,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		}
 
 		var h, l, l2;
-		ratio = quan_sqrt ? 512.0 : 256.0;
+		ratio = quan_sqrt ? 320.0 : 256.0;
 		/* Initialize nearest neighbors and build heap of them */
 		for (var i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
@@ -709,7 +709,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			}
 		}
 		var qPixels = new Uint32Array(pixels.length);
-		if (this.hasSemiTransparency || nMaxColors <= 32)
+		if (this.hasSemiTransparency)
 			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
