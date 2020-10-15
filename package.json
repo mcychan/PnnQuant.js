@@ -10,10 +10,10 @@
     "url": "git://github.com/mcychan/PnnQuant.js.git"
   },
   "keywords": [
-	"ciede2000",
+    "ciede2000",
     "color-quantization",
-	"error-diffusion",
+    "error-diffusion",
     "dithering",
     "image-processing"
-  ],
+  ]
 }
