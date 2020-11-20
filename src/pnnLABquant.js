@@ -350,7 +350,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 		}
 
 		var h, l, l2;
-		ratio = 0.003125 * nMaxColors;
+		ratio = 0.0;
 		/* Initialize nearest neighbors and build heap of them */
 		for (var i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
@@ -366,6 +366,7 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			heap[l] = i;
 		}
 
+		ratio = 0.003125 * nMaxColors;
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (var i = 0; i < extbins;) {
