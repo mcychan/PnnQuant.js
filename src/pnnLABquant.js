@@ -1,6 +1,6 @@
 /* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
 Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
-Copyright (c) 2018-2020 Miller Cy Chan
+Copyright (c) 2018-2021 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function(){
@@ -587,7 +587,6 @@ Copyright (c) 2018-2020 Miller Cy Chan
 			var odd_scanline = false;
 			var erowerr = new Uint32Array(err_len);
 			var orowerr = new Uint32Array(err_len);
-			var lookup = new Uint32Array(65536);
 			for (var i = 0; i < height; ++i) {
 				var dir;
 				var row0, row1;
@@ -618,20 +617,13 @@ Copyright (c) 2018-2020 Miller Cy Chan
 					var a_pix = ditherPixel[3];
 
 					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
-					var offset = getARGBIndex(a_pix, r_pix, g_pix, b_pix, this.hasSemiTransparency);
-					if (lookup[offset] == 0)
-						lookup[offset] = nearestColorIndex(this.palette, nMaxColors, c1) + 1;
-					qPixels[pixelIndex] = lookup[offset] - 1;
+					qPixels[pixelIndex] = nearestColorIndex(this.palette, nMaxColors, c1);
 
 					var c2 = this.palette[qPixels[pixelIndex]];
 					var r2 = (c2 & 0xff),
 					g2 = (c2 >>> 8) & 0xff,
 					b2 = (c2 >>> 16) & 0xff,
 					a2 = (c2 >>> 24) & 0xff;
-					if (a2 < 255 && a == 255) {
-						lookup[offset] = nearestColorIndex(this.palette, nMaxColors, pixels[pixelIndex]) + 1;
-						qPixels[pixelIndex] = lookup[offset] - 1;
-					}
 
 					r_pix = limtb[r_pix - r2 + 256];
 					g_pix = limtb[g_pix - g2 + 256];
