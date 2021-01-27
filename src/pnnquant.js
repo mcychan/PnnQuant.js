@@ -12,13 +12,15 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		this.palette = [];
 	}
 	
-	Math.clamp = function(a,b,c){
-		return this.max(b, this.min(c, a));
-	};
+	if(!Math.clamp) {
+		Math.clamp = function(a,b,c){
+			return this.max(b, this.min(c, a));
+		};
+	}
 	
 	var closestMap = [];
 	
-	function Pnnbin() {
+	function PnnBin() {
 		this.ac = this.rc = this.gc = this.bc = 0;
 		this.cnt = 0;
 		this.nn = this.fw = this.bk = this.tm = this.mtm = 0;
@@ -47,11 +49,23 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		var wb = bin1.bc;
 		for (var i = bin1.fw; i != 0; i = bins[i].fw)
 		{
-			var nerr, n2;
+			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
+			if (nerr2 >= err)
+				continue;
+			
+			var nerr = nerr2 * sqr(bins[i].ac - wa);
+			if (nerr >= err)
+				continue;
+			
+			nerr += nerr2 * sqr(bins[i].rc - wr);
+			if (nerr >= err)
+				continue;
 
-			nerr = sqr(bins[i].ac - wa) + sqr(bins[i].rc - wr) + sqr(bins[i].gc - wg) + sqr(bins[i].bc - wb);
-			n2 = bins[i].cnt;
-			nerr *= (n1 * n2) / (n1 + n2);
+			nerr += nerr2 * sqr(bins[i].gc - wg);
+			if (nerr >= err)
+				continue;
+
+			nerr += nerr2 * sqr(bins[i].bc - wb);				
 			if (nerr >= err)
 				continue;
 			err = nerr;
@@ -76,7 +90,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			
 			var index = getARGBIndex(a, r, g, b, this.hasSemiTransparency);
 			if (bins[index] == null)
-				bins[index] = new Pnnbin();
+				bins[index] = new PnnBin();
 			bins[index].ac += a;
 			bins[index].rc += r;
 			bins[index].gc += g;

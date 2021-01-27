@@ -12,9 +12,11 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		this.palette = [];
 	}
 	
-	Math.clamp = function(a,b,c){
-		return this.max(b, this.min(c, a));
-	};
+	if(!Math.clamp) {
+		Math.clamp = function(a,b,c){
+			return this.max(b, this.min(c, a));
+		};
+	}
 	
 	if(!Math.cbrt) {
 		Math.cbrt = function(value){
