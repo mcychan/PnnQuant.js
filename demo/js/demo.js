@@ -93,8 +93,7 @@ function readImageData(img, opts) {
 		return;
 
 	var ctx = can.getContext('2d');
-	if(!opts.isHQ)
-		ctx.setTransform(1,0,0,1, 0.49,0.49); // offset 0.49 pixel to handle sub pixeling
+	ctx.setTransform(1,0,0,1, 0.49,0.49); // offset 0.49 pixel to handle sub pixeling
 	ctx.drawImage(img, 0, 0);
 				
 	try {
