@@ -85,28 +85,12 @@ function doProcess(ti, opts) {
 	}
 }
 
-function webgl_detect(canvas, return_context) {
-    if (!!window.WebGLRenderingContext) {
-        var names = ["webgl2", "webgl", "experimental-webgl", "moz-webgl", "webkit-3d"],
-           context = false;
-
-        for(var i=0;i< names.length;i++) {
-            try {
-                context = canvas.getContext(names[i]);
-                if (context && typeof context.getParameter == "function") {
-                    // WebGL is enabled
-                    if (return_context) {
-                        // return WebGL object if the function's argument is present
-                        return context;
-                    }
-                    // else, return just true
-                    return true;
-                }
-            } catch(e) {}
-        }
-
-        // WebGL is supported, but disabled
-        return false;
+function webgl_detect(canvas) {
+    if(canvas && canvas.getContext) {
+        return canvas.getContext('webgl') ||
+			canvas.getContext('webkit-3d') ||
+			canvas.getContext('experimenal-webgl') ||
+			canvas.getContext('moz-3d');
     }
 
     // WebGL not supported
@@ -121,7 +105,7 @@ function readImageData(img, opts) {
 		return;
 
 	var ctx = can.getContext('2d');
-	var gl = webgl_detect(can, true);
+	var gl = webgl_detect(can);
 	if (gl)
 		gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 	else
