@@ -85,6 +85,34 @@ function doProcess(ti, opts) {
 	}
 }
 
+function webgl_detect(canvas, return_context) {
+    if (!!window.WebGLRenderingContext) {
+        var names = ["webgl2", "webgl", "experimental-webgl", "moz-webgl", "webkit-3d"],
+           context = false;
+
+        for(var i=0;i< names.length;i++) {
+            try {
+                context = canvas.getContext(names[i]);
+                if (context && typeof context.getParameter == "function") {
+                    // WebGL is enabled
+                    if (return_context) {
+                        // return WebGL object if the function's argument is present
+                        return context;
+                    }
+                    // else, return just true
+                    return true;
+                }
+            } catch(e) {}
+        }
+
+        // WebGL is supported, but disabled
+        return false;
+    }
+
+    // WebGL not supported
+    return false;
+}
+
 function readImageData(img, opts) {
 	var can = document.createElement("canvas");
 	can.width = img.naturalWidth | img.width;
@@ -93,7 +121,11 @@ function readImageData(img, opts) {
 		return;
 
 	var ctx = can.getContext('2d');
-	ctx.setTransform(1,0,0,1, 0.49,0.49); // offset 0.49 pixel to handle sub pixeling
+	var gl = webgl_detect(can, true);
+	if (gl)
+		gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+	else
+		ctx.setTransform(1,0,0,1, 0.49,0.49); // offset 0.49 pixel to handle sub pixeling
 	ctx.drawImage(img, 0, 0);
 				
 	try {
