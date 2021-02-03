@@ -104,8 +104,8 @@ function readImageData(img, opts) {
 	if(can.width == 0 || can.height == 0)
 		return;
 
-	var ctx = can.getContext('2d');
 	var gl = webgl_detect(can);
+	var ctx = can.getContext('2d');	
 	if (gl)
 		gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 	else
