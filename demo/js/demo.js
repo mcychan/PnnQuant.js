@@ -85,9 +85,10 @@ function doProcess(ti, opts) {
 	}
 }
 
-function webgl_detect(canvas) {
-    if(canvas && canvas.getContext) {
-        return canvas.getContext('webgl') ||
+function webgl_detect() {
+    var canvas = document.createElement("canvas");
+	if(canvas && canvas.getContext) {
+        return canvas.getContext('webgl2') ||canvas.getContext('webgl') ||
 			canvas.getContext('webkit-3d') ||
 			canvas.getContext('experimenal-webgl') ||
 			canvas.getContext('moz-3d');
@@ -103,9 +104,9 @@ function readImageData(img, opts) {
 	can.height = img.naturalHeight | img.height;
 	if(can.width == 0 || can.height == 0)
 		return;
-
-	var gl = webgl_detect(can);
+	
 	var ctx = can.getContext('2d');	
+	var gl = webgl_detect();
 	if (gl)
 		gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 	else
