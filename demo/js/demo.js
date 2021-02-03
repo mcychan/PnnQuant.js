@@ -88,7 +88,7 @@ function doProcess(ti, opts) {
 function webgl_detect() {
     var canvas = document.createElement("canvas");
 	if(canvas && canvas.getContext) {
-        return canvas.getContext('webgl2',{preserveDrawingBuffer:true}) ||canvas.getContext('webgl',{preserveDrawingBuffer:true}) ||
+        return canvas.getContext('webgl2',{preserveDrawingBuffer:true}) || canvas.getContext('webgl',{preserveDrawingBuffer:true}) ||
 			canvas.getContext('webkit-3d',{preserveDrawingBuffer:true}) ||
 			canvas.getContext('experimenal-webgl',{preserveDrawingBuffer:true}) ||
 			canvas.getContext('moz-3d',{preserveDrawingBuffer:true});
