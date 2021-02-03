@@ -88,17 +88,17 @@ function doProcess(ti, opts) {
 function webgl_detect() {
     var canvas = document.createElement("canvas");
 	if(canvas && canvas.getContext) {
-        return canvas.getContext('webgl2',{preserveDrawingBuffer:true}) || canvas.getContext('webgl',{preserveDrawingBuffer:true}) ||
-			canvas.getContext('webkit-3d',{preserveDrawingBuffer:true}) ||
-			canvas.getContext('experimenal-webgl',{preserveDrawingBuffer:true}) ||
-			canvas.getContext('moz-3d',{preserveDrawingBuffer:true});
+        return canvas.getContext('webgl2') || canvas.getContext('webgl') ||
+			canvas.getContext('webkit-3d') ||
+			canvas.getContext('experimenal-webgl') ||
+			canvas.getContext('moz-3d');
     }
 
     // WebGL not supported
     return false;
 }
 
-function readImageData(img, opts) {
+function readImageData(img, gl, opts) {
 	var can = document.createElement("canvas");
 	can.width = img.naturalWidth | img.width;
 	can.height = img.naturalHeight | img.height;
@@ -106,30 +106,18 @@ function readImageData(img, opts) {
 		return;
 	
 	var ctx = can.getContext('2d');	
-	var gl = webgl_detect();
 	
 	try {
-		if (gl) {
-			gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
-			var tex = gl.createTexture();
-			
-			// Make a framebuffer
-			var fb = gl.createFramebuffer();
-			gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-			gl.bindTexture(gl.TEXTURE_2D, tex);
-			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-
-			// Attach the texture to the framebuffer
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+		if (gl) {			
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);			
 			var pixels = new Uint8Array(can.width * can.height * 4);
 			gl.readPixels(0, 0, can.width, can.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 			opts.pixels = new Uint32Array(pixels.buffer);
 		}
 		else {
 			ctx.drawImage(img, 0, 0);
 			var imgd = ctx.getImageData(0,0, can.width, can.height);
-			ctx.setTransform(1,0,0,1, 0.49,0.49); // offset 0.49 pixel to handle sub pixeling
+			ctx.setTransform(1, 0, 0, 1, 0.49, 0.49); // offset 0.49 pixel to handle sub pixeling
 			opts.pixels = new Uint32Array(imgd.data.buffer);
 		}	
 		
@@ -163,6 +151,19 @@ function createImage(id, imgUrl, ev) {
 	var img = $orig.find("img")[0];
 	if(!img) {
 		$orig.html("<h4>Original</h4>");
+		var gl = webgl_detect();
+		if (gl) {
+			gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);			
+			
+			// Make a framebuffer
+			var fb = gl.createFramebuffer();
+			gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+			
+			var tex = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, tex);
+			// Attach the texture to the framebuffer
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+		}
 		
 		img = document.createElement("img");
 		img.onload = function() {
@@ -176,7 +177,7 @@ function createImage(id, imgUrl, ev) {
 				img.crossOrigin = '';			
 			});	
 	
-			readImageData(img, opts);
+			readImageData(img, gl, opts);
 			doProcess(ti, opts);
 			
 			dragLeave(ev);
