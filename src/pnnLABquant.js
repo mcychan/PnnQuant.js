@@ -250,11 +250,10 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		var n1 = bin1.cnt;
 		var lab1 = new Lab();
 		lab1.alpha = bin1.ac; lab1.L = bin1.Lc; lab1.A = bin1.Ac; lab1.B = bin1.Bc;
-		var crossover = Math.random() < ratio;
 		for (var i = bin1.fw; i != 0; i = bins[i].fw) {
 			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
 			if (nerr2 >= err)
-                   continue;
+                continue;
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
@@ -262,38 +261,38 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			var nerr = nerr2 * sqr(alphaDiff) * alphaDiff / 3.0;
 			if (nerr >= err)
 				continue;
+				
+			nerr += (1 - ratio) * nerr2 * sqr(lab2.L - lab1.L);
+			if (nerr >= err)
+				continue;
 
-			if (crossover) {
-				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
-				nerr += nerr2 * sqr(deltaL_prime_div_k_L_S_L);
-				if (nerr >= err)
-					continue;
+			nerr += (1 - ratio) * nerr2 * sqr(lab2.A - lab1.A);
+			if (nerr >= err)
+				continue;
 
-				var a1Prime = {}, a2Prime = {}, CPrime1 = {}, CPrime2 = {};
-				var deltaC_prime_div_k_L_S_L = C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2);
-				nerr += nerr2 * sqr(deltaC_prime_div_k_L_S_L);
-				if (nerr >= err)
-					continue;
+			nerr += (1 - ratio) * nerr2 * sqr(lab2.B - lab1.B);
 
-				var barCPrime = {}, barhPrime = {};
-				var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
-				nerr += nerr2 * sqr(deltaH_prime_div_k_L_S_L);
-				if (nerr >= err)
-					continue;
+			if (nerr >= err)
+				continue;
 
-				nerr += nerr2 * R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
-			}
-			else {
-				nerr += nerr2 * sqr(lab2.L - lab1.L);
-				if (nerr >= err)
-					continue;
+			var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
+			nerr += ratio * nerr2 * sqr(deltaL_prime_div_k_L_S_L);
+			if (nerr >= err)
+				continue;
 
-				nerr += nerr2 * sqr(lab2.A - lab1.A);
-				if (nerr >= err)
-					continue;
+			var a1Prime = {}, a2Prime = {}, CPrime1 = {}, CPrime2 = {};
+			var deltaC_prime_div_k_L_S_L = C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2);
+			nerr += ratio * nerr2 * sqr(deltaC_prime_div_k_L_S_L);
+			if (nerr >= err)
+				continue;
 
-				nerr += nerr2 * sqr(lab2.B - lab1.B);
-			}
+			var barCPrime = {}, barhPrime = {};
+			var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
+			nerr += ratio * nerr2 * sqr(deltaH_prime_div_k_L_S_L);
+			if (nerr >= err)
+				continue;
+
+			nerr += ratio * nerr2 * R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
 			if (nerr >= err)
 				continue;
 				
@@ -368,7 +367,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			heap[l] = i;
 		}
 
-		ratio = sqr(nMaxColors) / Object.keys(pixelMap).length;
+		ratio = Math.min(1.0, sqr(nMaxColors) / Object.keys(pixelMap).length);
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (var i = 0; i < extbins;) {
