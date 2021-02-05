@@ -472,15 +472,24 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			else {
 				var lab2 = getLab(a2, r2, g2, b2);
 
-				curdist += sqr(lab2.L - lab1.L);
-                if (curdist > mindist)
-                    continue;
+				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
+				curdist += sqr(deltaL_prime_div_k_L_S_L);
+				if (curdist > mindist)
+					continue;
 
-                curdist += sqr(lab2.A - lab1.A);
-                if (curdist > mindist)
-                    continue;
+				var a1Prime = {}, a2Prime = {}, CPrime1 = {}, CPrime2 = {};
+				var deltaC_prime_div_k_L_S_L = C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2);
+				curdist += sqr(deltaC_prime_div_k_L_S_L);
+				if (curdist > mindist)
+					continue;
 
-                curdist += sqr(lab2.B - lab1.B);
+				var barCPrime = {}, barhPrime = {};
+				var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
+				curdist += sqr(deltaH_prime_div_k_L_S_L);
+				if (curdist > mindist)
+					continue;
+
+				curdist += R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
 			}
 			
 			if (curdist > mindist)
