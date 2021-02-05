@@ -367,7 +367,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			heap[l] = i;
 		}
 
-		ratio = Math.min(1.0, sqr(nMaxColors) / Object.keys(pixelMap).length);
+		ratio = Math.min(1.0, Math.pow(nMaxColors, 2.25) / Object.keys(pixelMap).length);
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (var i = 0; i < extbins;) {
@@ -472,24 +472,15 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			else {
 				var lab2 = getLab(a2, r2, g2, b2);
 
-				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
-				curdist += sqr(deltaL_prime_div_k_L_S_L);
-				if (curdist > mindist)
-					continue;
+				curdist += sqr(lab2.L - lab1.L);
+                if (curdist > mindist)
+                    continue;
 
-				var a1Prime = {}, a2Prime = {}, CPrime1 = {}, CPrime2 = {};
-				var deltaC_prime_div_k_L_S_L = C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2);
-				curdist += sqr(deltaC_prime_div_k_L_S_L);
-				if (curdist > mindist)
-					continue;
+                curdist += sqr(lab2.A - lab1.A);
+                if (curdist > mindist)
+                    continue;
 
-				var barCPrime = {}, barhPrime = {};
-				var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
-				curdist += sqr(deltaH_prime_div_k_L_S_L);
-				if (curdist > mindist)
-					continue;
-
-				curdist += R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
+                curdist += sqr(lab2.B - lab1.B);
 			}
 			
 			if (curdist > mindist)
@@ -585,20 +576,14 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			for (var i = -DITHER_MAX; i <= DITHER_MAX; ++i)
 				limtb[i + 256] = i;
 
-			var odd_scanline = false;
+			var dir = 1;
+			var row0, row1;
 			var erowerr = new Uint32Array(err_len);
 			var orowerr = new Uint32Array(err_len);
 			for (var i = 0; i < height; ++i) {
-				var dir;
-				var row0, row1;
-				if (odd_scanline) {
-					dir = -1;
-					pixelIndex += (width - 1);
-					row0 = orowerr;
-					row1 = erowerr;
-				}
+				if (dir < 0)
+					pixelIndex += width - 1;					
 				else {
-					dir = 1;
 					row0 = erowerr;
 					row1 = orowerr;
 				}
@@ -662,7 +647,8 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				if ((i % 2) == 1)
 					pixelIndex += width + 1;
 
-				odd_scanline = !odd_scanline;
+				dir *= -1;
+				var temp = row0; row0 = row1; row1 = temp;
 			}
 			return true;
 		}
@@ -707,7 +693,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
-		var quan_sqrt = Math.random() < nMaxColors / 64.0;
+		var quan_sqrt = true;
 		if (nMaxColors > 2)
 			this.pnnquan(pixels, nMaxColors, quan_sqrt);
 		else {

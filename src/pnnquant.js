@@ -339,23 +339,15 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			for (var i = -DITHER_MAX; i <= DITHER_MAX; ++i)
 				limtb[i + 256] = i;
 
-			var odd_scanline = false;
+			var dir = 1;
+			var row0, row1;
 			var erowerr = new Uint32Array(err_len);
 			var orowerr = new Uint32Array(err_len);
 			for (var i = 0; i < height; ++i)
 			{
-				var dir;
-				var row0, row1;
-				if (odd_scanline)
-				{
-					dir = -1;
-					pixelIndex += (width - 1);
-					row0 = orowerr;
-					row1 = erowerr;
-				}
-				else
-				{
-					dir = 1;
+				if (dir < 0)
+					pixelIndex += width - 1;					
+				else {
 					row0 = erowerr;
 					row1 = orowerr;
 				}
@@ -420,7 +412,8 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				if ((i % 2) == 1)
 					pixelIndex += width + 1;
 
-				odd_scanline = !odd_scanline;
+				dir *= -1;
+				var temp = row0; row0 = row1; row1 = temp;
 			}
 			return true;
 		}
