@@ -586,16 +586,11 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				limtb[i + 256] = i;
 
 			var dir = 1;
-			var row0, row1;
-			var erowerr = new Uint32Array(err_len);
-			var orowerr = new Uint32Array(err_len);
+			var row0 = new Uint32Array(err_len);
+			var row1 = new Uint32Array(err_len);
 			for (var i = 0; i < height; ++i) {
 				if (dir < 0)
 					pixelIndex += width - 1;					
-				else {
-					row0 = erowerr;
-					row1 = orowerr;
-				}
 
 				var cursor0 = DJ, cursor1 = width * DJ;
 				row1[cursor1] = row1[cursor1 + 1] = row1[cursor1 + 2] = row1[cursor1 + 3] = 0;
