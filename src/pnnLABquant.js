@@ -367,7 +367,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			heap[l] = i;
 		}
 
-		ratio = Math.min(1.0, Math.pow(nMaxColors, 2.25) / Object.keys(pixelMap).length);
+		ratio = Math.min(1.0, sqr(nMaxColors) / Object.keys(pixelMap).length);
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (var i = 0; i < extbins;) {
