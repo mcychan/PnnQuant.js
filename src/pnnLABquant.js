@@ -341,7 +341,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			bins[i].Bc *= d;
 			
 			if (quan_sqrt)
-				bins[i].cnt = Math.sqrt(bins[i].cnt);
+				bins[i].cnt = Math.pow(bins[i].cnt, 0.7);
 			bins[maxbins++] = bins[i];
 		}
 
@@ -368,7 +368,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		}
 
 		if (nMaxColors < 64)
-			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.45) / maxbins);
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.75) / maxbins);
 		else
 			ratio = Math.min(1.0, sqr(nMaxColors / Object.keys(pixelMap).length));
 		/* Merge bins which increase error the least */
