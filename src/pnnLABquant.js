@@ -476,7 +476,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 					if (curdist > mindist)
 						continue;
 
-					var yDiff = abs(lab2.B - lab1.B);;
+					var yDiff = Math.abs(lab2.B - lab1.B);
 					curdist += yDiff * sqr(yDiff) / 3.0;
 				}
 			}
