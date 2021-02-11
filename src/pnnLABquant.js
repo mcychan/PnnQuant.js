@@ -257,7 +257,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
-			var alphaDiff = lab2.alpha - lab1.alpha;
+			var alphaDiff = Math.abs(lab2.alpha - lab1.alpha);
 			var nerr = nerr2 * sqr(alphaDiff) * alphaDiff / 3.0;
 			if (nerr >= err)
 				continue;
@@ -476,7 +476,8 @@ Copyright (c) 2018-2021 Miller Cy Chan
 					if (curdist > mindist)
 						continue;
 
-					curdist += .333 * sqr(lab2.B - lab1.B);
+					var yDiff = abs(lab2.B - lab1.B);;
+					curdist += yDiff * sqr(yDiff) / 3.0;
 				}
 			}
 			else {
