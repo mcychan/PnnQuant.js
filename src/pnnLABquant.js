@@ -24,7 +24,6 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		};
 	}
 	
-	var PR = .2126, PG = .7152, PB = .0722;
 	var ratio = 1.0;
 	var closestMap = [], pixelMap = [];
 	
@@ -341,7 +340,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			bins[i].Bc *= d;
 			
 			if (quan_sqrt)
-				bins[i].cnt = Math.pow(bins[i].cnt, 0.7);
+				bins[i].cnt = Math.pow(bins[i].cnt, 0.6);
 			bins[maxbins++] = bins[i];
 		}
 
@@ -368,9 +367,9 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		}
 
 		if (nMaxColors < 64)
-			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.75) / maxbins);
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.05) / maxbins);
 		else
-			ratio = Math.min(1.0, sqr(nMaxColors / Object.keys(pixelMap).length));
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (var i = 0; i < extbins;) {
@@ -461,20 +460,19 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			if (curdist > mindist)
 				continue;
 
+			var lab2 = getLab(a2, r2, g2, b2);
 			if (nMaxColors > 32) {
-				curdist += PR * sqr(r2 - r);
+				curdist += sqr(lab2.L - lab1.L);
 				if (curdist > mindist)
 					continue;
 
-				curdist += PG * sqr(g2 - g);
+				curdist += sqr(lab2.A - lab1.A);
 				if (curdist > mindist)
 					continue;
 
-				curdist += PB * sqr(b2 - b);
+				curdist += sqr(lab2.B - lab1.B);
 			}
 			else {
-				var lab2 = getLab(a2, r2, g2, b2);
-
 				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
 				curdist += sqr(deltaL_prime_div_k_L_S_L);
 				if (curdist > mindist)
@@ -696,8 +694,6 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			}
 		}
 		var qPixels = new Uint32Array(pixels.length);
-		if (this.hasSemiTransparency)
-			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
 		var quan_sqrt = true;
