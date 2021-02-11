@@ -24,6 +24,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		};
 	}
 	
+	var PR = .2126, PG = .7152, PB = .0722;
 	var ratio = 1.0;
 	var closestMap = [], pixelMap = [];
 	
@@ -460,19 +461,20 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			if (curdist > mindist)
 				continue;
 
-			var lab2 = getLab(a2, r2, g2, b2);
 			if (nMaxColors > 32) {
-				curdist += sqr(lab2.L - lab1.L);
+				curdist += PR * sqr(r2 - r);
 				if (curdist > mindist)
 					continue;
 
-				curdist += sqr(lab2.A - lab1.A);
+				curdist += PG * sqr(g2 - g);
 				if (curdist > mindist)
 					continue;
 
-				curdist += sqr(lab2.B - lab1.B);
+				curdist += PB * sqr(b2 - b);
 			}
 			else {
+				var lab2 = getLab(a2, r2, g2, b2);
+
 				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
 				curdist += sqr(deltaL_prime_div_k_L_S_L);
 				if (curdist > mindist)
@@ -694,6 +696,8 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			}
 		}
 		var qPixels = new Uint32Array(pixels.length);
+		if (this.hasSemiTransparency)
+			PR = PG = PB = 1;
 
 		this.palette = new Uint32Array(nMaxColors);
 		var quan_sqrt = true;
