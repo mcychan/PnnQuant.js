@@ -26,7 +26,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	
 	var PR = .2126, PG = .7152, PB = .0722;
 	var ratio = 1.0;
-	var closestMap = [], pixelMap = [];
+	var closestMap = [], pixelMap = [], nearestMap = [];
 	
 	function Lab() {
 		this.alpha = this.A = this.B = this.L = 0;
@@ -444,6 +444,10 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	};
 	
 	function nearestColorIndex(palette, nMaxColors, pixel) {
+		var nearest = nearestMap[pixel];
+		if (nearest != null)
+			return nearest;
+			
 		var k = 0;
 		var r = (pixel & 0xff),
 		g = (pixel >>> 8) & 0xff,
@@ -506,6 +510,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			mindist = curdist;
 			k = i;
 		}
+		nearestMap[pixel] = k;
 		return k;
 	}
 	
@@ -733,6 +738,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		}
 		pixelMap = [];
 		closestMap = [];
+		nearestMap = [];
 
 		return processImagePixels(this.palette, qPixels);
 	};

@@ -18,7 +18,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		};
 	}
 	
-	var closestMap = [];
+	var closestMap = [], nearestMap = [];
 	
 	function PnnBin() {
 		this.ac = this.rc = this.gc = this.bc = 0;
@@ -217,6 +217,10 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	};
 	
 	function nearestColorIndex(palette, nMaxColors, pixel) {
+		var nearest = nearestMap[pixel];
+		if (nearest != null)
+			return nearest;
+			
 		var k = 0;
 		var r = (pixel & 0xff),
 		g = (pixel >>> 8) & 0xff,
@@ -249,6 +253,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			mindist = curdist;
 			k = i;
 		}
+		nearestMap[pixel] = k;
 		return k;
 	}
 	
@@ -483,6 +488,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			}
 		}
 		closestMap = [];
+		nearestMap = [];
 
 		return processImagePixels(this.palette, qPixels);
 	};
