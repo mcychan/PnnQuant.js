@@ -111,20 +111,28 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			bins[i].rc *= d;
 			bins[i].gc *= d;
 			bins[i].bc *= d;
-			if (quan_sqrt)
-				bins[i].cnt = Math.sqrt(bins[i].cnt);
+
 			bins[maxbins++] = bins[i];
 		}
-
-		for (var i = 0; i < maxbins - 1; ++i)
+		
+		if (sqr(nMaxColors) / maxbins < .022)
+			quan_sqrt = false;
+		
+		var i = 0;
+		for (; i < maxbins - 1; ++i)
 		{
 			bins[i].fw = (i + 1);
 			bins[i + 1].bk = i;
+			
+			if (quan_sqrt)
+				bins[i].cnt = Math.sqrt(bins[i].cnt);
 		}
+		if (quan_sqrt)
+			bins[i].cnt = Math.sqrt(bins[i].cnt);
 
 		var h, l, l2;
 		/* Initialize nearest neighbors and build heap of them */
-		for (var i = 0; i < maxbins; ++i)
+		for (i = 0; i < maxbins; ++i)
 		{
 			find_nn(bins, i);
 			/* Push slot on heap */
@@ -141,7 +149,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
-		for (var i = 0; i < extbins;)
+		for (i = 0; i < extbins;)
 		{
 			var tb;
 			/* Use heap to find which bins to merge */
@@ -193,7 +201,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		/* Fill palette */
 		var k = 0;
-		for (var i = 0; ; ++k)
+		for (i = 0; ; ++k)
 		{
 			var a = Math.round(Math.clamp(bins[i].ac, 0, 0xff)),
 			r = Math.round(Math.clamp(bins[i].rc, 0, 0xff)),

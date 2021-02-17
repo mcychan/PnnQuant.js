@@ -339,21 +339,28 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			bins[i].Lc *= d;
 			bins[i].Ac *= d;
 			bins[i].Bc *= d;
+
+			bins[maxbins++] = bins[i];
+		}
+		
+		if (sqr(nMaxColors) / maxbins < .022)
+			quan_sqrt = false;
+		
+		var i = 0;
+		for (; i < maxbins - 1; ++i) {
+			bins[i].fw = (i + 1);
+			bins[i + 1].bk = i;
 			
 			if (quan_sqrt)
 				bins[i].cnt = Math.pow(bins[i].cnt, 0.6);
-			bins[maxbins++] = bins[i];
 		}
-
-		for (var i = 0; i < maxbins - 1; ++i) {
-			bins[i].fw = (i + 1);
-			bins[i + 1].bk = i;
-		}
+		if (quan_sqrt)
+			bins[i].cnt = Math.pow(bins[i].cnt, 0.6);
 
 		var h, l, l2;
 		ratio = 0.0;
 		/* Initialize nearest neighbors and build heap of them */
-		for (var i = 0; i < maxbins; ++i) {
+		for (i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
 			/* Push slot on heap */
 			var err = bins[i].err;
@@ -367,13 +374,15 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			heap[l] = i;
 		}
 
-		if (nMaxColors < 64)
+		if (quan_sqrt && nMaxColors < 64)
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.05) / maxbins);
+		else if (!quan_sqrt)
+			ratio = .75;
 		else
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
-		for (var i = 0; i < extbins;) {
+		for (i = 0; i < extbins;) {
 			var tb;
 			/* Use heap to find which bins to merge */
 			for (; ; ) {
@@ -422,7 +431,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		/* Fill palette */
 		var k = 0;
-		for (var i = 0; ; ++k) {
+		for (i = 0; ; ++k) {
 			var lab1 = new Lab();
 			lab1.alpha = Math.round(Math.clamp(bins[i].ac, 0, 0xff)),
 			lab1.L = bins[i].Lc; lab1.A = bins[i].Ac; lab1.B = bins[i].Bc;
@@ -480,7 +489,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 					if (curdist > mindist)
 						continue;
 
-					curdist += sqr(lab2.B - lab1.B) / 3.0;
+					curdist += sqr(lab2.B - lab1.B) / 2.0;
 				}
 			}
 			else {
