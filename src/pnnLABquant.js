@@ -24,7 +24,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		};
 	}
 	
-	var PR = .2126, PG = .7152, PB = .0722;
+	var PR = .299, PG = .587, PB = .114;
 	var ratio = 1.0;
 	var closestMap = [], pixelMap = [], nearestMap = [];
 	
