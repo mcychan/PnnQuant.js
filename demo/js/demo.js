@@ -57,8 +57,9 @@ function quantizeImage(gl, result, width) {
 
 	ctx.imageSmoothingEnabled = ctx.imageSmoothingEnabled = ctx.webkitImageSmoothingEnabled = ctx.msImageSmoothingEnabled = false;
 
+	var imgd = ctx.createImageData(can.width, can.height);
 	var buf8 = new Uint8ClampedArray(idxi32.buffer);
-	var imgd = new ImageData(buf8, can.width, can.height);
+	imgd.data.set(buf8);
 
 	ctx.putImageData(imgd, 0, 0);
 	
