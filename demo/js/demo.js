@@ -413,10 +413,10 @@ $(document).on("click", "img.th", function() {
 		$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("img.th").css("z-index", "2").on("dragstart", dragStart);
 	$("#readme").on("mouseover", function() {
-		$("#footer").css("z-index", "-1");
+		$(this).parent().css("z-index", "-1");
 	})
 	.on("mouseout", function() {
-		$("#footer").css("z-index", "1");
+		$(this).parent().css("z-index", "1");
 	});
 	process("img/SE5x9.jpg");
 });
