@@ -24,47 +24,28 @@ function typeOf(val) {
 	return Object.prototype.toString.call(val).slice(8,-1);
 }
 
-function drawPixels(idxi32, width0, maxWidth, maxHeight, cols) {
-	var forPalette = maxWidth > 0;
+function drawPalette(idxi32, width, maxWidth, maxHeight, cols) {
 	if(!maxWidth)
-		maxWidth = width0;
+		maxWidth = width;
+
+	if(cols > idxi32.length)
+		cols = idxi32.length;
+	var rows = Math.floor(idxi32.length / cols);
+	var ratioX = Math.floor(100.0 / cols);
+	var ratioY = Math.floor(100.0 / rows);
+	if((ratioY * maxHeight) > (ratioX * maxWidth))
+		ratioY = ratioX * maxWidth / maxHeight;
 	
-	var can = document.createElement("canvas"),
-		ctx = can.getContext("2d");
-
-	can.width = width0;
-	can.height = Math.ceil(idxi32.length / width0);
-
-	ctx.imageSmoothingEnabled = ctx.imageSmoothingEnabled = ctx.webkitImageSmoothingEnabled = ctx.msImageSmoothingEnabled = false;
-
-	var imgd = ctx.createImageData(can.width, can.height);
-
-	var buf8 = new Uint8ClampedArray(idxi32.buffer);
-	imgd.data.set(buf8);
-
-	ctx.putImageData(imgd, 0, 0);
-	if(forPalette) {
-		if(cols > idxi32.length)
-			cols = idxi32.length;
-		var rows = Math.floor(idxi32.length / cols);
-		var ratioX = Math.floor(100.0 / cols);
-		var ratioY = Math.floor(100.0 / rows);
-		if((ratioY * maxHeight) > (ratioX * maxWidth))
-			ratioY = ratioX * maxWidth / maxHeight;
-		
-		var divContent = "";
-		for(var k = 0; k < idxi32.length; ++k) {
-			var r = (idxi32[k] & 0xff),
-				g = (idxi32[k] >>> 8) & 0xff,
-				b = (idxi32[k] >>> 16) & 0xff,
-				a = (idxi32[k] >>> 24) & 0xff;
-			divContent += "<div style='background-color:rgba(" + r + ", " + g + ", " + b + ", " + a / 255.0 + "); float: left; ";
-			divContent += "width: " + ratioX + "%; height: " + ratioY + "%;'></div>";		
-		}
-		return divContent;
+	var divContent = "";
+	for(var k = 0; k < idxi32.length; ++k) {
+		var r = (idxi32[k] & 0xff),
+			g = (idxi32[k] >>> 8) & 0xff,
+			b = (idxi32[k] >>> 16) & 0xff,
+			a = (idxi32[k] >>> 24) & 0xff;
+		divContent += "<div style='background-color:rgba(" + r + ", " + g + ", " + b + ", " + a / 255.0 + "); float: left; ";
+		divContent += "width: " + ratioX + "%; height: " + ratioY + "%;'></div>";		
 	}
-
-	return can;
+	return divContent;
 }
 
 (function() {

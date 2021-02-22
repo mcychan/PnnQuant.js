@@ -35,8 +35,8 @@ function getOpts(id) {
 	return opts;
 }
 
-function quantizeImage(result, width) {				
-	var	can = drawPixels(result.img8, width);
+function quantizeImage(gl, result, width) {				
+	var idxi32 = result.img8;
 	var $redu = $("#redu");
 	var img = $redu.find("img")[0];
 	if(!img) {
@@ -49,6 +49,19 @@ function quantizeImage(result, width) {
 		$redu.append(img);
 	}	
 	
+	var can = document.createElement("canvas"),
+		ctx = can.getContext("2d");
+
+	can.width = width;
+	can.height = Math.ceil(idxi32.length / width);
+
+	ctx.imageSmoothingEnabled = ctx.imageSmoothingEnabled = ctx.webkitImageSmoothingEnabled = ctx.msImageSmoothingEnabled = false;
+
+	var buf8 = new Uint8ClampedArray(idxi32.buffer);
+	var imgd = new ImageData(buf8, can.width, can.height);
+
+	ctx.putImageData(imgd, 0, 0);
+	
 	img.width = can.width, img.height = can.height;
 	img.src = can.toDataURL(result.type);
 	
@@ -57,17 +70,17 @@ function quantizeImage(result, width) {
 	var maxWidth = $palt.width();
 	var cols = 32;
 	
-	var colorCells = drawPixels(pal, pal.length, maxWidth, $palt.height(), cols);	
+	var colorCells = drawPalette(pal, pal.length, maxWidth, $palt.height(), cols);	
 	$palt.html(colorCells);
 }
 
-function doProcess(ti, opts) {	
+function doProcess(gl, ti, opts) {	
 	if(typeof Worker !== "undefined") {			
 		var w = new Worker("./js/worker.js");
 		w.postMessage(opts);
 		w.onmessage = function(e) {
 			ti.mark("reduced -> DOM", function() {
-				quantizeImage(e.data, opts.width);
+				quantizeImage(gl, e.data, opts.width);
 				
 				$("#btn_upd").prop("disabled", false).text("Update");
 			});
@@ -77,7 +90,7 @@ function doProcess(ti, opts) {
 		setTimeout(function(){
 			ti.mark("reduced -> DOM", function() {
 				var	quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);
-				quantizeImage({ img8: quant.quantizeImage(), pal8: quant.getPalette(), type: quant.getImgType() }, opts.width);
+				quantizeImage(gl, { img8: quant.quantizeImage(), pal8: quant.getPalette(), type: quant.getImgType() }, opts.width);
 				
 				$("#btn_upd").prop("disabled", false).text("Update");
 			});
@@ -178,7 +191,7 @@ function createImage(id, imgUrl, ev) {
 			});	
 	
 			readImageData(img, gl, opts);
-			doProcess(ti, opts);
+			doProcess(gl, ti, opts);
 			
 			dragLeave(ev);
 		};
