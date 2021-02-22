@@ -343,7 +343,8 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			bins[maxbins++] = bins[i];
 		}
 		
-		if (sqr(nMaxColors) / maxbins < .022)
+		var proportional = sqr(nMaxColors) / maxbins;
+		if ((proportional < .022 || proportional > .5) && nMaxColors < 64)
 			quan_sqrt = false;
 		
 		var i = 0;
@@ -376,10 +377,10 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		if (quan_sqrt && nMaxColors < 64)
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.05) / maxbins);
-		else if (!quan_sqrt)
-			ratio = .75;
+		else if (quan_sqrt)
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);			
 		else
-			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);
+			ratio = .75;
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (i = 0; i < extbins;) {
