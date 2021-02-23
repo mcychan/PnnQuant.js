@@ -384,10 +384,10 @@ Copyright (c) 2018-2021 Miller Cy Chan
 					b2 = (c2 >>> 16) & 0xff,
 					a2 = (c2 >>> 24) & 0xff;
 
-					r_pix = limtb[r_pix - r2 + 256];
-					g_pix = limtb[g_pix - g2 + 256];
-					b_pix = limtb[b_pix - b2 + 256];
-					a_pix = limtb[a_pix - a2 + 256];
+					r_pix = limtb[r_pix - r2 + BLOCK_SIZE];
+					g_pix = limtb[g_pix - g2 + BLOCK_SIZE];
+					b_pix = limtb[b_pix - b2 + BLOCK_SIZE];
+					a_pix = limtb[a_pix - a2 + BLOCK_SIZE];
 
 					var k = r_pix * 2;
 					row1[cursor1 - DJ] = r_pix;
