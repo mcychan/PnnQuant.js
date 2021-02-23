@@ -412,10 +412,10 @@ $(document).on("click", "img.th", function() {
 	else
 		$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("img.th").css("z-index", "2").on("dragstart", dragStart);
-	$("#readme").on("mouseover", function() {
+	$("#readme").mouseenter(function() {
 		$(this).parent().css("z-index", "-1");
 	})
-	.on("mouseout", function() {
+	.mouseleave(function() {
 		$(this).parent().css("z-index", "1");
 	});
 	process("img/SE5x9.jpg");
