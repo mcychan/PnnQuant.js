@@ -591,22 +591,22 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	PnnLABQuant.prototype.quantize_image = function quantize_image(pixels, nMaxColors, qPixels, width, height, dither) {
 		var pixelIndex = 0;
 		if (dither) {
-			const DJ = 4, DITHER_MAX = 20;
+			const DJ = 4, BLOCK_SIZE = 256, DITHER_MAX = 20;
 			var err_len = (width + 2) * DJ;
-			var clamp = new Uint32Array(DJ * 256);
-			var limtb = new Uint32Array(512);
+			var clamp = new Uint32Array(DJ * BLOCK_SIZE);
+			var limtb = new Uint32Array(2 * BLOCK_SIZE);
 
-			for (var i = 0; i < 256; ++i) {
+			for (var i = 0; i < BLOCK_SIZE; ++i) {
 				clamp[i] = 0;
-				clamp[i + 256] = i;
-				clamp[i + 512] = 0xff;
-				clamp[i + 768] = 0xff;
+				clamp[i + BLOCK_SIZE] = i;
+				clamp[i + BLOCK_SIZE * 2] = 0xff;
+				clamp[i + BLOCK_SIZE * 3] = 0xff;
 
 				limtb[i] = -DITHER_MAX;
-				limtb[i + 256] = DITHER_MAX;
+				limtb[i + BLOCK_SIZE] = DITHER_MAX;
 			}
 			for (var i = -DITHER_MAX; i <= DITHER_MAX; ++i)
-				limtb[i + 256] = i;
+				limtb[i + BLOCK_SIZE] = i;
 
 			var dir = 1;
 			var row0 = new Uint32Array(err_len);
@@ -617,7 +617,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 				var cursor0 = DJ, cursor1 = width * DJ;
 				row1[cursor1] = row1[cursor1 + 1] = row1[cursor1 + 2] = row1[cursor1 + 3] = 0;
-				for (var j = 0; j < width; j++) {
+				for (var j = 0; j < width; ++j) {
 					var r = (pixels[pixelIndex] & 0xff),
 					g = (pixels[pixelIndex] >>> 8) & 0xff,
 					b = (pixels[pixelIndex] >>> 16) & 0xff,
