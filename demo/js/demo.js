@@ -411,12 +411,12 @@ $(document).on("click", "img.th", function() {
 		document.body.addEventListener("keyup", keyBoardListener);
 	else
 		$("body").on("paste", retrieveImageFromClipboardAsBase64);
-	$("img.th").css("z-index", "2").on("dragstart", dragStart);
-	$("#readme").mouseenter(function() {
-		$(this).parent().css("z-index", "-1");
+	$("img.th").css("z-index", "2").on("dragstart", dragStart)
+	.mouseenter(function() {
+		$("#footer").css("z-index", "-1");
 	})
 	.mouseleave(function() {
-		$(this).parent().css("z-index", "1");
+		$("#footer").css("z-index", "1");
 	});
 	process("img/SE5x9.jpg");
 });
