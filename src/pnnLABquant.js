@@ -403,7 +403,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				var err = bins[b1].err;
 				for (l = 1; (l2 = l + l) <= heap[0]; l = l2) {
 					if ((l2 < heap[0]) && (bins[heap[l2]].err > bins[heap[l2 + 1]].err))
-						l2++;
+						++l2;
 					if (err <= bins[h = heap[l2]].err)
 						break;
 					heap[l] = h;
@@ -608,6 +608,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			for (var i = -DITHER_MAX; i <= DITHER_MAX; ++i)
 				limtb[i + BLOCK_SIZE] = i;
 
+			var noBias = this.hasSemiTransparency || nMaxColors < 64;
 			var dir = 1;
 			var row0 = new Uint32Array(err_len);
 			var row1 = new Uint32Array(err_len);
@@ -623,7 +624,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 					b = (pixels[pixelIndex] >>> 16) & 0xff,
 					a = (pixels[pixelIndex] >>> 24) & 0xff;
 
-					var ditherPixel = CalcDitherPixel(a, r, g, b, clamp, row0, cursor0, this.hasSemiTransparency);
+					var ditherPixel = CalcDitherPixel(a, r, g, b, clamp, row0, cursor0, noBias);
 					var r_pix = ditherPixel[0];
 					var g_pix = ditherPixel[1];
 					var b_pix = ditherPixel[2];
