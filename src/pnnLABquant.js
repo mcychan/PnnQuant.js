@@ -97,7 +97,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	
 	function L_prime_div_k_L_S_L(lab1, lab2)
 	{
-		const k_L = 1.0;
+		var k_L = 1.0;
 		var deltaLPrime = lab2.L - lab1.L;	
 		var barLPrime = (lab1.L + lab2.L) / 2.0;
 		var S_L = 1 + ((0.015 * sqr(barLPrime - 50.0)) / Math.sqrt(20 + sqr(barLPrime - 50.0)));
@@ -106,8 +106,8 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	
 	function C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2)
 	{
-		const k_C = 1.0;
-		const pow25To7 = 6103515625.0; /* pow(25, 7) */
+		var k_C = 1.0;
+		var pow25To7 = 6103515625.0; /* pow(25, 7) */
 		var C1 = Math.sqrt((lab1.A * lab1.A) + (lab1.B * lab1.B));
 		var C2 = Math.sqrt((lab2.A * lab2.A) + (lab2.B * lab2.B));
 		var barC = (C1 + C2) / 2.0;
@@ -193,7 +193,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	
 	function R_T(barCPrime, barhPrime, C_prime_div_k_L_S_L, H_prime_div_k_L_S_L)
 	{
-		const pow25To7 = 6103515625.0; /* Math.pow(25, 7) */
+		var pow25To7 = 6103515625.0; /* Math.pow(25, 7) */
 		var deltaTheta = deg2Rad(30.0) * Math.exp(-Math.pow((barhPrime - deg2Rad(275.0)) / deg2Rad(25.0), 2.0));
 		var R_C = 2.0 * Math.sqrt(Math.pow(barCPrime, 7.0) / (Math.pow(barCPrime, 7.0) + pow25To7));
 		var R_T = (-Math.sin(2.0 * deltaTheta)) * R_C;
@@ -257,7 +257,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
-			var alphaDiff = Math.abs(lab2.alpha - lab1.alpha);
+			var alphaDiff = this.hasSemiTransparency ? Math.abs(lab2.alpha - lab1.alpha) : 0;
 			var nerr = nerr2 * sqr(alphaDiff) * alphaDiff / 3.0;
 			if (nerr >= err)
 				continue;
@@ -320,11 +320,12 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			
 			if (bins[index] == null)
 				bins[index] = new Pnnbin();
-			bins[index].ac += a;
-			bins[index].Lc += lab1.L;
-			bins[index].Ac += lab1.A;
-			bins[index].Bc += lab1.B;
-			bins[index].cnt++;
+			var tb = bins[index];
+			tb.ac += a;
+			tb.Lc += lab1.L;
+			tb.Ac += lab1.A;
+			tb.Bc += lab1.B;
+			tb.cnt++;
 		}
 
 		/* Cluster nonempty bins at one end of array */
@@ -353,13 +354,18 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			bins[i + 1].bk = i;
 			
 			if (quan_sqrt)
-				bins[i].cnt = Math.pow(bins[i].cnt, 0.6);
+				bins[i].cnt = (Math.sqrt(bins[i].cnt) | 0);
 		}
 		if (quan_sqrt)
-			bins[i].cnt = Math.pow(bins[i].cnt, 0.6);
+			bins[i].cnt = (Math.sqrt(bins[i].cnt) | 0);
 
 		var h, l, l2;
-		ratio = 0.0;
+		if (quan_sqrt && nMaxColors < 64)
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.05) / maxbins);
+		else if (quan_sqrt)
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);			
+		else
+			ratio = .55;
 		/* Initialize nearest neighbors and build heap of them */
 		for (i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
@@ -374,13 +380,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			}
 			heap[l] = i;
 		}
-
-		if (quan_sqrt && nMaxColors < 64)
-			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.05) / maxbins);
-		else if (quan_sqrt)
-			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);			
-		else
-			ratio = .75;
+		
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (i = 0; i < extbins;) {
@@ -434,7 +434,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		var k = 0;
 		for (i = 0; ; ++k) {
 			var lab1 = new Lab();
-			lab1.alpha = Math.round(Math.clamp(bins[i].ac, 0, 0xff)),
+			lab1.alpha = (Math.clamp(bins[i].ac, 0, 0xff) | 0),
 			lab1.L = bins[i].Lc; lab1.A = bins[i].Ac; lab1.B = bins[i].Bc;
 
 			this.palette[k] = LAB2RGB(lab1);
