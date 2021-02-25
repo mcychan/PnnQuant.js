@@ -361,7 +361,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		var h, l, l2;
 		if (quan_sqrt && nMaxColors < 64)
-			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.05) / maxbins);
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.1) / maxbins);
 		else if (quan_sqrt)
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);			
 		else
