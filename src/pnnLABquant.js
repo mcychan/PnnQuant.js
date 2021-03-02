@@ -329,8 +329,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		}
 
 		/* Cluster nonempty bins at one end of array */
-		var maxbins = 0;
-		var heap = new Uint32Array(65537);
+		var maxbins = 0;		
 		for (var i = 0; i < bins.length; ++i) {
 			if (bins[i] == null)
 				continue;
@@ -348,16 +347,15 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		if ((proportional < .022 || proportional > .5) && nMaxColors < 64)
 			quan_sqrt = false;
 		
-		var i = 0;
-		for (; i < maxbins - 1; ++i) {
+		if (quan_sqrt)
+			bins[0].cnt = (Math.sqrt(bins[0].cnt) | 0);
+		for (var i = 0; i < maxbins - 1; ++i) {
 			bins[i].fw = (i + 1);
 			bins[i + 1].bk = i;
 			
 			if (quan_sqrt)
-				bins[i].cnt = (Math.sqrt(bins[i].cnt) | 0);
-		}
-		if (quan_sqrt)
-			bins[i].cnt = (Math.sqrt(bins[i].cnt) | 0);
+				bins[i + 1].cnt = (Math.sqrt(bins[i + 1].cnt) | 0);
+		}		
 
 		var h, l, l2;
 		if (quan_sqrt && nMaxColors < 64)
@@ -365,9 +363,11 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		else if (quan_sqrt)
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);			
 		else
-			ratio = .55;
+			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.31) / maxbins);
+		
 		/* Initialize nearest neighbors and build heap of them */
-		for (i = 0; i < maxbins; ++i) {
+		var heap = new Uint32Array(65537);
+		for (var i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
 			/* Push slot on heap */
 			var err = bins[i].err;
@@ -383,7 +383,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
-		for (i = 0; i < extbins;) {
+		for (var i = 0; i < extbins;) {
 			var tb;
 			/* Use heap to find which bins to merge */
 			for (; ; ) {
@@ -432,7 +432,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		/* Fill palette */
 		var k = 0;
-		for (i = 0; ; ++k) {
+		for (var i = 0; ; ++k) {
 			var lab1 = new Lab();
 			lab1.alpha = (Math.clamp(bins[i].ac, 0, 0xff) | 0),
 			lab1.L = bins[i].Lc; lab1.A = bins[i].Ac; lab1.B = bins[i].Bc;
