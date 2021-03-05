@@ -36,6 +36,7 @@ function getOpts(id) {
 }
 
 function quantizeImage(gl, result, width) {				
+	var idxi32 = result.img8;
 	var $redu = $("#redu");
 	var img = $redu.find("img")[0];
 	if(!img) {
@@ -52,12 +53,13 @@ function quantizeImage(gl, result, width) {
 		ctx = can.getContext("2d");
 
 	can.width = width;
-	can.height = Math.ceil(result.img8.length / width);
+	can.height = Math.ceil(idxi32.length / width);
 
 	ctx.imageSmoothingEnabled = ctx.imageSmoothingEnabled = ctx.webkitImageSmoothingEnabled = ctx.msImageSmoothingEnabled = false;
 
 	var imgd = ctx.createImageData(can.width, can.height);
-	imgd.data.set(result.img8);
+	var buf8 = new Uint8ClampedArray(idxi32.buffer);
+	imgd.data.set(buf8);
 
 	ctx.putImageData(imgd, 0, 0);
 	
