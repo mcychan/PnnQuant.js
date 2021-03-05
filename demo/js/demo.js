@@ -36,7 +36,6 @@ function getOpts(id) {
 }
 
 function quantizeImage(gl, result, width) {				
-	var idxi32 = result.img8;
 	var $redu = $("#redu");
 	var img = $redu.find("img")[0];
 	if(!img) {
@@ -53,13 +52,12 @@ function quantizeImage(gl, result, width) {
 		ctx = can.getContext("2d");
 
 	can.width = width;
-	can.height = Math.ceil(idxi32.length / width);
+	can.height = Math.ceil(result.img8.length / width);
 
 	ctx.imageSmoothingEnabled = ctx.imageSmoothingEnabled = ctx.webkitImageSmoothingEnabled = ctx.msImageSmoothingEnabled = false;
 
 	var imgd = ctx.createImageData(can.width, can.height);
-	var buf8 = new Uint8ClampedArray(idxi32.buffer);
-	imgd.data.set(buf8);
+	imgd.data.set(result.img8);
 
 	ctx.putImageData(imgd, 0, 0);
 	
@@ -68,10 +66,8 @@ function quantizeImage(gl, result, width) {
 	
 	var pal = new Uint32Array(result.pal8);
 	var $palt = $("#palt");
-	var maxWidth = $palt.width();
-	var cols = 32;
 	
-	var colorCells = drawPalette(pal, pal.length, maxWidth, $palt.height(), cols);	
+	var colorCells = drawPalette(pal, pal.length, $palt.width(), $palt.height(), 32);	
 	$palt.html(colorCells);
 }
 
