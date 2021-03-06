@@ -330,7 +330,8 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		return ditherPixel;
 	}
 	
-	PnnQuant.prototype.quantize_image = function quantize_image(pixels, nMaxColors, qPixels, width, height, dither) {
+	PnnQuant.prototype.quantize_image = function quantize_image(pixels, nMaxColors, width, height, dither) {
+		var qPixels = new Uint32Array(pixels.length);
 		var pixelIndex = 0;
 		if (dither)
 		{
@@ -424,7 +425,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				dir *= -1;
 				var temp = row0; row0 = row1; row1 = temp;
 			}
-			return true;
+			return qPixels;
 		}
 
 		if (this.m_transparentPixelIndex >= 0 || nMaxColors < 64)
@@ -438,7 +439,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				qPixels[i] = closestColorIndex(this.palette, nMaxColors, pixels[i]);
 		}
 
-		return true;
+		return qPixels;
 	};
 	
 	function processImagePixels(palette, qPixels) {
@@ -465,8 +466,6 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				}
 			}
 		}
-	
-		var qPixels = new Uint32Array(pixels.length);
 
 		this.palette = new Uint32Array(nMaxColors);
 		if (nMaxColors > 2)
@@ -484,7 +483,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			}
 		}
 
-		this.quantize_image(pixels, nMaxColors, qPixels, width, height, dither);
+		var qPixels = this.quantize_image(pixels, nMaxColors, width, height, dither);
 		if (this.m_transparentPixelIndex >= 0)
 		{
 			var k = qPixels[this.m_transparentPixelIndex];
