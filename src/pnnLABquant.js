@@ -257,8 +257,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
-			var alphaDiff = this.hasSemiTransparency ? Math.abs(lab2.alpha - lab1.alpha) : 0;
-			var nerr = nerr2 * sqr(alphaDiff) * alphaDiff / 3.0;
+			var nerr = nerr2 * sqr(lab2.alpha - lab1.alpha) / Math.exp(1.0);
 			if (nerr >= err)
 				continue;
 				
@@ -476,7 +475,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				continue;
 
 			var lab2 = getLab(a2, r2, g2, b2);
-			if (nMaxColors > 32) {
+			if (nMaxColors > 32 || this.hasSemiTransparency) {
 				curdist += PR * sqr(r2 - r);
 				if (curdist > mindist)
 					continue;
