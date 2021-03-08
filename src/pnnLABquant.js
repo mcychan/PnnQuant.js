@@ -470,7 +470,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			g2 = (palette[i] >>> 8) & 0xff,
 			b2 = (palette[i] >>> 16) & 0xff,
 			a2 = (palette[i] >>> 24) & 0xff;
-			var curdist = sqr(a2 - a) / Math.exp(1.0);
+			var curdist = sqr(a2 - a);
 			if (curdist > mindist)
 				continue;
 
