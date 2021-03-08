@@ -470,7 +470,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			g2 = (palette[i] >>> 8) & 0xff,
 			b2 = (palette[i] >>> 16) & 0xff,
 			a2 = (palette[i] >>> 24) & 0xff;
-			var curdist = sqr(a2 - a);
+			var curdist = sqr(a2 - a) / Math.exp(1.0);
 			if (curdist > mindist)
 				continue;
 
@@ -535,7 +535,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			closest[2] = closest[3] = 1e100;
 			var lab1 = getLab(a, r, g, b);
 
-			for (; k < nMaxColors; k++) {
+			for (; k < nMaxColors; ++k) {
 				var r2 = (palette[k] & 0xff),
 				g2 = (palette[k] >>> 8) & 0xff,
 				b2 = (palette[k] >>> 16) & 0xff,
