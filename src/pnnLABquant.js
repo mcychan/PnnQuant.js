@@ -257,7 +257,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
-			var nerr = nerr2 * sqr(lab2.alpha - lab1.alpha) / Math.exp(1.0);
+			var nerr = nerr2 * sqr(lab2.alpha - lab1.alpha) / Math.exp(1.5);
 			if (nerr >= err)
 				continue;
 				
