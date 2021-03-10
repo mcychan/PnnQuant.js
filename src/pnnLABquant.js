@@ -257,8 +257,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
-			var alphaDiff = this.hasSemiTransparency ? Math.abs(lab2.alpha - lab1.alpha) : 0;
-			var nerr = nerr2 * sqr(alphaDiff) / Math.exp(1.7);
+			var nerr = nerr2 * sqr(lab2.alpha - lab1.alpha) / Math.exp(1.7);
 			if (nerr >= err)
 				continue;
 				
