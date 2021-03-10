@@ -349,7 +349,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		if (quan_sqrt)
 			bins[0].cnt = (Math.sqrt(bins[0].cnt) | 0);
 		for (var i = 0; i < maxbins - 1; ++i) {
-			bins[i].fw = (i + 1);
+			bins[i].fw = i + 1;
 			bins[i + 1].bk = i;
 			
 			if (quan_sqrt)
@@ -365,7 +365,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.31) / maxbins);
 		
 		/* Initialize nearest neighbors and build heap of them */
-		var heap = new Uint32Array(65537);
+		var heap = new Uint32Array(bins.length + 1);
 		for (var i = 0; i < maxbins; ++i) {
 			find_nn(bins, i, nMaxColors);
 			/* Push slot on heap */
