@@ -38,7 +38,7 @@
 
 	function kenForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
-		var n = Math.log2(y2 / y1) / (x2 - x1);
+		var n = Math.log(y2 / y1) / (x2 - x1);
 		var k = y1 / Math.exp(x1 * n);
 		var result = "y = " + k + " e<sup>" + n + "x</sup><br/>";
 		result += "x1 = " + x1 + ", y1 = " + (k * Math.exp(n * x1)) + "<br/>";
