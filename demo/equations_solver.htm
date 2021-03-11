@@ -1,0 +1,45 @@
+<html>
+<style>
+button::after {
+    content: attr(data-superscript);
+    vertical-align: super;
+}
+</style>
+<script>
+function twoPForm(x1, y1, x2, y2) {
+	var m = (parseFloat(y2) - parseFloat(y1)) / (parseFloat(x2) - parseFloat(x1));
+	var c = -m * parseFloat(x1) + parseFloat(y1);
+	document.body.innerHTML += "y = " + m + "x + " + c + "<br/>";
+	document.body.innerHTML += "x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
+	document.body.innerHTML += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<p/>";
+	return [m, c];
+}
+
+function knForm(x1, y1, x2, y2) {
+	var n = (Math.log(parseFloat(y2)) - Math.log(parseFloat(y1))) / (Math.log(parseFloat(x2)) - Math.log(parseFloat(x1)));
+	var k = parseFloat(y1) / Math.pow(parseFloat(x1), n);
+	document.body.innerHTML += "y = " + k + " x<sup>" + n + "</sup><br/>";	
+	document.body.innerHTML += "x1 = " + x1 + ", y1 = " + (k * Math.pow(parseFloat(x1), n)) + "<br/>";
+	document.body.innerHTML += "x2 = " + x2 + ", y2 = " + (k * Math.pow(parseFloat(x2), n)) + "<p/>";
+	return [k, n];
+}
+
+function kenForm(x1, y1, x2, y2) {
+	var n = (Math.log(parseFloat(y2)) - Math.log(parseFloat(y1))) / (parseFloat(x2) - parseFloat(x1));
+	var k = parseFloat(y1) / Math.exp(parseFloat(x1) * n);
+	document.body.innerHTML += "y = " + k + " e<sup>" + n + "x</sup><br/>";
+	document.body.innerHTML += "x1 = " + x1 + ", y1 = " + (k * Math.exp(n * parseFloat(x1))) + "<br/>";
+	document.body.innerHTML += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * parseFloat(x2))) + "<p/>";
+	return [k, n];
+}
+</script>
+<body>
+<form>
+x1: <input id="x1" type="number" size="30" value="0.03349031920460492"/> y1: <input id="y1" type="number" size="30" value="0.00792094314369939"/><br />
+x2: <input id="x2" type="number" size="30" value="0.02327061176256704"/> y2: <input id="y2" type="number" size="30" value="0.03070575630923198"/><br />
+<button onclick="twoPForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)">y = mx + c</button>
+<button onclick="knForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="n">y = kx</button>
+<button onclick="kenForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="nx">y = ke</button>
+</form>
+</body>
+</html>
