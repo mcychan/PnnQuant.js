@@ -52,13 +52,13 @@
 <body>
 <h3>Solve a Simultaneous Set of Two Equations</h3>
 <form novalidate="">
-x1: <input id="x1" type="number" size="30" value="0.03349031920460492"/> y1: <input id="y1" type="number" size="30" value="0.00792094314369939"/><br />
-x2: <input id="x2" type="number" size="30" value="0.02327061176256704"/> y2: <input id="y2" type="number" size="30" value="0.03070575630923198"/><br />
+x1: <input id="x1" type="number" size="30" value="1"/> y1: <input id="y1" type="number" size="30" value="2"/><br />
+x2: <input id="x2" type="number" size="30" value="3"/> y2: <input id="y2" type="number" size="30" value="54"/><br />
 <div style="height: 0.5em"></div>
 <button type="button" onclick="twoPForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)">y = mx + c</button>
 <button type="button" onclick="knForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="n">y = kx</button>
 <button type="button" onclick="kenForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="nx">y = ke</button>
-<button type="button" onclick="document.getElementById('answer').innerHTML = ''">AC</button>
+<button type="reset" onclick="document.getElementById('answer').innerHTML = ''; ">AC</button>
 </form>
 <div id="answer"></div>
 	<div id="wrapfabtest">
