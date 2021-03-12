@@ -91,7 +91,7 @@
 		var k, n = Math.log2(Math.abs(ey)) / Math.log2(Math.abs(ex));
 		color = "rgb(" + Math.floor(Math.random() * 200) + ", 38, 67)";
 		if(Number.isFinite(n)) {
-			k = y1 / Math.pow(x1, n);			
+			k = y1 / Math.pow(Math.abs(x1), n);			
 			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
 			var y1b = k * Math.pow(Math.abs(x1), n);
 			result += "x1 = " + x1 + ", y1 = " + ((y1 < 0) ^ (y1b < 0) ? -y1b : y1b) + "<br/>";
