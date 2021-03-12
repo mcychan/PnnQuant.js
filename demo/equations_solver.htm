@@ -1,7 +1,7 @@
 <html>
 <title>Solve a Simultaneous Set of Two Equations</title>
 <head>
-	<meta name="keywords" content="equations, linear, problem, simultaneous, solve, two, typing" />
+	<meta name="keywords" content="equations, linear, problem, simultaneous, set, solve, two, typing" />
 	<meta name="description" content="Solve a Simultaneous Set of Two Equations"/>
 	<meta name="author" content="Miller Cy Chan">
 	<meta name="viewport" content="width=device-width, initial-scale=1">	
@@ -14,12 +14,16 @@
 	}
 </style>
 <script>
+	function insertRow(result) {
+		document.getElementById("answer").insertRow(0).innerHTML = result;
+	}
+	
 	function twoPForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
 		var result = "No solution.<br/>";
-		var m = (y2 - y1) / (x2 - x1);
+		var c, m = (y2 - y1) / (x2 - x1);
 		if(Number.isFinite(m)) {			
-			var c = -m * x1 + y1;
+			c = -m * x1 + y1;
 			var sign = c < 0 ? " - " : " + ";
 			result = "y = " + m + "x" + sign + Math.abs(c) + "<br/>";
 			result += "x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
@@ -29,7 +33,7 @@
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
 			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
 		}
-		document.getElementById("answer").innerHTML = result + document.getElementById("answer").innerHTML;
+		insertRow(result);
 		return [m, c];
 	}
 
@@ -41,12 +45,8 @@
 		var ipi = ey > 0 ? 0 : 1;
 		if(ex <= 0)
 			++ipi;
-		var k, n = Math.log2(Math.abs(ey)) / Math.log2(Math.abs(ex));
-		if(!Number.isFinite(n)) {
-			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
-		}
-		else {
+		var k, n = Math.log2(Math.abs(ey)) / Math.log2(Math.abs(ex));		
+		if(Number.isFinite(n)) {
 			k = y1 / Math.pow(x1, n);			
 			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
 			var sign = (ipi > 0 && y1 < 0) ? -1 : 1;
@@ -54,8 +54,12 @@
 			sign = (ipi > 0 && y2 < 0) ? -1 : 1;
 			result += "x2 = " + x2 + ", y2 = " + (k * Math.pow(Math.abs(x2), n) * sign) + "<p/>";
 			n += ipis[ipi];
-		}		
-		document.getElementById("answer").innerHTML = result + document.getElementById("answer").innerHTML;
+		}
+		else {
+			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+		}
+		insertRow(result);
 		return [k, n];
 	}
 
@@ -64,12 +68,8 @@
 		var result = "No solution.<br/>";
 		var ey = y2 / y1;
 		var ipi = ey > 0 ? "" : " + iπ";
-		var k, n = Math.log(Math.abs(ey)) / (x2 - x1);
-		if(!Number.isFinite(n)) {
-			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
-		}
-		else {
+		var k, n = Math.log(Math.abs(ey)) / (x2 - x1);		
+		if(Number.isFinite(n)) {
 			k = y1 / Math.exp(x1 * n);
 			result = "y = " + k + " e<sup>" + n + "x" + ipi + "</sup><br/>";
 			var sign = (ipi != "" && y1 < 0) ? -1 : 1;
@@ -77,8 +77,12 @@
 			sign = (ipi != "" && y2 < 0) ? -1 : 1;
 			result += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * x2) * sign) + "<p/>";
 			n += ipi;
-		}		
-		document.getElementById("answer").innerHTML = result + document.getElementById("answer").innerHTML;
+		}
+		else {
+			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+		}
+		insertRow(result);
 		return [k, n];
 	}
 </script>
@@ -101,7 +105,7 @@
 <button type="button" onclick="kenForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="nx">y = ke</button>
 <button type="button" onclick="document.getElementById('answer').innerHTML = ''">C</button>
 </form>
-<div id="answer"></div>
+<table id="tbl_showcase"><tbody id="answer"></tbody></table>
 	<div id="wrapfabtest">
 		<div class="adBanner">
 			ImgV64 Copyright © 2016-2021
