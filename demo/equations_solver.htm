@@ -40,7 +40,7 @@
 	function knForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
 		var result = "No solution.<br/>";
-		var ipis = ["", " + iπ", " + 2iπ"];
+		var ipis = ["", " + i&pi;", " + 2i&pi;"];
 		var ey = y2 / y1, ex = x2 / x1;
 		var ipi = ey > 0 ? 0 : 1;
 		if(ex <= 0)
@@ -49,10 +49,8 @@
 		if(Number.isFinite(n)) {
 			k = y1 / Math.pow(x1, n);			
 			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
-			var sign = (ipi > 0 && x1 < 0) ? -1 : 1;
-			result += "x1 = " + x1 + ", y1 = " + (k * Math.pow(Math.abs(x1), n) * sign) + "<br/>";
-			sign = (ipi > 0 && x2 < 0) ? -1 : 1;
-			result += "x2 = " + x2 + ", y2 = " + (k * Math.pow(Math.abs(x2), n) * sign) + "<br/>";
+			result += "x1 = " + x1 + ", y1 = " + ((ipi > 0) ? y1 : (k * Math.pow(Math.abs(x1), n) * sign)) + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + ((ipi > 0) ? y2 : (k * Math.pow(Math.abs(x2), n) * sign)) + "<br/>";
 			n += ipis[ipi];
 		}
 		else {
@@ -67,15 +65,13 @@
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
 		var result = "No solution.<br/>";
 		var ey = y2 / y1;
-		var ipi = ey > 0 ? "" : " + iπ";
+		var ipi = ey > 0 ? "" : " + i&pi;";
 		var k, n = Math.log(Math.abs(ey)) / (x2 - x1);		
 		if(Number.isFinite(n)) {
 			k = y1 / Math.exp(x1 * n);
 			result = "y = " + k + " e<sup>" + n + "x" + ipi + "</sup><br/>";
-			var sign = (ipi != "" && x1 < 0) ? -1 : 1;
-			result += "x1 = " + x1 + ", y1 = " + (k * Math.exp(n * x1) * sign) + "<br/>";
-			sign = (ipi != "" && x2 < 0) ? -1 : 1;
-			result += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * x2) * sign) + "<br/>";
+			result += "x1 = " + x1 + ", y1 = " + ((ipi != "") ? y1 : (k * Math.exp(n * x1) * sign)) + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + ((ipi != "") ? y2 : (k * Math.exp(n * x2) * sign)) + "<br/>";
 			n += ipi;
 		}
 		else {
