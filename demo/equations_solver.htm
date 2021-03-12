@@ -49,9 +49,9 @@
 		else {
 			k = y1 / Math.pow(x1, n);			
 			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
-			var sign = (ipi > 0 && x1 < 0) ? -1 : 1;
+			var sign = (ipi > 0 && y1 < 0) ? -1 : 1;
 			result += "x1 = " + x1 + ", y1 = " + (k * Math.pow(Math.abs(x1), n) * sign) + "<br/>";
-			sign = (ipi > 0 && x2 < 0) ? -1 : 1;
+			sign = (ipi > 0 && y2 < 0) ? -1 : 1;
 			result += "x2 = " + x2 + ", y2 = " + (k * Math.pow(Math.abs(x2), n) * sign) + "<p/>";
 			n += ipis[ipi];
 		}		
@@ -72,9 +72,9 @@
 		else {
 			k = y1 / Math.exp(x1 * n);
 			result = "y = " + k + " e<sup>" + n + "x" + ipi + "</sup><br/>";
-			var sign = (ipi != "" && x1 < 0) ? -1 : 1;
+			var sign = (ipi != "" && y1 < 0) ? -1 : 1;
 			result += "x1 = " + x1 + ", y1 = " + (k * Math.exp(n * x1) * sign) + "<br/>";
-			sign = (ipi != "" && x2 < 0) ? -1 : 1;
+			sign = (ipi != "" && y2 < 0) ? -1 : 1;
 			result += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * x2) * sign) + "<p/>";
 			n += ipi;
 		}		
