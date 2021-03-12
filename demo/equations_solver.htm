@@ -16,34 +16,69 @@
 <script>
 	function twoPForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
+		var result = "No solution.<br/>";
 		var m = (y2 - y1) / (x2 - x1);
-		var c = -m * x1 + y1;
-		var result = "y = " + m + "x + " + c + "<br/>";
-		result += "x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
-		result += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<p/>";
-		document.getElementById("answer").innerHTML += result;
+		if(Number.isFinite(m)) {			
+			var c = -m * x1 + y1;
+			var sign = c < 0 ? " - " : " + ";
+			result = "y = " + m + "x" + sign + Math.abs(c) + "<br/>";
+			result += "x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<p/>";
+		}
+		else {
+			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+		}
+		document.getElementById("answer").innerHTML = result + document.getElementById("answer").innerHTML;
 		return [m, c];
 	}
 
 	function knForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
-		var n = Math.log2(y2 / y1) / Math.log2(x2 / x1);
-		var k = y1 / Math.pow(x1, n);
-		var result = "y = " + k + " x<sup>" + n + "</sup><br/>";	
-		result += "x1 = " + x1 + ", y1 = " + (k * Math.pow(x1, n)) + "<br/>";
-		result += "x2 = " + x2 + ", y2 = " + (k * Math.pow(x2, n)) + "<p/>";
-		document.getElementById("answer").innerHTML += result;
+		var result = "No solution.<br/>";
+		var ipis = ["", " + iπ", " + 2iπ"];
+		var ey = y2 / y1, ex = x2 / x1;
+		var ipi = ey > 0 ? 0 : 1;
+		if(ex <= 0)
+			++ipi;
+		var k, n = Math.log2(Math.abs(ey)) / Math.log2(Math.abs(ex));
+		if(!Number.isFinite(n)) {
+			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+		}
+		else {
+			k = y1 / Math.pow(x1, n);			
+			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
+			var sign = (ipi > 0 && x1 < 0) ? -1 : 1;
+			result += "x1 = " + x1 + ", y1 = " + (k * Math.pow(Math.abs(x1), n) * sign) + "<br/>";
+			sign = (ipi > 0 && x2 < 0) ? -1 : 1;
+			result += "x2 = " + x2 + ", y2 = " + (k * Math.pow(Math.abs(x2), n) * sign) + "<p/>";
+			n += ipis[ipi];
+		}		
+		document.getElementById("answer").innerHTML = result + document.getElementById("answer").innerHTML;
 		return [k, n];
 	}
 
 	function kenForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
-		var n = Math.log(y2 / y1) / (x2 - x1);
-		var k = y1 / Math.exp(x1 * n);
-		var result = "y = " + k + " e<sup>" + n + "x</sup><br/>";
-		result += "x1 = " + x1 + ", y1 = " + (k * Math.exp(n * x1)) + "<br/>";
-		result += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * x2)) + "<p/>";
-		document.getElementById("answer").innerHTML += result;
+		var result = "No solution.<br/>";
+		var ey = y2 / y1;
+		var ipi = ey > 0 ? "" : " + iπ";
+		var k, n = Math.log(Math.abs(ey)) / (x2 - x1);
+		if(!Number.isFinite(n)) {
+			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+		}
+		else {
+			k = y1 / Math.exp(x1 * n);
+			result = "y = " + k + " e<sup>" + n + "x" + ipi + "</sup><br/>";
+			var sign = (ipi != "" && x1 < 0) ? -1 : 1;
+			result += "x1 = " + x1 + ", y1 = " + (k * Math.exp(n * x1) * sign) + "<br/>";
+			sign = (ipi != "" && x2 < 0) ? -1 : 1;
+			result += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * x2) * sign) + "<p/>";
+			n += ipi;
+		}		
+		document.getElementById("answer").innerHTML = result + document.getElementById("answer").innerHTML;
 		return [k, n];
 	}
 </script>
@@ -52,13 +87,19 @@
 <body>
 <h3>Solve a Simultaneous Set of Two Equations</h3>
 <form novalidate="">
-x1: <input id="x1" type="number" size="30" value="1"/> y1: <input id="y1" type="number" size="30" value="2"/><br />
-x2: <input id="x2" type="number" size="30" value="3"/> y2: <input id="y2" type="number" size="30" value="54"/><br />
-<div style="height: 0.5em"></div>
+<div style="float:left; width:100%">
+	<div style="float:left; padding-left: 1ex; max-width: 50%">x1: <input id="x1" type="number" value="1" style="width: 11em" /></div>
+	<div style="float:left; padding-left: 2ex; max-width: 50%">y1: <input id="y1" type="number" value="2" style="width: 11em" /></div>
+</div>
+<div style="float:left; width:100%">
+	<div style="float:left; padding-left: 1ex; max-width: 50%">x2: <input id="x2" type="number" value="3" style="width: 11em" /></div>
+	<div style="float:left; padding-left: 2ex; max-width: 50%">y2: <input id="y2" type="number" value="54" style="width: 11em" /></div>
+</div>
+<div style="clear: both; height: 0.5em"></div>
 <button type="button" onclick="twoPForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)">y = mx + c</button>
 <button type="button" onclick="knForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="n">y = kx</button>
 <button type="button" onclick="kenForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="nx">y = ke</button>
-<button type="reset" onclick="document.getElementById('answer').innerHTML = ''; ">AC</button>
+<button type="button" onclick="document.getElementById('answer').innerHTML = ''">C</button>
 </form>
 <div id="answer"></div>
 	<div id="wrapfabtest">
