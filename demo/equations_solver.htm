@@ -15,7 +15,7 @@
 </style>
 <script>
 	function insertRow(result) {
-		document.getElementById("answer").insertRow(0).innerHTML = result;
+		document.getElementById("answer").insertRow(0).innerHTML = "<td>" + result + "</td>;
 	}
 	
 	function twoPForm(x1, y1, x2, y2) {
@@ -27,11 +27,11 @@
 			var sign = c < 0 ? " - " : " + ";
 			result = "y = " + m + "x" + sign + Math.abs(c) + "<br/>";
 			result += "x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<p/>";
+			result += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<br/>";
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<br/>";
 		}
 		insertRow(result);
 		return [m, c];
@@ -52,12 +52,12 @@
 			var sign = (ipi > 0 && y1 < 0) ? -1 : 1;
 			result += "x1 = " + x1 + ", y1 = " + (k * Math.pow(Math.abs(x1), n) * sign) + "<br/>";
 			sign = (ipi > 0 && y2 < 0) ? -1 : 1;
-			result += "x2 = " + x2 + ", y2 = " + (k * Math.pow(Math.abs(x2), n) * sign) + "<p/>";
+			result += "x2 = " + x2 + ", y2 = " + (k * Math.pow(Math.abs(x2), n) * sign) + "<br/>";
 			n += ipis[ipi];
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<br/>";
 		}
 		insertRow(result);
 		return [k, n];
@@ -75,12 +75,12 @@
 			var sign = (ipi != "" && y1 < 0) ? -1 : 1;
 			result += "x1 = " + x1 + ", y1 = " + (k * Math.exp(n * x1) * sign) + "<br/>";
 			sign = (ipi != "" && y2 < 0) ? -1 : 1;
-			result += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * x2) * sign) + "<p/>";
+			result += "x2 = " + x2 + ", y2 = " + (k * Math.exp(n * x2) * sign) + "<br/>";
 			n += ipi;
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + y2 + "<p/>";
+			result += "x2 = " + x2 + ", y2 = " + y2 + "<br/>";
 		}
 		insertRow(result);
 		return [k, n];
