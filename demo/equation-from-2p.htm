@@ -8,11 +8,8 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<link rel="stylesheet" href="css/demo.css">
 <style>
-	body::after {
-		content: "";
-		background: url(img/graph.png);
-		background-repeat: no-repeat;
-		opacity: 0.2;
+	#canvas {
+		opacity: 0.4;
 		top: 15%;
 		left: 15%;
 		bottom: 0;
@@ -26,6 +23,7 @@
 		vertical-align: super;
 	}
 </style>
+<script src="js/plot-graph.js"></script>
 <script>
 	/**
 	 * Number.isFinite
@@ -56,25 +54,29 @@
 	}
 
 	function insertRow(result) {
-		document.getElementById("answer").insertRow(0).innerHTML = "<td>" + result + "</td>";
+		document.getElementById("answer").insertRow(0).innerHTML = "<td style='color: " + color + "'>" + result + "</td>";
 	}
 	
 	function twoPForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
 		var result = "No solution.<br/>";
 		var c, m = (y2 - y1) / (x2 - x1);
+		color = "rgb(72, " + Math.floor(Math.random() * 200) + ", 40)";
 		if(Number.isFinite(m)) {			
 			c = -m * x1 + y1;
 			var sign = c < 0 ? " - " : " + ";
 			result = "y = " + m + "x" + sign + Math.abs(c) + "<br/>";
 			result += "x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
 			result += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<br/>";
+			funGraph(ctx, axes, function(x) {
+				return m * x + c;
+			}, color, 1);
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
 			result += "x2 = " + x2 + ", y2 = " + y2 + "<br/>";
 		}
-		insertRow(result);
+		insertRow(result);		
 		return [m, c];
 	}
 
@@ -86,7 +88,8 @@
 		var ipi = ey > 0 ? 0 : 1;
 		if(ex <= 0)
 			++ipi;
-		var k, n = Math.log2(Math.abs(ey)) / Math.log2(Math.abs(ex));		
+		var k, n = Math.log2(Math.abs(ey)) / Math.log2(Math.abs(ex));
+		color = "rgb(" + Math.floor(Math.random() * 200) + ", 38, 67)";
 		if(Number.isFinite(n)) {
 			k = y1 / Math.pow(x1, n);			
 			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
@@ -95,6 +98,11 @@
 			var y2b = k * Math.pow(Math.abs(x2), n);
 			result += "x2 = " + x2 + ", y2 = " + ((y2 < 0) ^ (y2b < 0) ? -y2b : y2b) + "<br/>";
 			n += ipis[ipi];
+			if(ipi < 1) {
+				funGraph(ctx, axes, function(x) {
+					return k * Math.pow(Math.abs(x), n);
+				}, color, 1);
+			}
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
@@ -109,7 +117,8 @@
 		var result = "No solution.<br/>";
 		var ey = y2 / y1;
 		var ipi = ey > 0 ? "" : " + i&pi;";
-		var k, n = Math.log(Math.abs(ey)) / (x2 - x1);		
+		var k, n = Math.log(Math.abs(ey)) / (x2 - x1);
+		color = "rgb(87, 33, " + Math.floor(Math.random() * 200) + ")";
 		if(Number.isFinite(n)) {
 			k = y1 / Math.exp(x1 * n);
 			result = "y = " + k + " e<sup>" + n + "x" + ipi + "</sup><br/>";
@@ -118,6 +127,11 @@
 			var y2b = k * Math.exp(n * x2);
 			result += "x2 = " + x2 + ", y2 = " + ((y2 < 0) ^ (y2b < 0) ? -y2b : y2b) + "<br/>";
 			n += ipi;
+			if(ipi == "") {
+				funGraph(ctx, axes, function(x) {
+					return k * Math.exp(n * x);
+				}, color, 1);
+			}
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
@@ -126,10 +140,12 @@
 		insertRow(result);
 		return [k, n];
 	}
+	
+	var ctx, color, axes;
 </script>
 </head>
 <meta name="google-site-verification" content="uaVZxe8V55rvkhFV7liiebPRTTfOZhFySiFN97A11qw" />
-<body>
+<body onload="draw()">
 <h3>Equation of a Line from 2 Points</h3>
 <form novalidate="">
 <div style="float:left; width:100%">
@@ -144,8 +160,9 @@
 <button type="button" onclick="twoPForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)">y = mx + c</button>
 <button type="button" onclick="knForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="n">y = kx</button>
 <button type="button" onclick="kenForm(document.getElementById('x1').value, document.getElementById('y1').value, document.getElementById('x2').value, document.getElementById('y2').value)" data-superscript="nx">y = ke</button>
-<button type="button" onclick="document.getElementById('answer').innerHTML = ''">C</button>
+<button type="button" onclick="document.getElementById('answer').innerHTML = ''; draw();">C</button>
 </form>
+<canvas id="canvas" width="360" height="360"></canvas>
 <table id="tbl_showcase"><tbody id="answer"></tbody></table>
 	<div id="wrapfabtest">
 		<div class="adBanner">
