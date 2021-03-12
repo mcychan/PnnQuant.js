@@ -49,8 +49,8 @@
 		if(Number.isFinite(n)) {
 			k = y1 / Math.pow(x1, n);			
 			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
-			result += "x1 = " + x1 + ", y1 = " + ((ipi > 0) ? y1 : (k * Math.pow(Math.abs(x1), n) * sign)) + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + ((ipi > 0) ? y2 : (k * Math.pow(Math.abs(x2), n) * sign)) + "<br/>";
+			result += "x1 = " + x1 + ", y1 = " + ((ipi > 0) ? y1 : (k * Math.pow(Math.abs(x1), n))) + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + ((ipi > 0) ? y2 : (k * Math.pow(Math.abs(x2), n))) + "<br/>";
 			n += ipis[ipi];
 		}
 		else {
@@ -70,8 +70,8 @@
 		if(Number.isFinite(n)) {
 			k = y1 / Math.exp(x1 * n);
 			result = "y = " + k + " e<sup>" + n + "x" + ipi + "</sup><br/>";
-			result += "x1 = " + x1 + ", y1 = " + ((ipi != "") ? y1 : (k * Math.exp(n * x1) * sign)) + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + ((ipi != "") ? y2 : (k * Math.exp(n * x2) * sign)) + "<br/>";
+			result += "x1 = " + x1 + ", y1 = " + ((ipi != "") ? y1 : (k * Math.exp(n * x1))) + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + ((ipi != "") ? y2 : (k * Math.exp(n * x2))) + "<br/>";
 			n += ipi;
 		}
 		else {
