@@ -17,6 +17,25 @@ function funGraph(ctx, axes, func, color, thick) {
 	ctx.stroke();
 }
 
+function invFunGraph(ctx, axes, func, color, thick) {
+	var xx, yy, dy = 1, x0 = axes.x0, y0 = axes.y0, scale = axes.scale;
+	var iMax = Math.round((ctx.canvas.height - y0) / dy);
+	var iMin = axes.doNegativeX ? Math.round(-y0 / dy) : 0;
+	ctx.beginPath();
+	ctx.lineWidth = thick;
+	ctx.strokeStyle = color;
+
+	for (var i=iMin; i<=iMax; ++i) {		
+		yy = dy * i;
+		xx = scale * func(yy / scale);
+		if (i == iMin)
+			ctx.moveTo(x0 + xx, y0 - yy);
+		else
+			ctx.lineTo(x0 + xx, y0 - yy);
+	}
+	ctx.stroke();
+}
+
 function showAxes(ctx, axes) {
 	var x0 = axes.x0, w = ctx.canvas.width;
 	var y0 = axes.y0, h = ctx.canvas.height;
