@@ -79,8 +79,7 @@
 			result = "y = " + term;
 			if(term == "")
 				sign = sign.replace('+', '').replace(/\s/g, '');
-			if(c)
-				result += sign + Math.abs(c);
+			result += sign + Math.abs(c);
 			result += "<br/>x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
 			result += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<br/>";
 			funGraph(ctx, axes, function(x) {
