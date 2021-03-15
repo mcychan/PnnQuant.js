@@ -87,8 +87,25 @@
 			}, color, 1);
 		}
 		else {
-			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + y2 + "<br/>";
+			m = (x2 - x1) / (y2 - y1);
+			if(Number.isFinite(m)) {
+				c = -m * y1 + x1;
+				var sign = c < 0 ? " - " : " + ";
+				var term = getTerm(m, "y");
+				result = "x = " + term;
+				if(term == "")
+					sign = sign.replace('+', '').replace(/\s/g, '');
+				result += sign + Math.abs(c);
+				result += "<br/>x1 = " + (m * y1 + c) + ", y1 = " + y1 + "<br/>";
+				result += "x2 = " + (m * y2 + c) + ", y2 = " + y2 + "<br/>";
+				invFunGraph(ctx, axes, function(x) {
+					return c;
+				}, color, 1);
+			}
+			else {
+				result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
+				result += "x2 = " + x2 + ", y2 = " + y2 + "<br/>";
+			}
 		}
 		insertRow(result);		
 		return [m, c];
