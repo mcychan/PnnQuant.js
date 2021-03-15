@@ -57,6 +57,16 @@
 		document.getElementById("answer").insertRow(0).innerHTML = "<td style='color: " + color + "'>" + result + "</td>";
 	}
 	
+	function getTerm(coefficient, variable) {
+		if(coefficient == -1)
+			return "-" + variable;
+		if(coefficient == 0)
+			return "";
+		if(coefficient == 1)
+			return variable;
+		return coefficient + variable;
+	}
+	
 	function twoPForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
 		var result = "No solution.<br/>";
@@ -65,8 +75,13 @@
 		if(Number.isFinite(m)) {			
 			c = -m * x1 + y1;
 			var sign = c < 0 ? " - " : " + ";
-			result = "y = " + m + "x" + sign + Math.abs(c) + "<br/>";
-			result += "x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
+			var term = getTerm(m, "x");
+			result = "y = " + term;
+			if(term == "")
+				sign = "";
+			if(c)
+				result += sign + Math.abs(c);
+			result += "<br/>x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
 			result += "x2 = " + x2 + ", y2 = " + (m * x2 + c) + "<br/>";
 			funGraph(ctx, axes, function(x) {
 				return m * x + c;
@@ -91,8 +106,11 @@
 		var k, n = Math.log2(Math.abs(ey)) / Math.log2(Math.abs(ex));
 		color = "rgb(" + Math.floor(Math.random() * 200) + ", 38, 67)";
 		if(Number.isFinite(n)) {
-			k = y1 / Math.pow(Math.abs(x1), n);			
-			result = "y = " + k + " x<sup>" + n + ipis[ipi] + "</sup><br/>";
+			k = y1 / Math.pow(Math.abs(x1), n);
+			var term = getTerm(k, "x<sup>");
+			result = "y = " + term;
+			if(term != "")
+				result += n + ipis[ipi] + "</sup><br/>";
 			var y1b = k * Math.pow(Math.abs(x1), n);
 			result += "x1 = " + x1 + ", y1 = " + ((y1 < 0) ^ (y1b < 0) ? -y1b : y1b) + "<br/>";
 			var y2b = k * Math.pow(Math.abs(x2), n);
@@ -121,7 +139,10 @@
 		color = "rgb(87, 33, " + Math.floor(Math.random() * 200) + ")";
 		if(Number.isFinite(n)) {
 			k = y1 / Math.exp(x1 * n);
-			result = "y = " + k + " e<sup>" + n + "x" + ipi + "</sup><br/>";
+			var term = getTerm(k, "e<sup>");
+			result = "y = " + term;
+			if(term != "")
+				result += n + "x" + ipi + "</sup><br/>";
 			var y1b = k * Math.exp(n * x1);
 			result += "x1 = " + x1 + ", y1 = " + ((y1 < 0) ^ (y1b < 0) ? -y1b : y1b) + "<br/>";
 			var y2b = k * Math.exp(n * x2);
