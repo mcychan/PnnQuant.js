@@ -78,7 +78,7 @@
 			var term = getTerm(m, "x");
 			result = "y = " + term;
 			if(term == "")
-				sign = "";
+				sign = sign.replace('+', '').replace(/\s/g, '');
 			if(c)
 				result += sign + Math.abs(c);
 			result += "<br/>x1 = " + x1 + ", y1 = " + (m * x1 + c) + "<br/>";
