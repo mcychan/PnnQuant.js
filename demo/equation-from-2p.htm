@@ -127,6 +127,8 @@
 			result = "y = " + term;
 			if(term != "")
 				result += n + ipis[ipi] + "</sup><br/>";
+			else
+				result += k + "<br />";
 			var y1b = k * Math.pow(Math.abs(x1), n);
 			result += "x1 = " + x1 + ", y1 = " + ((y1 < 0) ^ (y1b < 0) ? -y1b : y1b) + "<br/>";
 			var y2b = k * Math.pow(Math.abs(x2), n);
@@ -159,6 +161,8 @@
 			result = "y = " + term;
 			if(term != "")
 				result += n + "x" + ipi + "</sup><br/>";
+			else
+				result += k + "<br />";
 			var y1b = k * Math.exp(n * x1);
 			result += "x1 = " + x1 + ", y1 = " + ((y1 < 0) ^ (y1b < 0) ? -y1b : y1b) + "<br/>";
 			var y2b = k * Math.exp(n * x2);
