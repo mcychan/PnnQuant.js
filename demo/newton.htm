@@ -82,7 +82,8 @@
 	
 	function newtonRoot(xn, a, b, y, f, df) {			
 		var xn2;
-		for(;;) {
+		var maxRetryCount = 99999;
+		for(var i=0; i<maxRetryCount; ++i) {
 			var dy = df(xn, a, b);
 			if(Math.abs(dy) < 0.000000001)
 				return NaN; // give up with this seed if derivative is too low
@@ -93,7 +94,7 @@
 				break;
 			xn = xn2;
 		}
-		return xn2;
+		return (i < maxRetryCount) ? xn2 : NaN;
 	}
 	
 	function newton(a, b, y, f, df) {		
@@ -108,26 +109,48 @@
 		return roots;
 	}
 	
+	function toIRoot(x, a) {
+		var iRoot = x + a;						
+		var iSign = (iRoot < 0) ? " - " : " + ";
+		return -a + iSign + Math.abs(iRoot) + "i";
+	}
+	
 	function show_xpa_b(a, b, y) {
 		a -= 0, b-= 0, y-= 0;
 		var result = "No solution.<br/>";
 	
 		var sign = (a < 0) ? " - " : " + ";
+		var neg = y < 0;
 		color = "rgb(72, " + Math.floor(Math.random() * 200) + ", 40)";
-		var roots = newton(a, b, y, xpa_b, d_xpa_b);
+		var roots = newton(a, b, Math.abs(y), xpa_b, d_xpa_b);
 		if(roots.length > 0) {
+			var iRoots = [];
 			for(var i=0; i<roots.length; ++i) {
-				var xn2 = parseFloat(roots[i]);
+				var xn2 = parseFloat(roots[i]);				
+					
 				var y1 = Math.power(xn2 + a, b);
 							
 				result = "(x" + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
-				result += " = " + y + ", x = " + xn2 + "<br/>";
+					
+				if(neg)
+					xn2 = toIRoot(xn2, a);
+					
+				result += " = " + y + ", x = " + xn2;
+				if(b % 2 == 0 && !neg) {
+					var y2 = Math.power(-(xn2 + a), b);
+					if(y2 == y1) {
+						var iRoot = toIRoot(xn2, a);						
+						iRoots.push(iRoot);
+						result += " or " + iRoot;
+					}
+				}				
+				result += "<br/>";
 				result += "y = (" + xn2 + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
-				result += "<br/>y = " + y1 + "<br/>";
+				result += "<br/>y = " + (neg ? -y1 : y1) + "<br/>";
 				
 				if(i < 1) {
 					funGraph(ctx, axes, function(x) {
@@ -137,9 +160,10 @@
 
 				insertRow(result);
 			}
+			roots = roots.concat(iRoots);
 		}
 		else {
-			result += sign + Math.abs(a) + " + x<sup>" + b + "</sup> = " + y + "<br/>";
+			result += "(x" + sign + Math.abs(a) + ")<sup>" + b + "</sup> = " + y + "<br/>";
 			insertRow(result);
 		}
 		return roots;
@@ -153,6 +177,7 @@
 		color = "rgb(" + Math.floor(Math.random() * 200) + ", 38, 67)";
 		var roots = newton(a, b, y, x_xpa_b, d_x_xpa_b);
 		if(roots.length > 0) {
+			var iRoots = [];
 			for(var i=0; i<roots.length; ++i) {
 				var xn2 = parseFloat(roots[i]);
 				var y1 = xn2 * Math.power(xn2 + a, b);
@@ -160,7 +185,16 @@
 				result = "x(x" + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
-				result += " = " + y + ", x = " + xn2 + "<br/>";
+				result += " = " + y + ", x = " + xn2;
+				if(b % 2 == 0) {
+					var y2 = -xn2 * Math.power(-(xn2 + a), b);
+					if(y2 == y1) {
+						var iRoot = toIRoot(xn2, a);						
+						iRoots.push(iRoot);
+						result += " or " + iRoot;
+					}
+				}
+				result += "<br/>";
 				result += "y = " + xn2 + " * (" + xn2 + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
@@ -174,6 +208,7 @@
 
 				insertRow(result);
 			}
+			roots = roots.concat(iRoots);
 		}
 		else {
 			result += "x(x" + sign + Math.abs(a) + ")<sup>" + b + "</sup> = " + y + "<br/>";
