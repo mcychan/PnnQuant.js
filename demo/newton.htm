@@ -109,22 +109,14 @@
 		return roots;
 	}
 	
-	function toIRoot(x, a) {
-		var iRoot = x + a;						
-		var iSign = (iRoot < 0) ? " - " : " + ";
-		return -a + iSign + Math.abs(iRoot) + "i";
-	}
-	
 	function show_xpa_b(a, b, y) {
 		a -= 0, b-= 0, y-= 0;
 		var result = "No solution.<br/>";
 	
 		var sign = (a < 0) ? " - " : " + ";
-		var neg = y < 0;
 		color = "rgb(72, " + Math.floor(Math.random() * 200) + ", 40)";
-		var roots = newton(a, b, Math.abs(y), xpa_b, d_xpa_b);
+		var roots = newton(a, b, y, xpa_b, d_xpa_b);
 		if(roots.length > 0) {
-			var iRoots = [];
 			for(var i=0; i<roots.length; ++i) {
 				var xn2 = parseFloat(roots[i]);					
 				var y1 = Math.power(xn2 + a, b);
@@ -133,30 +125,14 @@
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
 					
-				if(neg) {
-					xn2 = toIRoot(xn2, a);
-					if(iRoots.indexOf(iRoot) < 0)
-						iRoots.push(xn2);
-				}
-					
-				result += " = " + y + ", x = " + xn2;
-				if(b % 2 == 0) {
-					var y2 = Math.power(-(xn2 + a), b);
-					if(y2 == y1) {
-						var iRoot = toIRoot(xn2, a);	
-						if(iRoots.indexOf(iRoot) < 0) {
-							iRoots.push(iRoot);
-							result += " or " + iRoot;
-						}
-					}
-				}				
+				result += " = " + y + ", x = " + xn2;		
 				result += "<br/>";
 				result += "y = (" + xn2 + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
-				result += "<br/>y = " + (neg ? -y1 : y1) + "<br/>";
+				result += "<br/>y = " + y1 + "<br/>";
 				
-				if(i < 1 && !neg) {
+				if(i < 1) {
 					funGraph(ctx, axes, function(x) {
 						return Math.power(x + a, b);
 					}, color, 1);
@@ -164,9 +140,6 @@
 
 				insertRow(result);
 			}
-			if(neg)
-				roots = [];
-			roots = roots.concat(iRoots);
 		}
 		else {
 			result += "(x" + sign + Math.abs(a) + ")<sup>" + b + "</sup> = " + y + "<br/>";
@@ -183,7 +156,6 @@
 		color = "rgb(" + Math.floor(Math.random() * 200) + ", 38, 67)";
 		var roots = newton(a, b, y, x_xpa_b, d_x_xpa_b);
 		if(roots.length > 0) {
-			var iRoots = [];
 			for(var i=0; i<roots.length; ++i) {
 				var xn2 = parseFloat(roots[i]);
 				var y1 = xn2 * Math.power(xn2 + a, b);
@@ -192,14 +164,6 @@
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
 				result += " = " + y + ", x = " + xn2;
-				if(b % 2 == 0) {
-					var y2 = -xn2 * Math.power(-(xn2 + a), b);
-					if(y2 == y1) {
-						var iRoot = toIRoot(xn2, a);						
-						iRoots.push(iRoot);
-						result += " or " + iRoot;
-					}
-				}
 				result += "<br/>";
 				result += "y = " + xn2 + " * (" + xn2 + sign + Math.abs(a) + ")";
 				if(b != 1)
@@ -214,7 +178,6 @@
 
 				insertRow(result);
 			}
-			roots = roots.concat(iRoots);
 		}
 		else {
 			result += "x(x" + sign + Math.abs(a) + ")<sup>" + b + "</sup> = " + y + "<br/>";

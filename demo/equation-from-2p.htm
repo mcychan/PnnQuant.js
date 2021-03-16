@@ -121,33 +121,25 @@
 	function knForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
 		var result = "No solution.<br/>";
-		var ipis = ["", " + i&pi;", " + 2i&pi;"];
-		var ipi = 0;		
-		var k, n = Math.log2(Math.abs(y2 / y1)) / Math.log2(Math.abs(x2 / x1));
+		var k, n = Math.log2(y2 / y1) / Math.log2(x2 / x1);
 		color = "rgb(" + Math.floor(Math.random() * 200) + ", 38, 67)";
 		if(Number.isFinite(n)) {
 			k = y1 / Math.power(x1, n);
 			var y1b = k * Math.power(x1, n);
 			var y2b = k * Math.power(x2, n);
-			if((y1 < 0) ^ (y1b < 0))
-				++ipi;
-			if((y2 < 0) ^ (y2b < 0))
-				++ipi;
 				
 			var term = getTerm(k, "x<sup>");
 			result = "y = " + term;
 			if(term != "")
-				result += n + ipis[ipi] + "</sup><br/>";
+				result += n + "</sup><br/>";
 			else
 				result += k + "<br />";			
-			result += "x1 = " + x1 + ", y1 = " + ((y1 < 0) ^ (y1b < 0) ? -y1b : y1b) + "<br/>";
-			result += "x2 = " + x2 + ", y2 = " + ((y2 < 0) ^ (y2b < 0) ? -y2b : y2b) + "<br/>";
-			n += ipis[ipi];
-			if(ipi < 1) {
-				funGraph(ctx, axes, function(x) {
-					return k * Math.power(x, n);
-				}, color, 1);
-			}
+			result += "x1 = " + x1 + ", y1 = " + y1b + "<br/>";
+			result += "x2 = " + x2 + ", y2 = " + y2b + "<br/>";
+			
+			funGraph(ctx, axes, function(x) {
+				return k * Math.power(x, n);
+			}, color, 1);
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
@@ -160,33 +152,25 @@
 	function kenForm(x1, y1, x2, y2) {
 		x1 -= 0, x2 -=0, y1 -=0, y2 -= 0;
 		var result = "No solution.<br/>";
-		var ipis = ["", " - i&pi;", " - 2i&pi;"];
-		var ipi = 0;
-		var k, n = Math.log(Math.abs(y2 / y1)) / (x2 - x1);
+		var k, n = Math.log(y2 / y1) / (x2 - x1);
 		color = "rgb(87, 33, " + Math.floor(Math.random() * 200) + ")";
 		if(Number.isFinite(n)) {
 			k = y1 / Math.exp(x1 * n);
 			var y1b = k * Math.exp(n * x1);
 			var y2b = k * Math.exp(n * x2);
-			if((y1 < 0) ^ (y1b < 0))
-				++ipi;
-			if((y2 < 0) ^ (y2b < 0))
-				++ipi;
 				
 			var term = getTerm(k, "e<sup>");
 			result = "y = " + term;
 			if(term != "")
-				result += n + "x" + ipis[ipi] + "</sup><br/>";
+				result += n + "x</sup><br/>";
 			else
 				result += k + "<br />";			
-			result += "x1 = " + x1 + ", y1 = " + ((y1 < 0) ^ (y1b < 0) ? -y1b : y1b) + "<br/>";			
-			result += "x2 = " + x2 + ", y2 = " + ((y2 < 0) ^ (y2b < 0) ? -y2b : y2b) + "<br/>";
-			n += ipis[ipi];
-			if(ipi < 1) {
-				funGraph(ctx, axes, function(x) {
-					return k * Math.exp(n * x);
-				}, color, 1);
-			}
+			result += "x1 = " + x1 + ", y1 = " + y1b + "<br/>";			
+			result += "x2 = " + x2 + ", y2 = " + y2b + "<br/>";
+
+			funGraph(ctx, axes, function(x) {
+				return k * Math.exp(n * x);
+			}, color, 1);
 		}
 		else {
 			result += "x1 = " + x1 + ", y1 = " + y1 + "<br/>";
