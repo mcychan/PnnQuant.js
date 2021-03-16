@@ -64,45 +64,94 @@
 		document.getElementById("answer").insertRow(0).innerHTML = "<td style='color: " + color + "'>" + result + "</td>";
 	}
 	
-	function f(x, a, b, y) {
+	function x_xpa_b(x, a, b, y) {
 		return x * Math.power(x + a, b) - y;
 	}
 	
-	function df(x, a, b) {
+	function d_x_xpa_b(x, a, b) {
 		return Math.power(x + a, b) + b * x * Math.power(x + a, b - 1);
 	}
 	
-	function newtonRoot(xn, a, b, y) {			
-		var xn2;
-		var dy = df(xn, a, b);
-		if(Math.abs(dy) < 0.000000001)
-			return NaN; // give up with this seed if derivative is too low
-
-		xn2 = xn - f(xn, a, b, y) / dy;
-		if(Math.abs(xn2 - xn) < 0.000000001)
-			return xn2;
-		return newtonRoot(xn2, a, b, y);
+	function xpa_b(x, a, b, y) {
+		return Math.power(x + a, b) - y;
 	}
 	
-	function newton(a, b, y) {		
+	function d_xpa_b(x, a, b) {
+		return b * Math.power(x + a, b - 1);
+	}
+	
+	function newtonRoot(xn, a, b, y, f, df) {			
+		var xn2;
+		for(;;) {
+			var dy = df(xn, a, b);
+			if(Math.abs(dy) < 0.000000001)
+				return NaN; // give up with this seed if derivative is too low
+			xn2 = xn - f(xn, a, b, y) / dy;
+			if(!Number.isFinite(xn2))
+				return NaN; // give up with this seed if reached NaN
+			if(Math.abs(xn2 - xn) < 0.000000001)
+				break;
+			xn = xn2;
+		}
+		return xn2;
+	}
+	
+	function newton(a, b, y, f, df) {		
 		var roots = [];
 		var seeds = [-100000, -100, -1, 1, 100, 100000]; // set initial guesses here
 		for(var i=0; i<seeds.length; ++i) {
 			var xn = seeds[i];
-			var root = newtonRoot(xn, a, b, y);
-			if(Number.isFinite(root) && roots.indexOf(root.toFixed(8)) < 0)
-				roots.push(root.toFixed(8));
+			var root = newtonRoot(xn, a, b, y, f, df);
+			if(Number.isFinite(root) && roots.indexOf(root.toFixed(10)) < 0)
+				roots.push(root.toFixed(10));
 		}
 		return roots;
 	}
 	
-	function showNewton(a, b, y) {
+	function show_xpa_b(a, b, y) {
 		a -= 0, b-= 0, y-= 0;
 		var result = "No solution.<br/>";
 	
 		var sign = (a < 0) ? " - " : " + ";
 		color = "rgb(72, " + Math.floor(Math.random() * 200) + ", 40)";
-		var roots = newton(a, b, y);
+		var roots = newton(a, b, y, xpa_b, d_xpa_b);
+		if(roots.length > 0) {
+			for(var i=0; i<roots.length; ++i) {
+				var xn2 = parseFloat(roots[i]);
+				var y1 = Math.power(xn2 + a, b);
+							
+				result = "(x" + sign + Math.abs(a) + ")";
+				if(b != 1)
+					result += "<sup>" + b + "</sup>";
+				result += " = " + y + ", x = " + xn2 + "<br/>";
+				result += "y = (" + xn2 + sign + Math.abs(a) + ")";
+				if(b != 1)
+					result += "<sup>" + b + "</sup>";
+				result += "<br/>y = " + y1 + "<br/>";
+				
+				if(i < 1) {
+					funGraph(ctx, axes, function(x) {
+						return Math.power(x + a, b);
+					}, color, 1);
+				}			
+
+				insertRow(result);
+			}
+		}
+		else {
+			result += sign + Math.abs(a) + " + x<sup>" + b + "</sup> = " + y + "<br/>";
+			insertRow(result);
+		}
+		return roots;
+	}
+	
+	function show_x_xpa_b(a, b, y) {
+		a -= 0, b-= 0, y-= 0;
+		var result = "No solution.<br/>";
+	
+		var sign = (a < 0) ? " - " : " + ";
+		color = "rgb(" + Math.floor(Math.random() * 200) + ", 38, 67)";
+		var roots = newton(a, b, y, x_xpa_b, d_x_xpa_b);
 		if(roots.length > 0) {
 			for(var i=0; i<roots.length; ++i) {
 				var xn2 = parseFloat(roots[i]);
@@ -142,11 +191,12 @@
 <form novalidate="">
 <div style="float:left; width:100%">
 	<div style="float:left; padding-left: 1ex; max-width: 33%">a: <input id="a" type="number" value="1" style="width: 6em" /></div>
-	<div style="float:left; padding-left: 2ex; max-width: 33%">b: <input id="b" type="number" value="5" style="width: 6em" /></div>
-	<div style="float:left; padding-left: 2ex; max-width: 33%">y: <input id="y" type="number" value="486" style="width: 6em" /></div>
+	<div style="float:left; padding-left: 2ex; max-width: 33%">b: <input id="b" type="number" value="2" style="width: 6em" /></div>
+	<div style="float:left; padding-left: 2ex; max-width: 33%">y: <input id="y" type="number" value="48" style="width: 6em" /></div>
 </div>
 <div style="clear: both; height: 0.5em"></div>
-<button type="button" onclick="showNewton(document.getElementById('a').value, document.getElementById('b').value, document.getElementById('y').value)" data-superscript="b">y = x(x+a)</button>
+<button type="button" onclick="show_xpa_b(document.getElementById('a').value, document.getElementById('b').value, document.getElementById('y').value)" data-superscript="b">y = (x + a)</button>
+<button type="button" onclick="show_x_xpa_b(document.getElementById('a').value, document.getElementById('b').value, document.getElementById('y').value)" data-superscript="b">y = x(x + a)</button>
 <button type="button" onclick="document.getElementById('answer').innerHTML = ''; draw();">C</button>
 </form>
 <canvas id="canvas" width="360" height="360"></canvas>
