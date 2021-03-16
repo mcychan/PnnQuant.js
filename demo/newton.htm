@@ -1,0 +1,160 @@
+<html>
+<title>Newton's method</title>
+<head>
+	<meta name="keywords" content="equation, Newton, method" />
+	<meta name="description" content="Newton's method"/>
+	<meta name="author" content="Miller Cy Chan">
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<link rel="stylesheet" href="css/demo.css">
+<style>
+	#canvas {
+		opacity: 0.4;
+		top: 15%;
+		left: 15%;
+		bottom: 0;
+		right: 0;
+		position: absolute;
+		z-index: -1;   
+	}
+	
+	button::after {
+		content: attr(data-superscript);
+		vertical-align: super;
+	}
+</style>
+<script src="js/plot-graph.js"></script>
+<script>
+	/**
+	 * Number.isFinite
+	 * Copyright (c) 2014 marlun78
+	 * MIT License, https://gist.github.com/marlun78/bd0800cf5e8053ba9f83
+	 * 
+	 * Spec: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite
+	 */
+	if (typeof Number.isFinite !== 'function') {
+		Number.isFinite = function isFinite(value) {
+			// 1. If Type(number) is not Number, return false.
+			if (typeof value !== 'number') {
+				return false;
+			}
+			// 2. If number is NaN, +∞, or −∞, return false.
+			if (value !== value || value === Infinity || value === -Infinity) {
+				return false;
+			}
+			// 3. Otherwise, return true.
+			return true;
+		};
+	}
+	
+	if (typeof Math.log2 !== 'function') {
+		Math.log2 = function log2(value) {
+			return Math.log(value) * Math.LOG2E;
+		};
+	}
+	
+	Math.power = function power(a, b) {
+		if(a >= 0)
+			return Math.pow(a, b);
+		var sign = (b % 2) == 0 ? 1 : -1;
+		return sign * Math.pow(-a, b);
+	};
+	
+	function insertRow(result) {		
+		document.getElementById("answer").insertRow(0).innerHTML = "<td style='color: " + color + "'>" + result + "</td>";
+	}
+	
+	function f(x, a, b, y) {
+		return x * Math.power(x + a, b) - y;
+	}
+	
+	function df(x, a, b) {
+		return Math.power(x + a, b) + b * x * Math.power(x + a, b - 1);
+	}
+	
+	function newtonRoot(xn, a, b, y) {			
+		var xn2;
+		var dy = df(xn, a, b);
+		if(Math.abs(dy) < 0.000000001)
+			return NaN; // give up with this seed if derivative is too low
+
+		xn2 = xn - f(xn, a, b, y) / dy;
+		if(Math.abs(xn2 - xn) < 0.000000001)
+			return xn2;
+		return newtonRoot(xn2, a, b, y);
+	}
+	
+	function newton(a, b, y) {		
+		var roots = [];
+		var seeds = [-100000, -100, -1, 1, 100, 100000]; // set initial guesses here
+		for(var i=0; i<seeds.length; ++i) {
+			var xn = seeds[i];
+			var root = newtonRoot(xn, a, b, y);
+			if(Number.isFinite(root) && roots.indexOf(root.toFixed(8)) < 0)
+				roots.push(root.toFixed(8));
+		}
+		return roots;
+	}
+	
+	function showNewton(a, b, y) {
+		a -= 0, b-= 0, y-= 0;
+		var result = "No solution.<br/>";
+	
+		var sign = (a < 0) ? " - " : " + ";
+		color = "rgb(72, " + Math.floor(Math.random() * 200) + ", 40)";
+		var roots = newton(a, b, y);
+		if(roots.length > 0) {
+			for(var i=0; i<roots.length; ++i) {
+				var xn2 = parseFloat(roots[i]);
+				var y1 = xn2 * Math.power(xn2 + a, b);
+							
+				result = "x(x" + sign + Math.abs(a) + ")";
+				if(b != 1)
+					result += "<sup>" + b + "</sup>";
+				result += " = " + y + ", x = " + xn2 + "<br/>";
+				result += "y = " + xn2 + " * (" + xn2 + sign + Math.abs(a) + ")";
+				if(b != 1)
+					result += "<sup>" + b + "</sup>";
+				result += "<br/>y = " + y1 + "<br/>";
+				
+				if(i < 1) {
+					funGraph(ctx, axes, function(x) {
+						return x * Math.power(x + a, b);
+					}, color, 1);
+				}			
+
+				insertRow(result);
+			}
+		}
+		else {
+			result += "x(x" + sign + Math.abs(a) + ")<sup>" + b + "</sup> = " + y + "<br/>";
+			insertRow(result);
+		}
+		return roots;
+	}
+	
+	var ctx, color, axes;
+</script>
+</head>
+<meta name="google-site-verification" content="uaVZxe8V55rvkhFV7liiebPRTTfOZhFySiFN97A11qw" />
+<body onload="draw()">
+<h3>Newton's method</h3>
+<form novalidate="">
+<div style="float:left; width:100%">
+	<div style="float:left; padding-left: 1ex; max-width: 33%">a: <input id="a" type="number" value="1" style="width: 6em" /></div>
+	<div style="float:left; padding-left: 2ex; max-width: 33%">b: <input id="b" type="number" value="5" style="width: 6em" /></div>
+	<div style="float:left; padding-left: 2ex; max-width: 33%">y: <input id="y" type="number" value="486" style="width: 6em" /></div>
+</div>
+<div style="clear: both; height: 0.5em"></div>
+<button type="button" onclick="showNewton(document.getElementById('a').value, document.getElementById('b').value, document.getElementById('y').value)" data-superscript="b">y = x(x+a)</button>
+<button type="button" onclick="document.getElementById('answer').innerHTML = ''; draw();">C</button>
+</form>
+<canvas id="canvas" width="360" height="360"></canvas>
+<table id="tbl_showcase"><tbody id="answer"></tbody></table>
+	<div id="wrapfabtest">
+		<div class="adBanner">
+			ImgV64 Copyright © 2016-2021
+		</div>
+	</div>
+</body>
+</html>
