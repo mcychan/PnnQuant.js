@@ -126,24 +126,28 @@
 		if(roots.length > 0) {
 			var iRoots = [];
 			for(var i=0; i<roots.length; ++i) {
-				var xn2 = parseFloat(roots[i]);				
-					
+				var xn2 = parseFloat(roots[i]);					
 				var y1 = Math.power(xn2 + a, b);
 							
 				result = "(x" + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
 					
-				if(neg)
+				if(neg) {
 					xn2 = toIRoot(xn2, a);
+					if(iRoots.indexOf(iRoot) < 0)
+						iRoots.push(xn2);
+				}
 					
 				result += " = " + y + ", x = " + xn2;
-				if(b % 2 == 0 && !neg) {
+				if(b % 2 == 0) {
 					var y2 = Math.power(-(xn2 + a), b);
 					if(y2 == y1) {
-						var iRoot = toIRoot(xn2, a);						
-						iRoots.push(iRoot);
-						result += " or " + iRoot;
+						var iRoot = toIRoot(xn2, a);	
+						if(iRoots.indexOf(iRoot) < 0) {
+							iRoots.push(iRoot);
+							result += " or " + iRoot;
+						}
 					}
 				}				
 				result += "<br/>";
@@ -152,7 +156,7 @@
 					result += "<sup>" + b + "</sup>";
 				result += "<br/>y = " + (neg ? -y1 : y1) + "<br/>";
 				
-				if(i < 1) {
+				if(i < 1 && !neg) {
 					funGraph(ctx, axes, function(x) {
 						return Math.power(x + a, b);
 					}, color, 1);
@@ -160,6 +164,8 @@
 
 				insertRow(result);
 			}
+			if(neg)
+				roots = [];
 			roots = roots.concat(iRoots);
 		}
 		else {
