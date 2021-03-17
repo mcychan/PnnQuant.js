@@ -184,11 +184,11 @@
 				result += " = " + y + ", x = " + root;
 				if(b % 2 == 0) {
 					var y2 = Math.power(-(xn2 + a), b);
-					if(y2 == y1) {
+					if(Math.abs(y2 - y1) < 0.000000001) {
 						var iRoot = new Complex(-a, xn2 + a);	
 						if(!iRoots.hasOwnProperty(iRoot.toString())) {
 							var y3 = Math.power(iRoot.add(a).square(), b / 2);
-							if(y3 == y) {
+							if(Math.abs(y3 - y) < 0.000000001) {
 								iRoots[iRoot.toString()] = iRoot;
 								result += " or " + iRoot;
 							}
@@ -199,9 +199,9 @@
 				result += "y = (" + root + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
-				result += "<br/>y = " + (neg ? -y1 : y1) + "<br/>";
+				result += "<br/>y = " + y1 + "<br/>";
 				
-				if(!rendered && !neg) {
+				if(!rendered && !(xn2 instanceof Complex)) {
 					funGraph(ctx, axes, function(x) {
 						return Math.power(x + a, b);
 					}, color, 1);
