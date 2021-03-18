@@ -32,11 +32,6 @@ function Complex(x, y) {
 			return new Complex(this.re * c1.re, 0);
 		return new Complex(this.re * c1.re - this.im * c1.im, this.re * c1.im + this.im * c1.re);
 	}
-	Complex.prototype.square = function(){
-		if(this.re == 0)
-			return -(this.im * this.im);
-		return this.mult(this);
-	}
     Complex.prototype.div = function(c1){
 		if (!(c1 instanceof Complex))
 			c1 = new Complex(c1, 0);

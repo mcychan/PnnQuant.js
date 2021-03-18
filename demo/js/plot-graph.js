@@ -1,3 +1,5 @@
+var isChrome = navigator.userAgent.indexOf("Chrome") != -1;
+
 function funGraph(ctx, axes, func, color, thick) {
 	var xx, yy, dx = 1, x0 = axes.x0, y0 = axes.y0, scale = axes.scale;
 	var iMax = Math.round((ctx.canvas.width - x0) / dx);
@@ -11,8 +13,9 @@ function funGraph(ctx, axes, func, color, thick) {
 		yy = scale * func(xx / scale);
 		if (i == iMin)
 			ctx.moveTo(x0 + xx, y0 - yy);
-		else
-			ctx.lineTo(x0 + xx, y0 - yy);
+		ctx.lineTo(x0 + xx, y0 - yy);
+		if(isChrome && thick > 1 && i % (iMax / 2) == 0)
+			ctx.stroke();
 	}
 	ctx.stroke();
 }
@@ -30,8 +33,9 @@ function invFunGraph(ctx, axes, func, color, thick) {
 		xx = scale * func(yy / scale);
 		if (i == iMin)
 			ctx.moveTo(x0 + xx, y0 - yy);
-		else
-			ctx.lineTo(x0 + xx, y0 - yy);
+		ctx.lineTo(x0 + xx, y0 - yy);
+		if(isChrome && i % (iMax / 2) == 0)
+			ctx.stroke();
 	}
 	ctx.stroke();
 }
