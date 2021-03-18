@@ -34,7 +34,7 @@ function invFunGraph(ctx, axes, func, color, thick) {
 		if (i == iMin)
 			ctx.moveTo(x0 + xx, y0 - yy);
 		ctx.lineTo(x0 + xx, y0 - yy);
-		if(isChrome && i % (iMax / 2) == 0)
+		if(isChrome && thick > 1 && i % (iMax / 2) == 0)
 			ctx.stroke();
 	}
 	ctx.stroke();
