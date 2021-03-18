@@ -123,7 +123,7 @@
 	
 	function newtonRoot(xn, a, b, y, f, df) {			
 		var xn2;
-		var maxRetryCount = 99999;
+		var maxRetryCount = 9999;
 		for(var i=0; i<maxRetryCount; ++i) {
 			var dy = df(xn, a, b);
 			if(Math.abs(dy) < 0.000000001)
@@ -165,7 +165,6 @@
 		var result = "No solution.<br/>";
 	
 		var sign = (a < 0) ? " - " : " + ";
-		var neg = y < 0;
 		color = "rgb(72, " + Math.floor(Math.random() * 200) + ", 40)";
 		var roots = newton(a, b, false, y, xpa_b, d_xpa_b);
 		if(b % 2 == 0)
@@ -175,7 +174,7 @@
 			var iRoots = {};
 			for(var root in roots) {
 				var xn2 = roots[root];					
-				var y1 = (xn2 instanceof Complex) ? Math.power(xn2.add(a).square(), b / 2) : Math.power(xn2 + a, b);
+				var y1 = (xn2 instanceof Complex) ? Math.power(xn2.add(a), b) : Math.power(xn2 + a, b);
 							
 				result = "(x" + sign + Math.abs(a) + ")";
 				if(b != 1)
@@ -187,7 +186,7 @@
 					if(Math.abs(y2 - y1) < 0.000000001) {
 						var iRoot = new Complex(-a, xn2 + a);	
 						if(!iRoots.hasOwnProperty(iRoot.toString())) {
-							var y3 = Math.power(iRoot.add(a).square(), b / 2);
+							var y3 = Math.power(iRoot.add(a), b);
 							if(Math.abs(y3 - y) < 0.000000001) {
 								iRoots[iRoot.toString()] = iRoot;
 								result += " or " + iRoot;
@@ -201,7 +200,7 @@
 					result += "<sup>" + b + "</sup>";
 				result += "<br/>y = " + y1 + "<br/>";
 				
-				if(!rendered && !(xn2 instanceof Complex)) {
+				if(!rendered) {
 					funGraph(ctx, axes, function(x) {
 						return Math.power(x + a, b);
 					}, color, 1);
