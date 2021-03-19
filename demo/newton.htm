@@ -126,12 +126,12 @@
 		var maxRetryCount = 9999;
 		for(var i=0; i<maxRetryCount; ++i) {
 			var dy = df(xn, a, b);
-			if(Math.abs(dy) < 0.000000001)
+			if(Math.abs(dy) < 0.00000001)
 				return NaN; // give up with this seed if derivative is too low
 			xn2 = xn - f(xn, a, b, y) / dy;
 			if(!Number.isFinite(xn2))
 				return NaN; // give up with this seed if reached NaN
-			if(Math.abs(xn2 - xn) < 0.000000001)
+			if(Math.abs(xn2 - xn) < 0.00000001)
 				break;
 			xn = xn2;
 		}
@@ -154,8 +154,8 @@
 				continue;
 			}
 				
-			if(!roots.hasOwnProperty(root.toFixed(10)))
-				roots[root.toFixed(10)] = root;
+			if(!roots.hasOwnProperty(root.toFixed(8)))
+				roots[root.toFixed(8)] = root;
 		}
 		return roots;
 	}
@@ -167,7 +167,8 @@
 		var sign = (a < 0) ? " - " : " + ";
 		color = "rgb(72, " + Math.floor(Math.random() * 200) + ", 40)";
 		var roots = newton(a, b, false, y, xpa_b, d_xpa_b);
-		if(b % 2 == 0)
+		var findIRoots = (b % 2 == 0 && y != 0);
+		if(findIRoots)
 			roots = Object.assign({}, roots, newton(a, b, true, -y, xpa_b, d_xpa_b));
 		if(Object.keys(roots).length > 0) {
 			var rendered = false;
@@ -181,13 +182,13 @@
 					result += "<sup>" + b + "</sup>";
 					
 				result += " = " + y + ", x = " + root;
-				if(b % 2 == 0) {
+				if(findIRoots) {
 					var y2 = Math.power(-(xn2 + a), b);
-					if(Math.abs(y2 - y1) < 0.000000001) {
+					if(Math.abs(y2 - y1) < 0.00000001) {
 						var iRoot = new Complex(-a, xn2 + a);	
 						if(!iRoots.hasOwnProperty(iRoot.toString())) {
 							var y3 = Math.power(iRoot.add(a), b);
-							if(Math.abs(y3 - y) < 0.000000001) {
+							if(Math.abs(y3 - y) < 0.00000001) {
 								iRoots[iRoot.toString()] = iRoot;
 								result += " or " + iRoot;
 							}
@@ -198,6 +199,8 @@
 				result += "y = (" + root + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
+				if(Math.abs(y - y1) < 0.00000001)
+					y1 = y
 				result += "<br/>y = " + y1 + "<br/>";
 				
 				if(!rendered) {
@@ -239,6 +242,8 @@
 				result += "y = " + root + " * (" + root + sign + Math.abs(a) + ")";
 				if(b != 1)
 					result += "<sup>" + b + "</sup>";
+				if(Math.abs(y - y1) < 0.00000001)
+					y1 = y
 				result += "<br/>y = " + y1 + "<br/>";
 				
 				if(!rendered) {
