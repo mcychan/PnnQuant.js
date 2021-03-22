@@ -345,30 +345,29 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		var proportional = sqr(nMaxColors) / maxbins;
 		if(nMaxColors < 16)
 			quan_rt = -1;
-		if ((proportional < .022 || proportional > .5) && nMaxColors < 64)
+		else if ((proportional < .022 || proportional > .5) && nMaxColors < 64)
 			quan_rt = 0;
 		
 		if (quan_rt > 0)
 			bins[0].cnt = (Math.sqrt(bins[0].cnt) | 0);
-		else if (quan_rt < 0)
-			bins[0].cnt = (Math.cbrt(bins[0].cnt) | 0);
 		for (var i = 0; i < maxbins - 1; ++i) {
 			bins[i].fw = i + 1;
 			bins[i + 1].bk = i;
 			
 			if (quan_rt > 0)
 				bins[i + 1].cnt = (Math.sqrt(bins[i + 1].cnt) | 0);
-			else if (quan_rt < 0)
-				bins[i + 1].cnt = (Math.cbrt(bins[i + 1].cnt) | 0);
 		}		
 
 		var h, l, l2;
-		if (quan_rt && nMaxColors < 64)
+		if (quan_rt != 0 && nMaxColors < 64)
 			ratio = Math.min(1.0, proportional + nMaxColors * Math.exp(3.845) / Object.keys(pixelMap).length);
-		else if (quan_rt)
+		else if (quan_rt > 0)
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 1.05) / Object.keys(pixelMap).length);			
 		else
 			ratio = Math.min(1.0, Math.pow(nMaxColors, 2.31) / maxbins);
+		
+		if (quan_rt < 0)
+			ratio += 0.5;
 		
 		/* Initialize nearest neighbors and build heap of them */
 		var heap = new Uint32Array(bins.length + 1);
