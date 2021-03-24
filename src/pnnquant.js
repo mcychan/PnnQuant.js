@@ -10,6 +10,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		this.m_transparentPixelIndex = -1;
 		this.m_transparentColor = 0;
 		this.palette = [];
+		this.qPixels = [];
 	}
 	
 	if(!Math.clamp) {
@@ -431,28 +432,32 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				dir *= -1;
 				var temp = row0; row0 = row1; row1 = temp;
 			}
-			return qPixels;
+			
+			this.qPixels = qPixels;
+			return this.qPixels;
 		}
 
 		if (this.m_transparentPixelIndex >= 0 || nMaxColors < 64)
 		{
-			for (var i = 0; i < qPixels.length; ++i)
+			for (var i = 0; i < this.qPixels.length; ++i)
 				qPixels[i] = nearestColorIndex(this.palette, nMaxColors, pixels[i]);
 		}
 		else
 		{
-			for (var i = 0; i < qPixels.length; ++i)
+			for (var i = 0; i < this.qPixels.length; ++i)
 				qPixels[i] = closestColorIndex(this.palette, nMaxColors, pixels[i]);
 		}
 
-		return qPixels;
+		this.qPixels = qPixels;
+		return this.qPixels;
 	};
 	
 	function processImagePixels(palette, qPixels) {
+		var qPixel32s = new Uint32Array(qPixels.length);
 		for (var i = 0; i < qPixels.length; ++i)
-			qPixels[i] = palette[qPixels[i]];		
+			qPixel32s[i] = palette[qPixels[i]];		
 
-		return qPixels;
+		return qPixel32s;
 	}
 	
 	PnnQuant.prototype.quantizeImage = function quantizeImage() {
@@ -489,7 +494,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 			}
 		}
 
-		var qPixels = this.quantize_image(pixels, nMaxColors, width, height, dither);
+		this.qPixels = this.quantize_image(pixels, nMaxColors, width, height, dither);
 		if (this.m_transparentPixelIndex >= 0)
 		{
 			var k = qPixels[this.m_transparentPixelIndex];
@@ -504,7 +509,11 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		closestMap = [];
 		nearestMap = [];
 
-		return processImagePixels(this.palette, qPixels);
+		return processImagePixels(this.palette, this.qPixels);
+	};
+	
+	PnnQuant.prototype.getIndexedPixels = function getIndexedPixels() {
+		return this.qPixels;
 	};
 	
 	PnnQuant.prototype.getPalette = function getPalette() {
