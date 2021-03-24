@@ -64,7 +64,7 @@ function quantizeImage(gl, result, width) {
 
 	ctx.putImageData(imgd, 0, 0);
 	
-	img.width = can.width, img.height = can.height;
+	img.width = can.width, img.height = can.height;	
 	img.src = can.toDataURL(result.type);
 	
 	var pal = new Uint32Array(result.pal8);
@@ -90,7 +90,7 @@ function doProcess(gl, ti, opts) {
 		setTimeout(function(){
 			ti.mark("reduced -> DOM", function() {
 				var	quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);
-				quantizeImage(gl, { img8: quant.quantizeImage(), pal8: quant.getPalette(), type: quant.getImgType() }, opts.width);
+				quantizeImage(gl, { img8: quant.quantizeImage(), pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(), type: quant.getImgType() }, opts.width);
 				
 				$("#btn_upd").prop("disabled", false).text("Update");
 			});
