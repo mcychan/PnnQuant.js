@@ -594,7 +594,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	}
 	
 	PnnLABQuant.prototype.quantize_image = function quantize_image(pixels, nMaxColors, width, height, dither) {
-		var qPixels = new Uint32Array(pixels.length);
+		var qPixels = new Uint16Array(pixels.length);
 		var pixelIndex = 0;
 		if (dither) {
 			const DJ = 4, BLOCK_SIZE = 256, DITHER_MAX = 16;
