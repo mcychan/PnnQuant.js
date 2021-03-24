@@ -35,6 +35,7 @@ function getOpts(id) {
 	return opts;
 }
 
+
 function quantizeImage(gl, result, width) {				
 	var idxi32 = result.img8;
 	var $redu = $("#redu");
@@ -64,7 +65,24 @@ function quantizeImage(gl, result, width) {
 	ctx.putImageData(imgd, 0, 0);
 	
 	img.width = can.width, img.height = can.height;
-	img.src = can.toDataURL(result.type);
+	if(result.type == "image/gif") {
+		var gif = new GIF({
+			workers: 2,
+			quality: 10
+		});
+
+		gif.addFrame(can, {delay: 200});
+		gif.on("finished", function(blob) {
+			var reader = new FileReader();
+			reader.onloadend = function() {					
+				img.src = reader.result;
+			};
+			reader.readAsDataURL(blob);
+		});
+		gif.render();
+	}
+	else
+		img.src = can.toDataURL(result.type);
 	
 	var pal = new Uint32Array(result.pal8);
 	var $palt = $("#palt");
