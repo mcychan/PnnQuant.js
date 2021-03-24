@@ -535,7 +535,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		a = (pixel >>> 24) & 0xff;
 
 		var closest = closestMap[pixel];
-		if (!closest) {
+		if (closest == null) {		
 			closest = [];
 			closest[2] = closest[3] = 1e100;
 			var lab1 = getLab(a, r, g, b);
@@ -547,7 +547,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 				a2 = (palette[k] >>> 24) & 0xff;
 				var lab2 = getLab(a2, r2, g2, b2);
 					
-				closest[4] = Math.abs(lab2.alpha - lab1.alpha) + CIEDE2000(lab2, lab1);
+				closest[4] = Math.abs(lab2.alpha - lab1.alpha) + Math.abs(lab2.L - lab1.L) + Math.abs(lab2.A - lab1.A) + Math.abs(lab2.B - lab1.B);
 				if (closest[4] < closest[2]) {
 					closest[1] = closest[0];
 					closest[3] = closest[2];
@@ -596,7 +596,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 		var qPixels = new Uint32Array(pixels.length);
 		var pixelIndex = 0;
 		if (dither) {
-			const DJ = 4, BLOCK_SIZE = 256, DITHER_MAX = 20;
+			const DJ = 4, BLOCK_SIZE = 256, DITHER_MAX = 16;
 			var err_len = (width + 2) * DJ;
 			var clamp = new Uint32Array(DJ * BLOCK_SIZE);
 			var limtb = new Uint32Array(2 * BLOCK_SIZE);
@@ -636,7 +636,10 @@ Copyright (c) 2018-2021 Miller Cy Chan
 					var a_pix = ditherPixel[3];
 
 					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
-					qPixels[pixelIndex] = nearestColorIndex(this.palette, nMaxColors, c1);
+					if(this.m_transparentPixelIndex >= 0 || nMaxColors < 64)
+						qPixels[pixelIndex] = nearestColorIndex(this.palette, nMaxColors, c1);
+					else
+						qPixels[pixelIndex] = closestColorIndex(this.palette, nMaxColors, c1);
 
 					var c2 = this.palette[qPixels[pixelIndex]];
 					var r2 = (c2 & 0xff),
