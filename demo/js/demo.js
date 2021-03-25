@@ -102,6 +102,9 @@ function quantizeImage(gl, result, width) {
 			};
 
 			reader.readAsDataURL(new Blob([data], {type: result.type}));
+			img.onerror = function () { 
+				img.src = can.toDataURL(result.type);
+			};
 		}
 		catch(err) {
 			console.error(err);
