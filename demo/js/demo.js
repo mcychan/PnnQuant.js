@@ -1,4 +1,5 @@
 var cfg_edited = false;
+var worker = (typeof Worker !== "undefined") ? new Worker("./js/worker.js") : null;
 
 var dflt_opts = {
 	colors: 256,
@@ -35,9 +36,18 @@ function getOpts(id) {
 	return opts;
 }
 
+function toRGBPalette(palette) {
+	var rgbPalette = [];
+	for(var k=0; k < palette.length; ++k) {
+		var r = (palette[k] & 0xff),
+			g = (palette[k] >>> 8) & 0xff,
+			b = (palette[k] >>> 16) & 0xff;
+		rgbPalette.push(r << 16 | g << 8 | b);
+	}
+	return rgbPalette;
+}
 
 function quantizeImage(gl, result, width) {				
-	var idxi32 = result.img8;
 	var $redu = $("#redu");
 	var img = $redu.find("img")[0];
 	if(!img) {
@@ -49,36 +59,54 @@ function quantizeImage(gl, result, width) {
 		};
 		$redu.append(img);
 	}	
-	
+	img.width = width, img.height = Math.ceil(result.img8.length / width);	
+		
+	var pal = new Uint32Array(result.pal8);
 	var can = document.createElement("canvas"),
-		ctx = can.getContext("2d");
+	ctx = can.getContext("2d");
 
 	can.width = width;
-	can.height = Math.ceil(idxi32.length / width);
+	can.height = img.height;
 
 	ctx.imageSmoothingEnabled = ctx.imageSmoothingEnabled = ctx.webkitImageSmoothingEnabled = ctx.msImageSmoothingEnabled = false;
 
 	var imgd = ctx.createImageData(can.width, can.height);
-	var buf8 = new Uint8ClampedArray(idxi32.buffer);
+	var buf8 = new Uint8ClampedArray(result.img8.buffer);
 	imgd.data.set(buf8);
 
 	ctx.putImageData(imgd, 0, 0);
-	
-	img.width = can.width, img.height = can.height;	
 	img.src = can.toDataURL(result.type);
+		
+	if("image/gif" == result.type) {
+		try {
+			var buf = new Uint8Array(width * img.height + 1000);
+			var gf = new GifWriter(buf, width, img.height);
+			var opts = {palette: toRGBPalette(pal)};
+			if(result.transparent > -1)
+				opts.transparent = result.transparent;
+			gf.addFrame(0, 0, width, img.height, result.indexedPixels, opts);
+			var data = buf.slice(0, gf.end());
+			var reader = new FileReader();
+			reader.onloadend = function() {					
+				img.src = reader.result;
+			};
+
+			reader.readAsDataURL(new Blob([data], {type: result.type}));
+		}
+		catch(err) {
+			console.error(err);
+		}
+	}
 	
-	var pal = new Uint32Array(result.pal8);
-	var $palt = $("#palt");
-	
+	var $palt = $("#palt");	
 	var colorCells = drawPalette(pal, pal.length, $palt.width(), $palt.height(), 32);	
 	$palt.html(colorCells);
 }
 
 function doProcess(gl, ti, opts) {	
-	if(typeof Worker !== "undefined") {			
-		var w = new Worker("./js/worker.js");
-		w.postMessage(opts);
-		w.onmessage = function(e) {
+	if(worker != null) {			
+		worker.postMessage(opts);
+		worker.onmessage = function(e) {
 			ti.mark("reduced -> DOM", function() {
 				quantizeImage(gl, e.data, opts.width);
 				
@@ -90,7 +118,8 @@ function doProcess(gl, ti, opts) {
 		setTimeout(function(){
 			ti.mark("reduced -> DOM", function() {
 				var	quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);
-				quantizeImage(gl, { img8: quant.quantizeImage(), pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(), type: quant.getImgType() }, opts.width);
+				quantizeImage(gl, { img8: quant.quantizeImage(), pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(),
+					transparent: quant.getTransparentIndex(), type: quant.getImgType() }, opts.width);
 				
 				$("#btn_upd").prop("disabled", false).text("Update");
 			});
