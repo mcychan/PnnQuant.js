@@ -215,6 +215,7 @@ function createImage(id, imgUrl, ev) {
 		
 		img = document.createElement("img");
 		img.onload = function() {
+			var id = this.name;
 			var opts = getOpts(id);
 			opts.isHQ = $("#radHQ").is(":checked");
 			
@@ -232,6 +233,7 @@ function createImage(id, imgUrl, ev) {
 		};
 	}
 	
+	img.name = id;
 	img.src = imgUrl;	
 }
 
