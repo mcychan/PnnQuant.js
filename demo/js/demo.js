@@ -76,6 +76,10 @@ function quantizeImage(gl, result, width) {
 
 	ctx.putImageData(imgd, 0, 0);
 	img.src = can.toDataURL(result.type);
+	
+	var $palt = $("#palt");	
+	var colorCells = drawPalette(pal, pal.length, $palt.width(), $palt.height(), 32);	
+	$palt.html(colorCells);
 		
 	if("image/gif" == result.type) {
 		try {
@@ -96,11 +100,7 @@ function quantizeImage(gl, result, width) {
 		catch(err) {
 			console.error(err);
 		}
-	}
-	
-	var $palt = $("#palt");	
-	var colorCells = drawPalette(pal, pal.length, $palt.width(), $palt.height(), 32);	
-	$palt.html(colorCells);
+	}	
 }
 
 function doProcess(gl, ti, opts) {	
