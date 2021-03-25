@@ -36,11 +36,11 @@ function getOpts(id) {
 	return opts;
 }
 
-if (typeof Uint8Array.slice !== 'function') {
-	Uint8Array.slice = function slice() {
+if(!Uint8Array.prototype.slice){
+	Uint8Array.prototype.slice = function(){
 		return new Uint8Array(this).subarray(this.arguments);
-	};
-}
+	}
+};
 
 function toRGBPalette(palette) {
 	var rgbPalette = [];
