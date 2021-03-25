@@ -594,7 +594,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	}
 	
 	PnnLABQuant.prototype.quantize_image = function quantize_image(pixels, nMaxColors, width, height, dither) {
-		var qPixels = new Uint16Array(pixels.length);
+		var qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 		var pixelIndex = 0;
 		if (dither) {
 			const DJ = 4, BLOCK_SIZE = 256, DITHER_MAX = 16;
@@ -746,7 +746,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		this.quantize_image(pixels, nMaxColors, width, height, dither);
 		if (this.m_transparentPixelIndex >= 0) {
-			var k = qPixels[this.m_transparentPixelIndex];
+			var k = this.qPixels[this.m_transparentPixelIndex];
 			if (nMaxColors > 2)
 				this.palette[k] = this.m_transparentColor;
 			else if (this.palette[k] != this.m_transparentColor) {
@@ -772,6 +772,10 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	
 	PnnLABQuant.prototype.getImgType = function getImgType() {
 		return this.hasSemiTransparency ? "image/png" : "image/gif";
+	};
+	
+	PnnLABQuant.prototype.getTransparentIndex = function getTransparentIndex() {
+		return this.m_transparentPixelIndex;
 	};
 
 	// expose
