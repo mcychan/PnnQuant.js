@@ -36,6 +36,12 @@ function getOpts(id) {
 	return opts;
 }
 
+if (typeof Uint8Array.slice !== 'function') {
+	Uint8Array.slice = function slice() {
+		return new Uint8Array(this).subarray(this.arguments);
+	};
+}
+
 function toRGBPalette(palette) {
 	var rgbPalette = [];
 	for(var k=0; k < palette.length; ++k) {
