@@ -113,8 +113,17 @@ function quantizeImage(gl, result, width) {
 }
 
 function doProcess(gl, ti, opts) {	
-	if(worker != null)			
-		worker.postMessage(opts);		
+	if(worker != null) {			
+		worker.postMessage(opts);
+		worker.onmessage = function(e) {
+			ti.mark("reduced -> DOM", function() {
+				quantizeImage(gl, e.data, opts.width);
+				
+				$("#btn_upd").removeAttr("disabled").text("Update");
+				$("#orig").removeAttr("disabled");
+			});
+		}
+	}		
 	else {
 		setTimeout(function(){
 			ti.mark("reduced -> DOM", function() {
@@ -207,18 +216,6 @@ function createImage(id, imgUrl, ev) {
 			gl.bindTexture(gl.TEXTURE_2D, tex);
 			// Attach the texture to the framebuffer
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-		}
-		
-		if(worker != null) {			
-			worker.onmessage = function(e) {
-				ti.mark("reduced -> DOM", function() {
-					var img = $("#orig").find("img")[0];
-					quantizeImage(gl, e.data, img.naturalWidth | img.width);
-					
-					$("#btn_upd").removeAttr("disabled").text("Update");
-					$("#orig").removeAttr("disabled");
-				});
-			}
 		}
 		
 		img = document.createElement("img");
