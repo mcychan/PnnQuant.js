@@ -771,7 +771,7 @@ Copyright (c) 2018-2021 Miller Cy Chan
 	};
 	
 	PnnLABQuant.prototype.getImgType = function getImgType() {
-		return this.hasSemiTransparency ? "image/png" : "image/gif";
+		return this.opts.colors > 256 || this.hasSemiTransparency ? "image/png" : "image/gif";
 	};
 	
 	PnnLABQuant.prototype.getTransparentIndex = function getTransparentIndex() {
