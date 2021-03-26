@@ -1,5 +1,6 @@
 var cfg_edited = false;
 var worker = (typeof Worker !== "undefined") ? new Worker("./js/worker.js") : null;
+var pngOnly = location.search != '' && location.search.toLowerCase().indexOf('png');
 
 var dflt_opts = {
 	colors: 256,
@@ -87,7 +88,7 @@ function quantizeImage(gl, result, width) {
 	var colorCells = drawPalette(pal, pal.length, $palt.width(), $palt.height(), 32);	
 	$palt.html(colorCells);
 		
-	if("image/gif" == result.type) {
+	if("image/gif" == result.type && !pngOnly) {
 		try {
 			var buf = new Uint8Array(width * img.height + 1000);
 			var gf = new GifWriter(buf, width, img.height);
@@ -113,16 +114,8 @@ function quantizeImage(gl, result, width) {
 }
 
 function doProcess(gl, ti, opts) {	
-	if(worker != null) {			
+	if(worker != null)			
 		worker.postMessage(opts);
-		worker.onmessage = function(e) {
-			ti.mark("reduced -> DOM", function() {
-				quantizeImage(gl, e.data, opts.width);
-				
-				$("#btn_upd").prop("disabled", false).text("Update");
-			});
-		}
-	}
 	else {
 		setTimeout(function(){
 			ti.mark("reduced -> DOM", function() {
@@ -130,7 +123,8 @@ function doProcess(gl, ti, opts) {
 				quantizeImage(gl, { img8: quant.quantizeImage(), pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(),
 					transparent: quant.getTransparentIndex(), type: quant.getImgType() }, opts.width);
 				
-				$("#btn_upd").prop("disabled", false).text("Update");
+				$("#btn_upd").removeAttr("disabled").text("Update");
+				$("#orig").removeAttr("disabled");
 			});
 		}, 0);
 	}
@@ -151,10 +145,10 @@ function webgl_detect() {
 
 function readImageData(img, gl, opts) {
 	var can = document.createElement("canvas");
-	can.width = img.naturalWidth | img.width;
-	can.height = img.naturalHeight | img.height;
+	can.width = opts.width;
+	can.height = opts.height;
 	if(can.width == 0 || can.height == 0)
-		return;
+		return false;
 	
 	var ctx = can.getContext('2d');	
 	
@@ -170,14 +164,13 @@ function readImageData(img, gl, opts) {
 			var imgd = ctx.getImageData(0,0, can.width, can.height);
 			ctx.setTransform(1, 0, 0, 1, 0.49, 0.49); // offset 0.49 pixel to handle sub pixeling
 			opts.pixels = new Uint32Array(imgd.data.buffer);
-		}	
-		
-		opts.width = can.width;
-		opts.height = can.height;		
+		}
+		return true;
 	} catch(err) {
 		alert(err);
 		throw err;
-	}	
+	}
+	return false;	
 }
 
 function dragLeave(ev) {
@@ -217,22 +210,45 @@ function createImage(id, imgUrl, ev) {
 		}
 		
 		img = document.createElement("img");
-		img.onload = function() {
-			var id = this.name;
-			var opts = getOpts(id);
-			opts.isHQ = $("#radHQ").is(":checked");
-			
-			ti.start();			
-			$("#orig h4").css("width", ((img.naturalWidth | img.width) - 10) + "px");
-			ti.mark("'" + id + "' -> DOM", function() {
-				$orig.append(img);			
-				img.crossOrigin = '';			
-			});	
-	
-			readImageData(img, gl, opts);
-			doProcess(gl, ti, opts);
-			
-			dragLeave(ev);
+		img.crossOrigin = '';	
+		img.onload = function() {			
+			if(!$orig.attr("disabled")) {
+				var srcImg = this;
+				var id = srcImg.name;
+				var opts = getOpts(id);
+				
+				$orig.attr("disabled", true);				
+				ti.start();				
+				ti.mark("'" + id + "' -> DOM", function() {					
+					opts.isHQ = $("#radHQ").is(":checked");
+					opts.width = srcImg.naturalWidth | srcImg.width;
+					opts.height = srcImg.naturalHeight | srcImg.height;
+					$("#orig h4").css("width", (opts.width - 10) + "px");
+					$orig.append(srcImg);							
+				});
+				
+				if(worker != null) {			
+					worker.onmessage = function(e) {
+						ti.mark("reduced -> DOM", function() {
+							quantizeImage(gl, e.data, opts.width);
+							
+							$("#btn_upd").removeAttr("disabled").text("Update");
+							$("#orig").removeAttr("disabled");
+						});
+					}
+				}
+		
+				if(readImageData(srcImg, gl, opts))					
+					doProcess(gl, ti, opts);
+				else {
+					ti.mark("invalid image", function() {				
+						$("#btn_upd").removeAttr("disabled").text("Update");
+						$("#orig").removeAttr("disabled");
+					});
+				}
+				
+				dragLeave(ev);
+			}
 		};
 	}
 	
@@ -241,7 +257,7 @@ function createImage(id, imgUrl, ev) {
 }
 
 function process(imgUrl) {		
-	$("#btn_upd").prop("disabled", true).text("Please wait...");
+	$("#btn_upd").attr("disabled", true).text("Please wait...");
 	var id = baseName(imgUrl)[0];
 	createImage(id, imgUrl, null);
 }
@@ -343,7 +359,7 @@ function drop(ev) {
 	var imageType = /image.*/;
 
 	if (file.type.match(imageType)) {
-		$("#btn_upd").prop("disabled", true).text("Please wait...");
+		$("#btn_upd").attr("disabled", true).text("Please wait...");
 		loadImage(file.name, file, ev);
 	}
 }
@@ -452,7 +468,7 @@ $(document).on("click", "img.th", function() {
 		$("body").on("paste", retrieveImageFromClipboardAsBase64);
 	$("#orig").click(function() {
 		$(this).next().change(function(ev) {
-			$("#btn_upd").prop("disabled", true).text("Please wait...");
+			$("#btn_upd").attr("disabled", true).text("Please wait...");
 			var id = baseName(this.files[0].name)[0];
 			loadImage(id, this.files[0], ev);
 		}).trigger("click");
