@@ -13,13 +13,16 @@ You would call PnnQuant.js as follows:
 var opts = {
     colors: 256,             // desired palette size
     dithering: true,         // whether to use dithering or not
+    pixels: pixels,         // source pixels in RGBA 32 bits
+    width: _width, height: _height
 };
 
 let bestQuality = false;
 var quant = bestQuality ? new PnnLABQuant(opts) : new PnnQuant(opts);
 
 // reduce image
-var img8 = quant.quantizeImage();
-var pal8 = quant.getPalette();
+var img8 = quant.quantizeImage();      // Uint32Array
+var pal8 = quant.getPalette();         // RGBA 32 bits of ArrayBuffer
+var indexedPixels = quant.getIndexedPixels();     // colors > 256 ? Uint16Array : Uint8Array
 ```
 
