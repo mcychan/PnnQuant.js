@@ -439,12 +439,12 @@ Copyright (c) 2018-2021 Miller Cy Chan
 
 		if (this.m_transparentPixelIndex >= 0 || nMaxColors < 64)
 		{
-			for (var i = 0; i < this.qPixels.length; ++i)
+			for (var i = 0; i < qPixels.length; ++i)
 				qPixels[i] = nearestColorIndex(this.palette, nMaxColors, pixels[i]);
 		}
 		else
 		{
-			for (var i = 0; i < this.qPixels.length; ++i)
+			for (var i = 0; i < qPixels.length; ++i)
 				qPixels[i] = closestColorIndex(this.palette, nMaxColors, pixels[i]);
 		}
 
