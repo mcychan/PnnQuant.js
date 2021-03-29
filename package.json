@@ -3,7 +3,11 @@
   "description": "Fast pairwise nearest neighbor based algorithm with javascript",
   "homepage": "https://mcychan.github.io/PnnQuant.js/demo/",
   "author": "Miller Cy Chan <miller.chan@gmail.com>",
-  "version": "1.0.0",
+  "bugs": {
+    "url": "https://github.com/mcychan/PnnQuant.js/issues"
+  },
+  "license": "MPL",
+  "version": "1.0.5",
   "main": "src/pnnquant.js",
   "repository": {
     "type": "git",
