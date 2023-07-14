@@ -1,0 +1,23 @@
+{
+  "name": "pnnquant",
+  "description": "Fast pairwise nearest neighbor based algorithm with javascript",
+  "homepage": "https://mcychan.github.io/PnnQuant.js/demo/",
+  "author": "Miller Cy Chan <miller.chan@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/mcychan/PnnQuant.js/issues"
+  },
+  "license": "MPL",
+  "version": "1.0.6",
+  "main": "src/pnnquant.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mcychan/PnnQuant.js.git"
+  },
+  "keywords": [
+    "ciede2000",
+    "color-quantization",
+    "error-diffusion",
+    "dithering",
+    "image-processing"
+  ]
+}
