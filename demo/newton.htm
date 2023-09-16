@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="keywords" content="equation, Newton, method" />
+	<meta name="description" content="Newton's method"/>
+	<meta name="author" content="Miller Cy Chan">
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+	<title>Newton's method</title>
+	<link rel="stylesheet" href="css/demo.css">
+<style>
+	#canvas {
+		opacity: 0.4;
+		top: 15%;
+		left: 15%;
+		bottom: 0;
+		right: 0;
+		position: absolute;
+		z-index: -1;   
+	}
+	
+	button::after {
+		content: attr(data-superscript);
+		vertical-align: super;
+	}
+</style>
+<script src="js/preact.umd.js"></script>
+<script src="js/hooks.umd.js"></script>
+<script src="js/compat.umd.js"></script>
+<script src="js/complex.js"></script>
+<script src="js/plot-graph.js"></script>
+<link rel="icon" href="ImgV64.ico?" type="image/x-icon">
+</head>
+<meta name="google-site-verification" content="uaVZxe8V55rvkhFV7liiebPRTTfOZhFySiFN97A11qw" />
+<body>
+	<h3>Newton's method</h3>
+	<noscript>
+		You need to enable JavaScript to run this app.
+	</noscript>
+	<div id="app"></div>
+</body>
+<script src="js/newton.js"></script>
+</html>

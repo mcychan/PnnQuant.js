@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="description" content="PnnQuant.js">
+	<meta name="keywords" content="PnnQuant.js,ImgV64,Webworker,color-quantization,quantization-algorithms,error-diffusion,image-processing,cielab,dithering,unsupervised-clustering,transparency,quality">
+	<meta name="author" content="Miller Cy Chan">
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>PnnQuant.js Playground</title>
+
+	<link rel="stylesheet" href="css/demo.css">
+
+	<script src="js/jquery-3.6.0.min.js"></script>
+	<script>
+	if(!Math.cbrt) {
+		Math.cbrt = function(value){
+			return this.exp((1/3) * this.log(value));
+		};
+	}
+		
+	
+	if (!Math.fround) {
+		Math.fround = (function() {
+			var temp = new Float32Array(1);
+			return function fround(x) {
+				temp[0] = +x;
+				return temp[0];
+			}
+		})();
+	}
+	
+	if (!Math.sign) {
+		Math.sign = function (x) {
+			return ((x > 0) - (x < 0)) || +x;
+		};
+	}
+	
+	if(!Map) {
+		function Map(init) {
+		  this.clear();
+		  if(init)
+			for(var i=0;i<init.length;i++)
+			  this.set(init[i][0],init[i][1]);
+		}
+
+		Map.prototype.clear=function(){
+		  this._map={};
+		  this._keys=[];
+		  this.size=0;
+		};
+
+		Map.prototype.get=function(key){
+		  return this._map["map_"+key];
+		};
+
+		Map.prototype.set=function(key,value){
+		  this._map["map_"+key]=value;
+		  if(this._keys.indexOf(key)<0)this._keys.push(key);
+		  this.size=this._keys.length;
+		  return this;
+		};
+	}
+	</script>
+	<script src="js/gilbertCurve.min.js"></script>
+	<script src="js/blueNoise.min.js"></script>
+	<script src="js/pnnquant.min.js"></script>
+	<script src="js/pnnLABquant.min.js"></script>
+	<script src="js/lazysizes.min.js" async=""></script>
+	<script src="js/timer.js"></script>
+	<script src="js/omggif.min.js"></script>
+	<script src="js/demo-jquery.js"></script>
+	<link rel="icon" href="ImgV64.ico?" type="image/x-icon">
+</head>
+<meta name="google-site-verification" content="uaVZxe8V55rvkhFV7liiebPRTTfOZhFySiFN97A11qw" />
+<body>
+	<noscript>
+		You need to enable JavaScript to run this app.
+	</noscript>
+	<h2>PnnQuant.js</h2>	
+
+	<div style="overflow: auto;">
+		<div class="box" style="margin: 0 auto; max-width: 49%; max-height: 35%;">
+			<h4>Original</h4>
+			<div id="orig" style="overflow: auto;" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+			</div><input type="file" style="display: none; width: 0px" />
+		</div>
+		
+		<div class="box" style="margin: 0 auto; max-width: 49%; max-height: 35%;">
+			<h4>Quantized</h4>
+			<div id="redu" style="overflow: auto;"></div>
+		</div>				
+	</div>	
+	
+	<div id="footer" style="max-width: 70vw">
+		<div id="help" class="box" style="padding-right: 1em; max-width: 100vw;">
+			<ul id="readme">
+				<li><b>Click an image to quantize it.</b></li>
+				<li><b>Please input number of colors wanted.</b></li>
+				<li><b>Config</b> values can be edited &amp; re-processed via <b>update</b>.</li>
+				<li>If your browser can't load an image fully, just try again.</li>
+			</ul>
+			<div id="palt" class="flex"></div>
+		</div>
+		
+		<div class="box" style="z-index: 999; min-width: 100px">
+			<h5>Config</h5>
+			<div id="config" style="padding-left: 1em;">
+				var opts = {<br />
+				<div style="padding-left: 4em">colors: <input id="colors" type="number" value="256" min="2" max="65536" size="6" class="autosize">,</div>
+				<div style="padding-left: 4em"><input id="dithering" type="checkbox" checked="checked"> <span>dithering</span>,</div>
+				};
+			</div>
+			<span style="padding-left: 1em; padding-bottom: 1em;">Quality: <input type="radio" name="quality" checked="checked" />
+			Normal <input type="radio" id="radHQ" name="quality" /> High</span>
+			<div style="padding: 0.5em 1em 0.5em 11em;"><button id="btn_upd">Update</button></div>			
+		</div>		
+	</div>
+
+	<table id="tbl_showcase">
+		<tr>
+			<th>Art</th>
+			<td>
+				<img class="lazyload th" data-sizes="auto" data-src="img/baseball_th.jpg" data-srcset="img/baseball_th.jpg 1x,img/baseball.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/compcube_th.jpg" data-srcset="img/compcube_th.jpg 1x,img/compcube.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/island_th.jpg" data-srcset="img/island_th.jpg 1x,img/island.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/legend_th.jpg" data-srcset="img/legend_th.jpg 1x,img/legend.jpg 4x" />				
+				<img class="lazyload th" data-sizes="auto" data-src="img/museum_th.jpg" data-srcset="img/museum_th.jpg 1x,img/museum.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/old-HK_th.jpg" data-srcset="img/old-HK_th.jpg 1x,img/old-HK.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/scream_th.jpg" data-srcset="img/scream_th.jpg 1x,img/scream.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/venus_th.jpg" data-srcset="img/venus_th.jpg 1x,img/venus.jpg 4x" />
+			</td>
+		</tr>
+		<tr>
+			<th>Photos</th>
+			<td>
+				<img class="lazyload th" data-sizes="auto" data-src="img/airline_th.jpg" data-srcset="img/airline_th.jpg 1x,img/airline.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/araras_th.jpg" data-srcset="img/araras_th.jpg 1x,img/araras.jpg 4x" />				
+				<img class="lazyload th" data-sizes="auto" data-src="img/bluff_th.jpg" data-srcset="img/bluff_th.jpg 1x,img/bluff.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/casa_th.jpg" data-srcset="img/casa_th.jpg 1x,img/casa.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/climb_th.jpg" data-srcset="img/climb_th.jpg 1x,img/climb.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/constitucion-chile_th.jpg" data-srcset="img/constitucion-chile_th.jpg 1x,img/constitucion-chile.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/f16_th.jpg" data-srcset="img/f16_th.jpg 1x,img/f16.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/HKView_th.jpg" data-srcset="img/HKView_th.jpg 1x,img/HKView.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/lily-pond_th.jpg" data-srcset="img/lily-pond_th.jpg 1x,img/lily-pond.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/pool_th.jpg" data-srcset="img/pool_th.jpg 1x,img/pool.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/quantfrog_th.jpg" data-srcset="img/quantfrog_th.jpg 1x,img/quantfrog.png 4x" />				
+				<img class="lazyload th" data-sizes="auto" data-src="img/sky_sea_th.jpg" data-srcset="img/sky_sea_th.jpg 1x,img/sky_sea.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/tree_th.jpg" data-srcset="img/tree_th.jpg 1x,img/tree.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/talia-ryder_th.jpg" data-srcset="img/talia-ryder_th.jpg 1x,img/talia-ryder.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/wooden_th.jpg" data-srcset="img/wooden_th.jpg 1x,img/wooden.jpg 4x" />
+			</td>
+		</tr>
+		<tr>
+			<th>Colorful</th>
+			<td>
+				<img class="lazyload th" data-sizes="auto" data-src="img/fish_th.jpg" data-srcset="img/fish_th.jpg 1x,img/fish.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/fruit-market_th.jpg" data-srcset="img/fruit-market_th.jpg 1x,img/fruit-market.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/g-fruit_th.jpg" data-srcset="img/g-fruit_th.jpg 1x,img/g-fruit.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/pills_th.jpg" data-srcset="img/pills_th.jpg 1x,img/pills.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/rainbow-illusions_th.jpg" data-srcset="img/rainbow-illusions_th.jpg 1x,img/rainbow-illusions.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/SE5x9_th.jpg" data-srcset="img/SE5x9_th.jpg 1x,img/SE5x9.jpg 4x" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/wildflowers_th.jpg" data-srcset="img/wildflowers_th.jpg 1x,img/wildflowers.jpg 4x" />
+			</td>
+		</tr>
+		<tr>
+			<th>Partial Transparent</th>
+			<td>
+				<img class="lazyload th" data-sizes="auto" data-src="img/color-wheel_th.png" data-srcset="img/color-wheel_th.png 1x,img/color-wheel.png 220w" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/cup_th.png" data-srcset="img/cup_th.png 1x,img/cup.png 640w" />
+				<img class="lazyload th" data-sizes="auto" data-src="img/rainbow-shadow_th.png" data-srcset="img/rainbow-shadow_th.png 1x,img/rainbow-shadow.png 1024w" />
+			</td>
+		</tr>
+	</table>
+	
+	<a href="https://github.com/mcychan/PnnQuant.js"><img src="img/forkme_right_red_aa0000.svg" style="position:absolute;top:0;right:0;" alt="Fork me on GitHub"></a>
+	<div id="wrapfabtest">
+		<div class="adBanner">
+			ImgV64 Copyright © 2016-2021
+		</div>
+	</div>
+</body>
+</html>
