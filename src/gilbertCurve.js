@@ -100,9 +100,9 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		error.p[3] = a_pix - a2;
 
 		var denoise = palette.length > 2;
-		var diffuse = RAW_BLUE_NOISE[bidx & 4095] > thresold;
+		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
 		var yDiff = diffuse ? 1 : Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix);
-		var illusion = !diffuse && RAW_BLUE_NOISE[(yDiff * 4096) | 0] > thresold;
+		var illusion = !diffuse && TELL_BLUE_NOISE[(yDiff * 4096) | 0] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
 		for(var j = 0; j < errLength; ++j) {

@@ -61,7 +61,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		var wb = bin1.bc;
 		
 		var start = 0;
-		if(RAW_BLUE_NOISE[idx & 4095] > -88)
+		if(TELL_BLUE_NOISE[idx & 4095] > -88)
 			start = (PG < coeffs[0][1]) ? coeffs.length : 1;
 		
 		for (var i = bin1.fw; i != 0; i = bins[i].fw)

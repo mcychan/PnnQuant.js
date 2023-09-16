@@ -1,6 +1,6 @@
 /* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
 Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
-Copyright (c) 2018-2022 Miller Cy Chan
+Copyright (c) 2018-2023 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function(){
@@ -653,7 +653,7 @@ Copyright (c) 2018-2022 Miller Cy Chan
 			closest[2] = closest[3] = 0xFFFF;
 			
 			var start = 0;
-			if(RAW_BLUE_NOISE[pos & 4095] > -88)
+			if(TELL_BLUE_NOISE[pos & 4095] > -88)
 				start = 1;
 
 			for (var k = 0; k < palette.length; ++k) {
@@ -720,7 +720,7 @@ Copyright (c) 2018-2022 Miller Cy Chan
 				MAX_ERR >>= 1;
 		}
 		
-		if(PG < coeffs[0][1] && RAW_BLUE_NOISE[pos & 4095] > -88)
+		if(PG < coeffs[0][1] && TELL_BLUE_NOISE[pos & 4095] > -88)
 			return nearestColorIndex(palette, pixel, pos);
 		
 		var idx = 1;
