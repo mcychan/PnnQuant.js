@@ -1,0 +1,417 @@
+class Scene extends preact.Component {
+	constructor(props) {
+		super(props);
+		this.state = { background: "none", boxWidth: 0, transparent: -1,
+			display: "none", imgName: "", imgBase64: "", imgUrl: "", width: "100%"
+		};
+		this.orig = preact.createRef();
+	}
+	
+	componentDidMount() {
+		eventBus.on("scene", data => {
+			if(data.imgUrl == this.state.imgUrl) {
+				eventBus.dispatch("app", {enabled: true});
+				return;
+			}
+			requestAnimationFrame(() => this.setState(data));
+		});
+		eventBus.on("process", data => {
+			var imgUrl = this.orig.current.src;
+			process(imgUrl);
+			origLoad(data);
+		});
+	}
+	componentWillUnmount() {
+		eventBus.remove("scene");
+		eventBus.remove("process");
+	}
+  
+	onChange = ev => {
+		eventBus.dispatch("app", {enabled: false});
+		const imgPath = ev.target.files[0];
+		var id = baseName(imgPath.name)[0];
+		loadImage(id, imgPath, ev);
+	}
+	onClick = ev => {
+		ev.target.parentNode.nextSibling.click();
+	}	
+	onDragOver = ev => {
+		ev.stopPropagation();
+		ev.preventDefault();
+		
+		ev.target.style.border = "4px dashed silver";
+	}
+	onDragLeave = ev => {
+		if(ev)
+			ev.target.style.border = "";
+		else
+			this.orig.current.style.border = "";
+	}
+	onDrop = ev => {
+		ev.stopPropagation();
+		ev.preventDefault();
+		
+		const enabled = this.props.isEnabled();
+		if(!enabled) {
+			this.onDragLeave(ev);
+			return;
+		}
+
+		var dt = ev.dataTransfer;
+		if(dt.files == null || dt.files.length <= 0) {
+			var imgUrl = dt.getData("text");
+			if(imgUrl == ev.target.src) {
+				this.onDragLeave(ev);
+				return;
+			}
+			
+			const mineType = "text/html";
+			try {
+				var dropContext = new DOMParser().parseFromString(dt.getData(mineType), mineType);
+				var img = dropContext.querySelector("img");
+				if(img instanceof HTMLImageElement)
+					imgUrl = img.srcset ? img.srcset.split(",").pop().trim().split(" ")[0] : img.src;
+			}
+			catch(err) {
+				console.error(err);
+			}
+
+			download(imgUrl, ev);
+			this.onDragLeave(ev);
+			return;
+		}
+		
+		var file = dt.files[0];
+		var imageType = /image.*/;
+
+		if (file.type.match(imageType)) {
+			eventBus.dispatch("app", {enabled: false});
+			loadImage(file.name, file, ev);
+		}
+		this.onDragLeave(ev);
+	}
+	onError = ev => {
+		var $orig = this.orig.current;
+		allowChange($orig);
+	}
+	onLoad = ev => {
+		eventBus.dispatch("origLoad", {});
+	}
+	
+	render() {
+		const {background, boxWidth, display, imgName, imgUrl, imgBase64, width, height} = this.state;
+		const reduDisplay = this.props.isEnabled() ? display : "none";
+		return preact.createElement("div", {id: "scene", style: {overflow: "auto"}},
+			[
+				preact.createElement("div", {key: "box1", className: "box", style: {background: background, display: display, margin: "0 auto", maxWidth: "49%", maxHeight: "35%"}}, 
+					[
+						preact.createElement("h4", {}, "Original"),
+						preact.createElement("div", {key: "orig", id: "orig", style: {overflow: "auto"},
+							onClick: this.onClick, onDrop: this.onDrop, 
+							onDragOver: this.onDragOver, onDragLeave: this.onDragLeave },
+							[
+								preact.createElement("div", {style: {width: boxWidth} }),
+								preact.createElement("img", {key: "origImg", crossOrigin: "Anonymous", ref: this.orig, 
+									name: imgName, src: imgUrl, 
+									onError: this.onError, onLoad: this.onLoad
+								})
+							]),
+						preact.createElement("input", {key: "file", type: "file", style: {display: "none", width: 0},
+							onChange: this.onChange
+						})
+					]
+				),
+				preact.createElement("div", {key: "box2",  className: "box", style: {background: background, display: reduDisplay, margin: "0 auto", maxWidth: "49%", maxHeight: "35%"}}, 
+					preact.createElement("h4", {}, "Quantized"),
+					preact.createElement("div", {key: "redu", id: "redu", style: {overflow: "auto"} },
+						[
+							preact.createElement("div", {style: {width: boxWidth} }),
+							preact.createElement("img", {key: "reducedImg", src: imgBase64, style: {width: width, height: height} })
+						])
+				)
+			]
+		);
+	}
+}
+
+class Readme extends preact.Component {  
+	constructor(props) {
+		super(props);
+		this.state = { cols: 32, dimensions: null, pal: []};
+	}
+	
+	componentDidMount() {
+		this.setState({
+			dimensions: {
+				width: this.container.offsetWidth,
+				height: this.container.offsetHeight,
+			},
+		});
+		eventBus.on("palt", data => {
+			requestAnimationFrame(() => this.setState(data));
+		});
+	}
+	componentWillUnmount() {
+		eventBus.remove("palt");
+	}
+	
+	drawPalette = () => {
+		const { dimensions } = this.state;
+		if(!dimensions)
+            return null;
+
+        let {pal} = this.state;
+		const maxWidth = dimensions.width;
+		const maxHeight = dimensions.height;
+		if(!maxWidth || pal.length == 0)
+			return null;
+		
+		let divContent = [];
+		pal.map((pixel, k) => {
+			const r = (pixel & 0xff),
+				g = (pixel >>> 8) & 0xff,
+				b = (pixel >>> 16) & 0xff,
+				a = ((pixel >>> 24) & 0xff) / 255.0;
+			const div = preact.createElement("div", {key: `pal${k}`, style: {backgroundColor: `rgba(${r}, ${g}, ${b}, ${a})`, 
+				}, title: rgbToHex(r, g, b) });
+			divContent.push(div);
+		});
+		return divContent;
+	}
+
+	render() {
+		const childrenData = [
+			"<b>Click an image to quantize it.</b>",
+			"<b>Please input number of colors wanted.</b>",
+			"<b>Config</b> values can be edited &amp; re-processed via <b>update</b>.",
+			"If your browser can't load an image fully, just try again."
+		];
+		const cols = Math.min(this.state.cols, this.state.pal.length);
+		
+		return preact.createElement("div", {key: "help", id: "help", className: "box", style: {paddingRight: "1em", maxWidth: "100vw"}},
+			[
+				preact.createElement("ul", {key: "readme", id: "readme"}, 
+					childrenData.map((text, index) => {
+						if(text.match(/^/))
+							return preact.createElement("li", {key: `li_${index}`,  dangerouslySetInnerHTML: { __html:  text} })
+						return preact.createElement("li", {key: `li_${index}`},  text)
+					})
+				),
+				preact.createElement("div", {key: "palt", id: "palt", className: "grid", ref: el => (this.container = el),
+				style: {gridTemplateColumns: `repeat(${cols}, 1fr)`}}, this.drawPalette())
+			]
+		);
+	}
+}
+
+class Config extends preact.Component {
+	constructor(props) {
+		super(props);
+	}
+	
+	componentDidMount() {
+		eventBus.on("origLoad", data => origLoad(this.props.getData()));
+	}
+	componentWillUnmount() {
+		eventBus.remove("config");
+		eventBus.remove("origLoad");
+	}	
+	
+	colorsChange = e => {
+		this.props.updateState({colors: e.target.value});
+	}
+	ditheringChange = e => {
+		this.props.updateState({dithering: e.target.checked});
+	}
+	qualityChange = e => {
+		this.props.updateState({isHQ: e.target.value == "H"});
+	}
+	onKeyUp = e => {
+		if(e.key === 'Enter')
+			e.currentTarget.blur();
+	}
+	onSubmit = async (e) => {
+		eventBus.dispatch("submit");
+	}
+	
+	render() {
+		const {enabled, colors, dithering, isHQ} = this.props.getData();
+		const btnText = enabled ? "Update" : "Please wait...";
+		return preact.createElement("div", {className: "box", style: {top: 0, zIndex: 999, minWidth: "100px"}},
+			[
+				preact.createElement("h5", {key: "h5_config"}, "Config"),
+				preact.createElement("div", {key: "pre_config", id: "config", style: {paddingLeft: "1em", right: 0}}, 
+					[
+						preact.createElement("span", {}, 'var opts = {\n'),
+						preact.createElement("div", {style: {paddingLeft: "4em"}}, 
+							[
+								preact.createElement("span", {}, 'colors: '),
+								preact.createElement("input", {key: "colors", id: "colors", type: "number", min: 2, max: 65536, size: 6, className: "autosize",
+								value: colors, onChange: this.colorsChange, onKeyUp: this.onKeyUp })
+							]
+						),
+						preact.createElement("div", {style: {paddingLeft: "4em"}}, 
+							[
+								preact.createElement("input", {key: "dithering", id: "dithering", type: "checkbox",
+									checked: dithering, onChange: this.ditheringChange }),
+								preact.createElement("span", {}, 'dithering,')
+							]
+						),
+						preact.createElement("span", {}, '};')
+					]
+				),
+				preact.createElement("span", {key: "input_config", style: {paddingLeft: "1em", paddingBottom: "1em"}},
+					[
+						preact.createElement("span", {}, 'Quality: '),
+						preact.createElement("input", {key: "radNQ", name: "quality", type: "radio", value: "N",
+							checked: !isHQ, onChange: this.qualityChange }),
+						preact.createElement("span", {}, 'Normal '),
+						preact.createElement("input", {key: "radHQ", id: "radHQ", name: "quality", type: "radio", value: "H",
+							checked: isHQ, onChange: this.qualityChange }),
+						preact.createElement("span", {}, ' High')
+					]
+				),
+				preact.createElement("div", {key: "btn_config", style: {padding: "0.5em 1em 0.5em 11em"}}, 
+					preact.createElement("button", {key: "btn_upd", id: "btn_upd", type: "button",
+					disabled: !enabled, onClick: this.onSubmit }, btnText)
+				)
+			]
+		);
+	}
+}
+
+function Footer(props) {  
+	return preact.createElement("div", {key: "footer", id: "footer", style: {maxWidth: "70vw"}},
+		[
+			preact.createElement(Readme, {key: "readme", ...props}),
+			preact.createElement(Config, {key: "config", ...props})
+		]
+	);
+}
+
+function ImageSet(props) {
+	const onClick = e => {
+	    if(!document.querySelector("#btn_upd").disabled) {
+			var id = e.target.name;
+			var imgUrl = e.target.srcset.split(",").pop().trim().split(" ")[0];
+			process(imgUrl);
+		}
+	}
+	const onDrop = e => {
+		if(!document.querySelector("#btn_upd").disabled) {
+			e.stopPropagation();
+			e.preventDefault();
+			var imageUrl = e.dataTransfer.getData('text/html');
+			var rex = /src="?([^"\s]+)"?\s*/;
+			var url = rex.exec(imageUrl);
+			e.dataTransfer.dropEffect = "copy";
+			e.dataTransfer.setData("text", url[1]);
+		}
+	}
+	
+	const imgType = props.pngOnly ? ".png" : ".jpg";
+	return props.images.map(imgName => {
+		return preact.createElement("img", {key: `img_${imgName}`, className: "lazyload th", name: imgName, style: {zIndex : 2}, 
+			"data-sizes": "auto", "data-src": `img/${imgName}_th${imgType}`, "data-srcset": `img/${imgName}_th${imgType} 1x, img/${imgName}${imgType} 4x`,
+			draggable: true, onClick: onClick, onDrop: onDrop })
+	});
+}
+
+function Category(props) {
+	const key = props.images[0];
+	const th = preact.createElement("th", {key: `th_${key}`}, props.text);
+	const pngOnly = props.text.indexOf("Transparent") > -1;
+	const imgSet = preact.createElement(ImageSet,  {key: `imgs_${key}`, images: props.images, pngOnly: pngOnly});	
+	const td = preact.createElement("td", {key: `td_${key}`}, imgSet);
+	return preact.createElement("tr", {key: `tr_${key}`}, [th, td]);
+}
+
+function Gallery() {  
+	const categories = [
+		{images: ["baseball", "caps", "compcube", "house", "island", "legend",  "museum",
+			"old-HK", "peppers", "scream", "venus"], text: "Art"}, 
+		{images: ["airline", "araras", "bluff", "climb",
+			"constitucion-chile", "f16", "HKView", "lily-pond", "pool",
+			"quantfrog", "sky_sea", "tree", "talia-ryder", "wooden"], text: "Photos"},
+		{images: ["bacaro", "canal", "fish", "fruit-market", "g-fruit", "pills", "rainbow-illusions",
+			"SE5x9", "venice", "wildflowers"], text: "Colorful"},
+		{images: ["color-wheel", "cup", "rainbow-shadow"],
+			text: "Partial Transparent"}
+	];
+	return preact.createElement("table", {id: "tbl_showcase", key: "tbl_showcase"},
+		preact.createElement("tbody", {key: "tb_showcase"},
+			categories.map(category => {
+				return preact.createElement(Category, {key: `cat_${category["images"][0]}`, images: category["images"], text: category["text"]})
+			})
+		)
+	);
+}
+
+function ForkMe() {  
+	const childrenData = [
+		{tag: "a", attrs: {href: "https://github.com/mcychan/PnnQuant.js"}},
+		{tag: "img", attrs: {src: "img/forkme_right_red_aa0000.svg", style: {position: "absolute", top: 0, right: 0}, alt: "Fork me on GitHub"}},
+		{tag: "div", attrs: {id: "wrapfabtest"}, children: (preact.createElement("div", {key: "adBanner", className: "adBanner"}, "ImgV64 Copyright \u00a9 2016-2021"))}
+	];
+
+	return preact.createElement("div", {key: "forkme"},
+		childrenData.map((item, index) => {
+			return preact.createElement(item["tag"], {key: `i${index}`, ...item["attrs"]}, item["children"])
+		})
+	);
+}
+
+class App extends preact.Component {
+	constructor(props) {
+		super(props);
+		this.clickedSubmit = false;
+		this.hasChanged = [];
+		this.state = { enabled: true, colors: 256, dithering: true, isHQ: false};
+	}
+	
+	componentDidMount() {
+		eventBus.on("app", data => this.setState(data));
+		eventBus.on("submit", () => {
+			if(this.hasChanged.length > 0)
+				this.clickedSubmit = true;
+			else
+				eventBus.dispatch("process", this.state);
+		});
+	}
+	componentWillUnmount() {
+		eventBus.remove("app");
+		eventBus.remove("submit");
+	}
+	componentDidCatch(error, info) {
+		console.error(`Error: ${error.message}`);
+	}
+	
+	isEnabled = () => this.state.enabled;	
+
+	
+	getData = () => this.state;
+	
+	updateState = data => {
+		const key = Object.keys(data)[0];
+		this.hasChanged.push(key);
+		this.setState(data, () => {
+			this.hasChanged = this.hasChanged.filter(e => e !== key);
+			if(this.clickedSubmit && this.hasChanged.length == 0) {
+				eventBus.dispatch("process", this.state);
+				this.clickedSubmit = false;
+			}
+		});
+	}
+	
+	render() {
+		return [
+			preact.createElement(Scene, {key: "scene", isEnabled: this.isEnabled}),
+			preact.createElement(Footer, {key: "footer", getData: this.getData, updateState: this.updateState}),
+			preact.createElement(Gallery, {key: "gallery"}),
+			preact.createElement(ForkMe, {key: "forkMe"})
+		];
+	}
+}
+
+// render
+preact.render(preact.createElement(App, {}), document.querySelector('#app'));
