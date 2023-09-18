@@ -64,8 +64,8 @@ function rgbToHex(r, g, b) {
 	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-function getCanvas(width, height, isSupported = true) {
-	if(isSupported && typeof OffscreenCanvasRenderingContext2D === "function")
+function getCanvas(width, height) {
+	if(typeof OffscreenCanvasRenderingContext2D === "function")
 		return new OffscreenCanvas(width, height);
 	
 	var can = document.createElement("canvas");
@@ -76,7 +76,7 @@ function getCanvas(width, height, isSupported = true) {
 
 async function getPngUrl(width, height, pixel32s, can = null) {
 	if(can == null) {
-		can = getCanvas(width, height, true);
+		can = getCanvas(width, height);
 		var ctx = can.getContext("2d");
 		ctx.imageSmoothingEnabled = false;
 	
@@ -236,10 +236,10 @@ function drawImageScaled(img){
 		return null;
 
 	var ratio = Math.min(maxWidth / width, maxHeight / height);	
-	var can = getCanvas(width * ratio, height * ratio, navigator.userAgent.indexOf("Firefox") < 0);
+	var can = getCanvas(width * ratio, height * ratio);
 	var ctx = can.getContext('2d');
 
-	var oc = getCanvas(can.width, can.height, navigator.userAgent.indexOf("Firefox") < 0);
+	var oc = getCanvas(can.width, can.height);
 	var octx = oc.getContext('2d');
 
 	var cur = {
