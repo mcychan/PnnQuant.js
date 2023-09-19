@@ -332,7 +332,7 @@ function Gallery() {
 			"old-HK", "peppers", "scream", "venus"], text: "Art"}, 
 		{images: ["airline", "araras", "bluff", "climb",
 			"constitucion-chile", "f16", "HKView", "lily-pond", "pool",
-			"quantfrog", "sky_sea", "tree", "talia-ryder", "wooden"], text: "Photos"},
+			"quantfrog", "sailing_2020", "sky_sea", "tree", "talia-ryder", "wooden"], text: "Photos"},
 		{images: ["bacaro", "canal", "fish", "fruit-market", "g-fruit", "pills", "rainbow-illusions",
 			"SE5x9", "venice", "wildflowers"], text: "Colorful"},
 		{images: ["color-wheel", "cup", "rainbow-shadow"],
