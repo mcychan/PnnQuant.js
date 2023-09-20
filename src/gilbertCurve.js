@@ -102,7 +102,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var denoise = palette.length > 2;
 		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
 		var yDiff = diffuse ? 1 : Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix);
-		var illusion = !diffuse && TELL_BLUE_NOISE[(yDiff * 4096) | 0] > thresold;
+		var illusion = !diffuse && TELL_BLUE_NOISE[((yDiff * 15e6) | 0) & 4095] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
 		for(var j = 0; j < errLength; ++j) {
@@ -111,9 +111,9 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 					error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (ditherMax - 1);
 				else {
 					if(illusion)
-						error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
-					else
 						error.p[j] = Math.fround(error.p[j] / maxErr * yDiff) * (ditherMax - 1);
+					else
+						error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
 				}
 			}
 		}
@@ -197,7 +197,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
 			ditherMax = Math.pow((5 + edge), 2);
-		thresold = DITHER_MAX > 9 ? -112 : -88;
+		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = new Array(DITHER_MAX);
 		lookup = new Uint32Array(65536);
 		var weightRatio = Math.pow(BLOCK_SIZE + 1.0,  1.0 / (DITHER_MAX - 1.0));
