@@ -25,7 +25,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		var y = color2Y(R, G, B);
 		var y2 = color2Y(R2, G2, B2);
-		return Math.abs(y2 - y) / 100;
+		return Math.abs(y2 - y) * 100;
 	}
 		
 	function ErrorBox(pixel) {
@@ -102,7 +102,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var denoise = palette.length > 2;
 		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
 		var yDiff = diffuse ? 1 : Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix);
-		var illusion = !diffuse && TELL_BLUE_NOISE[((yDiff * 15e6) | 0) & 4095] > thresold;
+		var illusion = !diffuse && TELL_BLUE_NOISE[((yDiff * 4096) | 0) & 4095] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
 		for(var j = 0; j < errLength; ++j) {
