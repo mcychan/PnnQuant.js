@@ -13,21 +13,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var c = channel / 255.0;
 		return c < 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
-	
-	function Y_Diff(R, G, B, R2, G2, B2)
-	{
-		function color2Y(R, G, B) {
-			var sr = gammaToLinear(R);
-			var sg = gammaToLinear(G);
-			var sb = gammaToLinear(B);
-			return sr * 0.2126 + sg * 0.7152 + sb * 0.0722;
-		}
 
-		var y = color2Y(R, G, B);
-		var y2 = color2Y(R2, G2, B2);
-		return Math.abs(y2 - y) * 100;
-	}
-		
 	function ErrorBox(pixel) {
 		var r = (pixel & 0xff),
 			g = (pixel >>> 8) & 0xff,
@@ -101,20 +87,14 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		var denoise = palette.length > 2;
 		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
-		var yDiff = diffuse ? 1 : Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix);
-		var illusion = !diffuse && TELL_BLUE_NOISE[((yDiff * 4096) | 0) & 4095] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
 		for(var j = 0; j < errLength; ++j) {
 			if(Math.abs(error.p[j]) >= ditherMax) {
 				if (diffuse)
 					error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (ditherMax - 1);
-				else {
-					if(illusion)
-						error.p[j] = Math.fround(error.p[j] / maxErr * yDiff) * (ditherMax - 1);
-					else
-						error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
-				}
+				else
+					error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
 			}
 		}
 
