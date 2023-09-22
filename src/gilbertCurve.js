@@ -172,7 +172,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		generate2d(x, y, bx2, by2, ax2, ay2);
 		generate2d(x + bx2, y + by2, ax, ay, bx - bx2, by - by2);
-		generate2d(x + (ax - dax) + (bx2 - dbx), y + (ay - day) + (by2 - dby), -bx2, -by2, -(ax - ax2), -(ay - ay2));    		
+		generate2d(x + (ax - dax) + (bx2 - dbx), y + (ay - day) + (by2 - dby), -bx2, -by2, -(ax - ax2), -(ay - ay2));
 	}
 	
 	function processImagePixels() {
@@ -196,9 +196,9 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
-			ditherMax = Math.pow((5 + edge), 2);
-		else if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length > 16 && this.opts.palette.length < 256)
-			ditherMax = Math.pow((5 + edge), 2);
+			ditherMax = Math.pow(5 + edge, 2);
+		else if(this.opts.palette.length > 16 && this.opts.palette.length < 256)
+			ditherMax = (this.opts.palette.length / this.opts.weight) < 3200 ? Math.pow(5 + edge, 2) : Math.pow(3 + edge, 2);
 		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = new Array(DITHER_MAX);
 		lookup = new Uint32Array(65536);
