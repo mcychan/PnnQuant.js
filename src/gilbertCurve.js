@@ -13,7 +13,21 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var c = channel / 255.0;
 		return c < 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
+	
+	function Y_Diff(R, G, B, R2, G2, B2)
+	{
+		function color2Y(R, G, B) {
+			var sr = gammaToLinear(R);
+			var sg = gammaToLinear(G);
+			var sb = gammaToLinear(B);
+			return sr * 0.2126 + sg * 0.7152 + sb * 0.0722;
+		}
 
+		var y = color2Y(R, G, B);
+		var y2 = color2Y(R2, G2, B2);
+		return Math.abs(y2 - y) * 100;
+	}
+		
 	function ErrorBox(pixel) {
 		var r = (pixel & 0xff),
 			g = (pixel >>> 8) & 0xff,
@@ -87,14 +101,20 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		var denoise = palette.length > 2;
 		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
+		var yDiff = diffuse ? 1 : Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix);
+		var illusion = !diffuse && TELL_BLUE_NOISE[((yDiff * 4096) | 0) & 4095] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
 		for(var j = 0; j < errLength; ++j) {
 			if(Math.abs(error.p[j]) >= ditherMax) {
 				if (diffuse)
 					error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (ditherMax - 1);
-				else
-					error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
+				else {
+					if(illusion)
+						error.p[j] = Math.fround(error.p[j] / maxErr * yDiff) * (ditherMax - 1);
+					else
+						error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
+				}
 			}
 		}
 
@@ -152,7 +172,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		generate2d(x, y, bx2, by2, ax2, ay2);
 		generate2d(x + bx2, y + by2, ax, ay, bx - bx2, by - by2);
-		generate2d(x + (ax - dax) + (bx2 - dbx), y + (ay - day) + (by2 - dby), -bx2, -by2, -(ax - ax2), -(ay - ay2));
+		generate2d(x + (ax - dax) + (bx2 - dbx), y + (ay - day) + (by2 - dby), -bx2, -by2, -(ax - ax2), -(ay - ay2));    		
 	}
 	
 	function processImagePixels() {
@@ -177,8 +197,8 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
 			ditherMax = Math.pow((5 + edge), 2);
-		if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length > 16 && this.opts.palette.length < 256)
-			ditherMax = Math.max(ditherMax, this.opts.palette.length - DITHER_MAX);
+		else if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length > 16 && this.opts.palette.length < 256)
+			ditherMax = Math.pow((5 + edge), 2);
 		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = new Array(DITHER_MAX);
 		lookup = new Uint32Array(65536);
