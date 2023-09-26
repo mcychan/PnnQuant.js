@@ -112,12 +112,10 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 			if(Math.abs(error.p[j]) >= ditherMax) {
 				if (diffuse)
 					error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (ditherMax - 1);
-				else {
-					if(illusion)
-						error.p[j] = Math.fround(error.p[j] / maxErr * error.yDiff) * (ditherMax - 1);
-					else
-						error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
-				}
+				else if(illusion)
+					error.p[j] = Math.fround(error.p[j] / maxErr * error.yDiff) * (ditherMax - 1);
+				else
+					error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
 			}
 		}
 
