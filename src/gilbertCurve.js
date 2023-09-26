@@ -33,7 +33,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 			g = (pixel >>> 8) & 0xff,
 			b = (pixel >>> 16) & 0xff,
 			a = (pixel >>> 24) & 0xff;
-		this.yDiff = 0;
+		this.yDiff = 1;
 		this.p = [r, g, b, a];
 	}
 	
