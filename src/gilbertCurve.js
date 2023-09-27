@@ -61,8 +61,8 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 					maxErr = error.p[j];
 			}
 			i += sortedByYDiff ? -1 : 1;
-			if(eb.yDiff < 0)
-				eb.yDiff = error.yDiff + 1e-6 * i;
+			if(sortedByYDiff && eb.yDiff < 0)
+				eb.yDiff = i % 2;
 		});
 
 		var r_pix = Math.clamp(error.p[0], 0, 0xff) | 0;
