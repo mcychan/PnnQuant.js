@@ -33,7 +33,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 			g = (pixel >>> 8) & 0xff,
 			b = (pixel >>> 16) & 0xff,
 			a = (pixel >>> 24) & 0xff;
-		this.yDiff = 1.0;
+		this.yDiff = -1;
 		this.p = [r, g, b, a];
 	}
 	
@@ -61,6 +61,8 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 					maxErr = error.p[j];
 			}
 			i += sortedByYDiff ? -1 : 1;
+			if(eb.yDiff < 0)
+				eb.yDiff = error.yDiff;
 		});
 
 		var r_pix = Math.clamp(error.p[0], 0, 0xff) | 0;
@@ -200,7 +202,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
 			ditherMax = Math.pow(5 + edge, 2);
-		else if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length > 16 && this.opts.palette.length < 256)
+		else if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length > 16 && this.opts.palette.length < 128)
 			ditherMax = Math.pow(5 + edge, 2);
 		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = new Array(DITHER_MAX);
