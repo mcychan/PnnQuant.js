@@ -33,7 +33,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 			g = (pixel >>> 8) & 0xff,
 			b = (pixel >>> 16) & 0xff,
 			a = (pixel >>> 24) & 0xff;
-		this.yDiff = 1;
+		this.yDiff = 1.0;
 		this.p = [r, g, b, a];
 	}
 	
@@ -45,24 +45,23 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 	var lookup;
 
 	var DITHER_MAX = 9, ditherMax, sortedByYDiff, thresold;
-	var BLOCK_SIZE = 343.0;	
+	var BLOCK_SIZE = 343.0;
 	
 	function ditherPixel(x, y)
 	{
 		var bidx = x + y * width;
 		var pixel = pixels[bidx];
 		var error = new ErrorBox(pixel);
-		var maxErr = DITHER_MAX - 1;
 		var i = sortedByYDiff ? weights.length - 1 : 0;
-		for(var c = 0; c < DITHER_MAX; ++c) {
-			var eb = errorq[c];
+		var maxErr = DITHER_MAX - 1;
+		errorq.forEach(function(eb) {
 			for(var j = 0; j < eb.p.length; ++j) {
 				error.p[j] += eb.p[j] * weights[i];
 				if(error.p[j] > maxErr)
 					maxErr = error.p[j];
 			}
 			i += sortedByYDiff ? -1 : 1;
-		}
+		});
 
 		var r_pix = Math.clamp(error.p[0], 0, 0xff) | 0;
 		var g_pix = Math.clamp(error.p[1], 0, 0xff) | 0;
@@ -104,7 +103,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		var denoise = palette.length > 2;
 		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
-		error.yDiff = diffuse ? 1 : Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix);
+		error.yDiff = sortedByYDiff ? Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) : 1;
 		var illusion = !diffuse && TELL_BLUE_NOISE[((error.yDiff * 4096) | 0) & 4095] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
@@ -194,7 +193,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		*/
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
-		sortedByYDiff = this.opts.saliencies != null && !hasAlpha && this.opts.palette.length >= 128;
+		sortedByYDiff = this.opts.saliencies != null && !hasAlpha && this.opts.palette.length >= 256;
 		this.opts.weight = Math.abs(this.opts.weight);
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
@@ -206,14 +205,12 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = new Array(DITHER_MAX);
 		lookup = new Uint32Array(65536);
-		var weightRatio = Math.pow(BLOCK_SIZE + 1.0,  1.0 / (DITHER_MAX - 1.0));
+		var weightRatio = Math.fround(Math.pow(BLOCK_SIZE + 1.0, 1.0 / (DITHER_MAX - 1.0)));
 		var weight = 1.0, sumweight = 0.0;
-		for(var c = 0; c < DITHER_MAX; ++c)
-		{
+		for(var c = 0; c < DITHER_MAX; ++c) {
 			errorq.push(new ErrorBox(0));
-			var d = Math.fround(1.0 / weight);
-			sumweight += (weights[DITHER_MAX - c - 1] = d);
-			weight *= weightRatio;
+			sumweight += (weights[DITHER_MAX - c - 1] = weight);
+			weight /= weightRatio;
 		}
 
 		weight = 0.0; /* Normalize */
