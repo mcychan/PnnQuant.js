@@ -33,7 +33,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 			g = (pixel >>> 8) & 0xff,
 			b = (pixel >>> 16) & 0xff,
 			a = (pixel >>> 24) & 0xff;
-		this.yDiff = -1;
+		this.yDiff = 0;
 		this.p = [r, g, b, a];
 	}
 	
@@ -54,16 +54,18 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var error = new ErrorBox(pixel);
 		var i = sortedByYDiff ? weights.length - 1 : 0;
 		var maxErr = DITHER_MAX - 1;
-		errorq.forEach(function(eb) {
+		for(var c = 0; c < errorq.length; ++c) {
+			var eb = errorq[c];
+			if(i < 0 || i > weights.length)
+				break;
+
 			for(var j = 0; j < eb.p.length; ++j) {
 				error.p[j] += eb.p[j] * weights[i];
 				if(error.p[j] > maxErr)
 					maxErr = error.p[j];
 			}
 			i += sortedByYDiff ? -1 : 1;
-			if(sortedByYDiff && eb.yDiff < 0)
-				eb.yDiff = i % 2;
-		});
+		}
 
 		var r_pix = Math.clamp(error.p[0], 0, 0xff) | 0;
 		var g_pix = Math.clamp(error.p[1], 0, 0xff) | 0;
@@ -87,7 +89,11 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		else
 			qPixels[bidx] = ditherFn(palette, c2, bidx);
 
-		errorq.shift();
+		if(errorq.length >= DITHER_MAX)
+			errorq.shift();
+		else if(errorq.length > 0)
+			initWeights(errorq.length);
+
 		var r0 = (pixel & 0xff),
 			g0 = (pixel >>> 8) & 0xff,
 			b0 = (pixel >>> 16) & 0xff;
@@ -120,9 +126,10 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 			}
 		}
 
-		errorq.push(error);
-		if(sortedByYDiff)
-			errorq.sort((o1, o2) => o2.yDiff - o1.yDiff);
+		if(sortedByYDiff && errorq.length > 0 && error.yDiff > errorq[0].yDiff)
+			errorq.unshift(error);
+		else
+			errorq.push(error);
 	}
 
 	function generate2d(x, y, ax, ay, bx, by) {
@@ -187,12 +194,32 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		return qPixel32s;
 	}
 
-	GilbertCurve.prototype.dither = function()
+	function initWeights(size)
 	{
 		/* Dithers all pixels of the image in sequence using
 		* the Gilbert path, and distributes the error in
-		* a sequence of DITHER_MAX pixels.
+		* a sequence of pixels size.
 		*/
+		var weightRatio = Math.fround(Math.pow(BLOCK_SIZE + 1.0, 1.0 / (size - 1.0)));
+		var weight = 1.0, sumweight = 0.0;
+		weights = new Array(size);
+		for(var c = 0; c < size; ++c) {
+			if(!sortedByYDiff)
+				errorq.push(new ErrorBox(0));
+			sumweight += (weights[size - c - 1] = weight);
+			weight /= weightRatio;
+		}
+
+		weight = 0.0; /* Normalize */
+		for(var c = 0; c < size; ++c) {
+			weights[c] = Math.fround(weights[c] / sumweight);
+			weight += weights[c];
+		}
+		weights[0] += Math.fround(1.0 - weight);
+	}
+
+	GilbertCurve.prototype.dither = function()
+	{
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
 		sortedByYDiff = this.opts.saliencies != null && !hasAlpha && this.opts.palette.length >= 256;
@@ -205,22 +232,8 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		else if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length > 16 && this.opts.palette.length < 128)
 			ditherMax = Math.pow(5 + edge, 2);
 		thresold = DITHER_MAX > 9 ? -112 : -64;
-		weights = new Array(DITHER_MAX);
+		weights = [];
 		lookup = new Uint32Array(65536);
-		var weightRatio = Math.fround(Math.pow(BLOCK_SIZE + 1.0, 1.0 / (DITHER_MAX - 1.0)));
-		var weight = 1.0, sumweight = 0.0;
-		for(var c = 0; c < DITHER_MAX; ++c) {
-			errorq.push(new ErrorBox(0));
-			sumweight += (weights[DITHER_MAX - c - 1] = weight);
-			weight /= weightRatio;
-		}
-
-		weight = 0.0; /* Normalize */
-		for(var c = 0; c < DITHER_MAX; ++c) {
-			weights[c] = Math.fround(weights[c] / sumweight);
-			weight += weights[c];
-		}
-		weights[0] += Math.fround(1.0 - weight);
 
 		ditherFn = this.opts.ditherFn;
 		getColorIndex = this.opts.getColorIndex;
@@ -231,6 +244,9 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		saliencies = this.opts.saliencies;
 		nMaxColors = palette.length;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
+
+		if(!sortedByYDiff)
+			initWeights(DITHER_MAX);
 
 		if (width >= height)
 			generate2d(0, 0, width, 0, 0, height);
