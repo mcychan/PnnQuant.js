@@ -56,7 +56,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var maxErr = DITHER_MAX - 1;
 		for(var c = 0; c < errorq.length; ++c) {
 			var eb = errorq[c];
-			if(i < 0 || i > weights.length)
+			if(i < 0 || i >= weights.length)
 				break;
 
 			for(var j = 0; j < eb.p.length; ++j) {
