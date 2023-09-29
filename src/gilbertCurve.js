@@ -225,7 +225,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		this.opts.weight = Math.abs(this.opts.weight);
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		if(sortedByYDiff && this.opts.palette.length < 256)
-			DITHER_MAX = 4;
+			DITHER_MAX = 6;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
