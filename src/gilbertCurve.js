@@ -221,7 +221,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 	{
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
-		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 64;
+		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 64 && weight < .09;
 		this.opts.weight = Math.abs(this.opts.weight);
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		if(sortedByYDiff && this.opts.palette.length < 256)
