@@ -128,7 +128,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		errorq.push(error);
 		if(sortedByYDiff)
-			errorq.sort((o1, o2) => o2.yDiff > o1.yDiff);
+			errorq.sort((o1, o2) => o2.yDiff < o1.yDiff);
 	}
 
 	function generate2d(x, y, ax, ay, bx, by) {
@@ -220,7 +220,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 	{
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
-		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 256;
+		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 64;
 		this.opts.weight = Math.abs(this.opts.weight);
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
