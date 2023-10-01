@@ -128,7 +128,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		errorq.push(error);
 		if(sortedByYDiff)
-			errorq.sort((o1, o2) => o2.yDiff > o1.yDiff);
+			errorq.sort((o1, o2) => o2.yDiff < o1.yDiff);
 	}
 
 	function generate2d(x, y, ax, ay, bx, by) {
