@@ -222,8 +222,9 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 	{
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
-		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 128;
 		this.opts.weight = Math.abs(this.opts.weight);
+		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 128 && this.opts.weight >= .04;
+		
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
@@ -245,7 +246,8 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		nMaxColors = palette.length;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
-		initWeights(sortedByYDiff ? 1 : DITHER_MAX);
+		if(!sortedByYDiff)
+			initWeights(DITHER_MAX);
 
 		if (width >= height)
 			generate2d(0, 0, width, 0, 0, height);
