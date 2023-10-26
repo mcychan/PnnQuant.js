@@ -46,18 +46,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 	var DITHER_MAX = 9, ditherMax, sortedByYDiff, thresold;
 	var BLOCK_SIZE = 343.0;
-
-	function sortDescending(arr, attr, val) {
-		i = arr.length - 1;
-		item = arr[i];
-		while (i > 0 && item[attr] > arr[i - 1][attr]) {
-			arr[i] = arr[i - 1];
-			--i;
-		}
-		arr[i] = item;
-		return arr;
-	}
-
+	
 	function ditherPixel(x, y)
 	{
 		var bidx = x + y * width;
@@ -139,7 +128,9 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 
 		errorq.push(error);
 		if(sortedByYDiff)
-			sortDescending(errorq, "yDiff", error);
+			errorq.sort(function(o1, o2) {
+				return Math.sign(o1.yDiff - o2.yDiff); // descending order
+			});
 	}
 
 	function generate2d(x, y, ax, ay, bx, by) {
