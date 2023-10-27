@@ -72,7 +72,10 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var b_pix = Math.clamp(error.p[2], 0, 0xff) | 0;
 		var a_pix = Math.clamp(error.p[3], 0, 0xff) | 0;
 
-		
+		var r0 = (pixel & 0xff),
+			g0 = (pixel >>> 8) & 0xff,
+			b0 = (pixel >>> 16) & 0xff;
+
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
 		if(nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
@@ -94,10 +97,6 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		else if(errorq.length > 0)
 			initWeights(errorq.length);
 
-		var r0 = (pixel & 0xff),
-			g0 = (pixel >>> 8) & 0xff,
-			b0 = (pixel >>> 16) & 0xff;
-			
 		c2 = palette[qPixels[bidx]];
 		var r2 = (c2 & 0xff),
 			g2 = (c2 >>> 8) & 0xff,
