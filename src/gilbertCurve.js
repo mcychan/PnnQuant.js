@@ -83,7 +83,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 				lookup[offset] = ditherFn(palette, c2, bidx) + 1;
 			qPixels[bidx] = lookup[offset] - 1;
 			
-			if(saliencies != null && Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > nMaxColors - 10) {
+			if(saliencies != null && Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > nMaxColors - 7) {
 				var strength = 1 / 3.0;
 				c2 = new BlueNoise({weight: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				qPixels[bidx] = ditherFn(palette, c2, bidx);
