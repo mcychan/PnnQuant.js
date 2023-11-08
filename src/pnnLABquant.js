@@ -483,7 +483,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		
 		if (quan_rt > 0 && nMaxColors < 64 && proportional > .035 && proportional < .1) {
 			var dir = proportional > .04 ? 1 : -1;
-			var delta = weight > .0025 && weight < .003 ? 1.872 : 1.632;
+			var delta = weight > .002 && weight < .003 ? 1.872 : 1.632;
 			ratio = Math.min(1.0, proportional + dir * weight * Math.exp(delta));
 		}
 		
