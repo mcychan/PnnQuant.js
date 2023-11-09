@@ -44,7 +44,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 	var weights = [];
 	var lookup;
 
-	var DITHER_MAX = 9, ditherMax, sortedByYDiff, thresold;
+	var DITHER_MAX = 9, ditherMax, sortedByYDiff, margin, thresold;
 	var BLOCK_SIZE = 343.0;
 	
 	function ditherPixel(x, y)
@@ -83,7 +83,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 				lookup[offset] = ditherFn(palette, c2, bidx) + 1;
 			qPixels[bidx] = lookup[offset] - 1;
 			
-			if(saliencies != null && Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > nMaxColors - 7) {
+			if(saliencies != null && Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > nMaxColors - margin) {
 				var strength = 1 / 3.0;
 				c2 = new BlueNoise({weight: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				qPixels[bidx] = ditherFn(palette, c2, bidx);
@@ -222,6 +222,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
 		this.opts.weight = Math.abs(this.opts.weight);
+		margin = this.opts.weight < .003 ? 12 : 6;
 		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 128 && this.opts.weight >= .04;
 		
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
