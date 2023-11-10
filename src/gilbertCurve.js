@@ -223,7 +223,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var hasAlpha = this.opts.weight < 0;
 		this.opts.weight = Math.abs(this.opts.weight);
 		margin = this.opts.weight < .003 ? 12 : 6;
-		sortedByYDiff = !hasAlpha && this.opts.palette.length >= 128 && this.opts.weight >= .04;
+		sortedByYDiff = this.opts.palette.length >= 128 && (hasAlpha ? this.opts.weight < .18 : this.opts.weight >= .04);
 		
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
