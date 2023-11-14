@@ -32,7 +32,7 @@ class Scene extends preact.Component {
 		eventBus.on("process", data => {
 			var imgUrl = this.orig.current.src;
 			process(imgUrl);
-			origLoad(data);
+			(async () => await origLoad(data))();
 		});
 	}
 	componentWillUnmount() {
@@ -224,7 +224,7 @@ class Config extends preact.Component {
 	}
 	
 	componentDidMount() {
-		eventBus.on("origLoad", data => origLoad(this.props.getData()));
+		eventBus.on("origLoad", data => (async () => await origLoad(this.props.getData()))());
 	}
 	componentWillUnmount() {
 		eventBus.remove("config");
