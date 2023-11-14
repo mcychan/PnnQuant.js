@@ -39,7 +39,7 @@ class Scene extends preact.Component {
 		eventBus.remove("scene");
 		eventBus.remove("process");
 	}
-  
+
 	onChange = ev => {
 		eventBus.dispatch("app", {enabled: false});
 		const imgPath = ev.target.files[0];
@@ -111,7 +111,7 @@ class Scene extends preact.Component {
 	onLoad = ev => {
 		eventBus.dispatch("origLoad", {});
 	}
-	
+
 	render() {
 		const {background, boxWidth, display, imgName, imgUrl, imgBase64, width, height} = this.state;
 		const reduDisplay = this.props.isEnabled() ? display : "none";
@@ -148,7 +148,7 @@ class Scene extends preact.Component {
 	}
 }
 
-class Readme extends preact.Component {  
+class Readme extends preact.Component {
 	constructor(props) {
 		super(props);
 		this.state = { cols: 32, dimensions: null, pal: []};
@@ -172,9 +172,9 @@ class Readme extends preact.Component {
 	drawPalette = () => {
 		const { dimensions } = this.state;
 		if(!dimensions)
-            return null;
+			return null;
 
-        let {pal} = this.state;
+		let {pal} = this.state;
 		const maxWidth = dimensions.width;
 		const maxHeight = dimensions.height;
 		if(!maxWidth || pal.length == 0)
@@ -207,8 +207,8 @@ class Readme extends preact.Component {
 				preact.createElement("ul", {key: "readme", id: "readme"}, 
 					childrenData.map((text, index) => {
 						if(text.match(/^/))
-							return preact.createElement("li", {key: `li_${index}`,  dangerouslySetInnerHTML: { __html:  text} })
-						return preact.createElement("li", {key: `li_${index}`},  text)
+							return preact.createElement("li", {key: `li_${index}`, dangerouslySetInnerHTML: { __html:  text} })
+						return preact.createElement("li", {key: `li_${index}`}, text)
 					})
 				),
 				preact.createElement("div", {key: "palt", id: "palt", className: "grid", ref: el => (this.container = el),
@@ -305,7 +305,7 @@ function Footer(props) {
 
 function ImageSet(props) {
 	const onClick = e => {
-	    if(!document.querySelector("#btn_upd").disabled) {
+		if(!document.querySelector("#btn_upd").disabled) {
 			var id = e.target.name;
 			var imgUrl = e.target.srcset.split(",").pop().trim().split(" ")[0];
 			process(imgUrl);
@@ -325,7 +325,8 @@ function ImageSet(props) {
 	
 	const imgType = props.pngOnly ? ".png" : ".jpg";
 	return props.images.map(imgName => {
-		return preact.createElement("img", {key: `img_${imgName}`, className: "lazyload th", name: imgName, style: {zIndex : 2}, 
+		const selected = props.selected == imgName ? " selected" : "";
+		return preact.createElement("img", {key: `img_${imgName}`, className: `lazyload th${selected}`, name: imgName, style: {zIndex : 2}, 
 			"data-sizes": "auto", "data-src": `img/${imgName}_th${imgType}`, "data-srcset": `img/${imgName}_th${imgType} 1x, img/${imgName}${imgType} 4x`,
 			draggable: true, onClick: onClick, onDrop: onDrop })
 	});
@@ -335,7 +336,7 @@ function Category(props) {
 	const key = props.images[0];
 	const th = preact.createElement("th", {key: `th_${key}`}, props.text);
 	const pngOnly = props.text.indexOf("Transparent") > -1;
-	const imgSet = preact.createElement(ImageSet,  {key: `imgs_${key}`, images: props.images, pngOnly: pngOnly});	
+	const imgSet = preact.createElement(ImageSet, {key: `imgs_${key}`, images: props.images, pngOnly: pngOnly, selected: props.selected});
 	const td = preact.createElement("td", {key: `td_${key}`}, imgSet);
 	return preact.createElement("tr", {key: `tr_${key}`}, [th, td]);
 }
@@ -348,14 +349,14 @@ function Gallery() {
 			"constitucion-chile", "f16", "goldhill", "HKView", "pool",
 			"quantfrog", "sailing_2020", "sky_sea", "tree", "talia-ryder", "wooden"], text: "Photos"},
 		{images: ["bacaro", "canal", "fruit-market", "g-fruit", "motocross", "pills", "rainbow-illusions",
-			"SE5x9", "venice", "wildflowers"], text: "Colorful"},
+			"SE5x9", "venice", "wildflowers"], selected: "SE5x9", text: "Colorful"},
 		{images: ["color-wheel", "cup", "rainbow-shadow"],
 			text: "Partial Transparent"}
 	];
 	return preact.createElement("table", {id: "tbl_showcase", key: "tbl_showcase"},
 		preact.createElement("tbody", {key: "tb_showcase"},
 			categories.map(category => {
-				return preact.createElement(Category, {key: `cat_${category["images"][0]}`, images: category["images"], text: category["text"]})
+				return preact.createElement(Category, {key: `cat_${category["images"][0]}`, images: category["images"], selected: category["selected"], text: category["text"]})
 			})
 		)
 	);
@@ -400,7 +401,7 @@ class App extends preact.Component {
 		console.error(`Error: ${error.message}`);
 	}
 	
-	isEnabled = () => this.state.enabled;	
+	isEnabled = () => this.state.enabled;
 
 	
 	getData = () => this.state;

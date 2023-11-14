@@ -485,5 +485,5 @@ document.addEventListener("DOMContentLoaded", function(){
 		};
 	});
 
-	process("img/SE5x9.jpg");
+	process("img/" + document.querySelector("img[class*=selected]").name + ".jpg");
 });
