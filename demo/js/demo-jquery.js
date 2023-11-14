@@ -115,7 +115,7 @@ function drawPalette(idxi32, width, maxWidth, maxHeight, cols) {
 	return divContent;
 }
 
-function quantizeImage(gl, result, width) {				
+function quantizeImage(gl, result, width) {
 	var $redu = $("#redu");
 	var img = $redu.find("img")[0];
 	if(!img) {
@@ -143,10 +143,10 @@ function quantizeImage(gl, result, width) {
 			var opts = {palette: toRGBPalette(pal)};
 			if(result.transparent > -1)
 				opts.transparent = result.transparent;
-			gf.addFrame(0, 0, width, can.height, result.indexedPixels, opts);
+			gf.addFrame(0, 0, width, height, result.indexedPixels, opts);
 			var data = buf.slice(0, gf.end());
 			var reader = new FileReader();
-			reader.onloadend = function() {					
+			reader.onloadend = function() {
 				img.src = reader.result;
 			};
 
