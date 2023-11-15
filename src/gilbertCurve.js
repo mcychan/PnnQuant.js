@@ -230,7 +230,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
 			ditherMax = Math.pow(5 + edge, 2);
-		else if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length > 16 && this.opts.palette.length < 128)
+		else if(this.opts.palette.length / this.opts.weight < 3200 && this.opts.palette.length >= 16 && this.opts.palette.length < 128)
 			ditherMax = Math.pow(5 + edge, 2);
 		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = [];
