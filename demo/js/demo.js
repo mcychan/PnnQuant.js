@@ -101,6 +101,13 @@ async function getPngUrl(width, height, pixel32s, can = null) {
 	});
 }
 
+
+function allowChange($orig) {
+	eventBus.dispatch("app", {enabled: true});
+	$orig.style.pointerEvents = "";
+	document.querySelector("#palt").style.opacity = 1;
+}
+
 function quantizeImage(gl, result, width) {
 	console.timeEnd("reduced -> DOM");
 	var pal = new Uint32Array(result.pal8);	
@@ -124,6 +131,9 @@ function quantizeImage(gl, result, width) {
 			reader.onload = () => {
 				eventBus.dispatch("scene", {imgBase64: reader.result, width: width, height: height});
 			};
+			reader.onerror = () => {
+				allowChange(document.querySelector("#orig"));
+			};
 
 			reader.readAsDataURL(new Blob([data], {type: result.type}));
 			document.querySelector("#redu img").onerror = () => {
@@ -144,12 +154,6 @@ function quantizeImage(gl, result, width) {
 			eventBus.dispatch("scene", {imgBase64: pngUrl, width: width, height: height});
 		});
 	console.timeEnd("palette");
-}
-
-function allowChange($orig) {
-	eventBus.dispatch("app", {enabled: true});
-	$orig.style.pointerEvents = "";
-	document.querySelector("#palt").style.opacity = 1;
 }
 
 async function getResult(opts) {
@@ -318,6 +322,9 @@ function loadImage(id, blob, ev) {
 	var reader = new FileReader();
 	reader.onload = function() {
 		createImage(id, reader.result, ev);
+	};
+	reader.onerror = function() {
+		allowChange(document.querySelector("#orig"));
 	};
 
 	reader.readAsDataURL(blob);
