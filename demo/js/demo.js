@@ -92,7 +92,7 @@ async function getPngUrl(width, height, pixel32s, can = null) {
 		
 	return new Promise((resolve, reject) => {
 		var reader = new FileReader();
-		reader.onloadend = () => {
+		reader.onload = () => {
 			resolve(reader.result);
 		};
 
@@ -121,7 +121,7 @@ function quantizeImage(gl, result, width) {
 			gf.addFrame(0, 0, width, height, result.indexedPixels, opts);
 			var data = buf.slice(0, gf.end());
 			var reader = new FileReader();
-			reader.onloadend = () => {
+			reader.onload = () => {
 				eventBus.dispatch("scene", {imgBase64: reader.result, width: width, height: height});
 			};
 
@@ -316,7 +316,7 @@ function process(imgUrl) {
 
 function loadImage(id, blob, ev) {
 	var reader = new FileReader();
-	reader.onloadend = function() {
+	reader.onload = function() {
 		createImage(id, reader.result, ev);
 	};
 
