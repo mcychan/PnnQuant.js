@@ -146,7 +146,7 @@ function quantizeImage(gl, result, width) {
 			gf.addFrame(0, 0, width, height, result.indexedPixels, opts);
 			var data = buf.slice(0, gf.end());
 			var reader = new FileReader();
-			reader.onloadend = function() {
+			reader.onload = function() {
 				img.src = reader.result;
 			};
 
@@ -348,7 +348,7 @@ function process(imgUrl) {
 
 function loadImage(id, blob, ev) {	
 	var reader = new FileReader();
-	reader.onloadend = function() {					
+	reader.onload = function() {
 		createImage(id, reader.result, ev);
 	};
 
