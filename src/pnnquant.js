@@ -123,6 +123,8 @@ Copyright (c) 2018-2023 Miller Cy Chan
 	}
 	
 	PnnQuant.prototype.pnnquan = function pnnquan(pixels, nMaxColors) {
+		closestMap.clear();
+		nearestMap.clear();
 		var quan_rt = 1;
 		var bins = new Array(65536);
 
@@ -172,7 +174,9 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			quan_rt = -1;
 		
 		var weight = this.opts.weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
-		if (weight < .03 && PG < 1 && PG >= coeffs[0][1]) {
+		if (weight > .003 && weight < .005)
+			quan_rt = 0;
+		if (weight < .03 && PG >= coeffs[0][1]) {
 			PR = PG = PB = PA = 1;
 			if (nMaxColors >= 64)
 				quan_rt = 0;
@@ -301,10 +305,11 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
 
-		var pr = PR, pg = PG, pb = PB, pa = PA;
-		if(palette.length < 3)
-			pr = pg = pb = pa = 1;
-		
+		var pr = PR, pg = PG, pb = PB;
+		if(palette.length > 2 && TELL_BLUE_NOISE[pos & 4095] > -88) {
+			pr = coeffs[0][0]; pg = coeffs[0][1]; pb = coeffs[0][2];
+		}
+
 		var mindist = 1e100;
 		for (var i = k; i < palette.length; i++)
 		{
@@ -312,7 +317,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			g2 = (palette[i] >>> 8) & 0xff,
 			b2 = (palette[i] >>> 16) & 0xff,
 			a2 = (palette[i] >>> 24) & 0xff;
-			var curdist = pa * sqr(a2 - a);
+			var curdist = PA * sqr(a2 - a);
 			if (curdist > mindist)
 				continue;
 			
@@ -350,9 +355,10 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			closest = new Array(4);
 			closest[2] = closest[3] = 0xFFFF;
 			
-			var pr = PR, pg = PG, pb = PB, pa = PA;
-			if(palette.length < 3)
-				pr = pg = pb = pa = 1;
+			var pr = PR, pg = PG, pb = PB;
+			if(TELL_BLUE_NOISE[pos & 4095] > -88) {
+				pr = coeffs[0][0]; pg = coeffs[0][1]; pb = coeffs[0][2];
+			}
 
 			for (var k = 0; k < palette.length; ++k)
 			{
@@ -374,7 +380,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 					continue;
 				
 				if(hasSemiTransparency)
-					err += pa * sqr(a2 - a);
+					err += PA * sqr(a2 - a);
 				
 				if (err < closest[2])
 				{
@@ -399,7 +405,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		var MAX_ERR = palette.length << 2;
 		var idx = (pos + 1) % 2;
 		if (closest[3] * .67 < (closest[3] - closest[2]))
-			idx = 0;		
+			idx = 0;
 		else if (closest[0] > closest[1])
 			idx = pos % 2;
 			
