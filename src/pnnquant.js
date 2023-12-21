@@ -263,9 +263,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		}
 
 		/* Fill palette */
-		if(extbins < 0)
-			this.palette = new Uint32Array(maxbins);
-		
+		this.palette = new Uint32Array(extbins > 0 ? nMaxColors : maxbins);
 		var k = 0;
 		for (var i = 0; ; ++k)
 		{
@@ -293,7 +291,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			pixel = transparentColor;
 			a = (pixel >>> 24) & 0xff;
 		}
-		
+
 		var nearest = nearestMap.get(pixel);
 		if (nearest != null)
 			return nearest;
@@ -387,12 +385,12 @@ Copyright (c) 2018-2023 Miller Cy Chan
 					closest[1] = closest[0];
 					closest[3] = closest[2];
 					closest[0] = k;
-					closest[2] = err;
+					closest[2] = err | 0;
 				}
 				else if (err < closest[3])
 				{
 					closest[1] = k;
-					closest[3] = err;
+					closest[3] = err | 0;
 				}
 			}
 
@@ -409,7 +407,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		else if (closest[0] > closest[1])
 			idx = pos % 2;
 			
-		if(closest[idx + 2] >= MAX_ERR || (hasAlpha && closest[idx] == 0))
+		if(closest[idx + 2] >= MAX_ERR || (hasAlpha && closest[idx + 2] == 0))
 			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];
 	}
@@ -560,10 +558,10 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			nMaxColors = this.opts.colors, dither = this.opts.dithering;
 		if(this.opts.alphaThreshold)
 			alphaThreshold = this.opts.alphaThreshold;
-		
+
 		closestMap.clear();
 		nearestMap.clear();
-		
+
 		hasAlpha = false;
 		var semiTransCount = 0;
 		for (var i = 0; i < pixels.length; ++i) {
@@ -613,16 +611,10 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		if (hasSemiTransparency)
 			this.opts.weight *= -1;
 
-		if (this.m_transparentPixelIndex >= 0)
+		if (this.m_transparentPixelIndex >= 0 && this.palette.length > 2)
 		{
 			var k = this.getDitherFn()(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
-			if (this.palette.length > 2)
-				this.palette[k] = this.m_transparentColor;
-			else if (this.palette[k] != this.m_transparentColor) {
-				this.palette[0] = this.palette[k];
-				this.palette[k] = this.m_transparentColor;
-				nearestMap.clear();
-			}
+			this.palette[k] = this.m_transparentColor;
 		}
 		
 		if(this.opts.paletteOnly) {
