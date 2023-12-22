@@ -436,11 +436,11 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			bins[j].fw = j + 1;
 			bins[j + 1].bk = j;
 			
-			bins[j].cnt = quanFn(bins[j].cnt);				
+			bins[j].cnt = quanFn(bins[j].cnt);
 		}	
-		bins[j].cnt = quanFn(bins[j].cnt);	
+		bins[j].cnt = quanFn(bins[j].cnt);
 		
-		var texicab = proportional > .0275;		
+		var texicab = proportional > .0275;
 		
 		if(this.hasSemiTransparency)
 			ratio = .5;
@@ -462,7 +462,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			ratio = Math.min(1.0, 1 - weight * .7);
 		
 		if (!this.hasSemiTransparency && quan_rt < 0)
-			ratio = Math.min(1.0, weight * Math.exp(3.13));		
+			ratio = Math.min(1.0, weight * Math.exp(3.13));
 		
 		var h, l, l2;
 		/* Initialize nearest neighbors and build heap of them */
@@ -933,15 +933,9 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		if (hasSemiTransparency)
 			this.opts.weight *= -1;
 
-		if (this.m_transparentPixelIndex >= 0) {
+		if (this.m_transparentPixelIndex >= 0 && this.palette.length > 2) {
 			var k = nearestColorIndex(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
-			if (this.palette.length > 2)
-				this.palette[k] = this.m_transparentColor;
-			else if (this.palette[k] != this.m_transparentColor) {
-				this.palette[0] = this.palette[k];
-				this.palette[k] = this.m_transparentColor;
-				nearestMap.clear();
-			}
+			this.palette[k] = this.m_transparentColor;
 		}
 		if(this.opts.paletteOnly) {
 			this.opts.ditherFn = this.getDitherFn();
