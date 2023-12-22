@@ -601,7 +601,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 				
 				curdist += sqr(lab2.B - lab1.B);
 			}
-			else if (palette.length > 32) {				
+			else if (palette.length > 32) {
 				curdist += Math.abs(lab2.L - lab1.L);
 				if (curdist > mindist)
 					continue;
@@ -868,12 +868,12 @@ Copyright (c) 2018-2023 Miller Cy Chan
 	function processImagePixels(palette, qPixels) {
 		var qPixel32s = new Uint32Array(qPixels.length);
 		for (var i = 0; i < qPixels.length; ++i)
-			qPixel32s[i] = palette[qPixels[i]];		
+			qPixel32s[i] = palette[qPixels[i]];
 
 		return qPixel32s;
 	}
 	
-	PnnLABQuant.prototype.quantizeImage = function quantizeImage() {	
+	PnnLABQuant.prototype.quantizeImage = function quantizeImage() {
 		var pixels = this.opts.pixels, width = this.opts.width, height = this.opts.height,
 			nMaxColors = this.opts.colors, dither = this.opts.dithering;
 		if(this.opts.alphaThreshold)
@@ -927,7 +927,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 
 		if(!this.opts.dithering) {
 			var delta = sqr(nMaxColors) / pixelMap.size;
-			this.opts.weight = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
+			this.opts.weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
 		}
 		
 		if (hasSemiTransparency)

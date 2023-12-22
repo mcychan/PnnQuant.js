@@ -608,6 +608,9 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			}
 		}
 
+		if(!this.opts.dithering)
+			this.opts.weightB = 1.0;
+
 		if (hasSemiTransparency)
 			this.opts.weight *= -1;
 
@@ -623,14 +626,14 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			this.opts.palette = this.palette;
 			return this.palette;
 		}
-		
+
 		this.qPixels = this.quantize_image(pixels, nMaxColors, width, height, dither);
 		return processImagePixels(this.palette, this.qPixels);
 	};
 	
 	PnnQuant.prototype.getIndexedPixels = function getIndexedPixels() {
 		return this.qPixels;
-	};	
+	};
 	
 	PnnQuant.prototype.getPalette = function getPalette() {
 		return this.palette.buffer;
