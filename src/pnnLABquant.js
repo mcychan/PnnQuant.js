@@ -249,7 +249,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 	function getLab(a, r, g, b)
 	{
 		var argb = (a << 24) | (b << 16) | (g << 8) | r;
-		var lab1 = pixelMap.get(argb);		
+		var lab1 = pixelMap.get(argb);
 		if (lab1 == null)
 		{
 			lab1 = RGB2LAB(a, r, g, b);
@@ -331,7 +331,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 	function getQuanFn(nMaxColors, quan_rt) {
 		if (quan_rt > 0) {
 			if (quan_rt > 1)
-				return function(cnt) { return Math.pow(cnt, 0.75) | 0; };
+				return function(cnt) { return Math.fround(Math.pow(cnt, 0.75)); };
 			if (nMaxColors < 64)
 				return function(cnt) {
 					return Math.sqrt(cnt) | 0;
@@ -382,7 +382,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		this.opts.saliencies = saliencies;
 
 		/* Cluster nonempty bins at one end of array */
-		var maxbins = 0;		
+		var maxbins = 0;
 		for (var i = 0; i < bins.length; ++i) {
 			if (bins[i] == null)
 				continue;
@@ -401,7 +401,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			quan_rt = -1;
 		
 		var weight = this.opts.weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
-		if (weight > .0015 && weight < .002)
+		if (weight > .0015 && weight < .0022)
 			quan_rt = 2;
 		if (weight < .04 && PG < 1 && PG >= coeffs[0][1]) {
 			var delta = Math.exp(1.75) * weight;
@@ -649,7 +649,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		b = (pixel >>> 16) & 0xff;
 
 		var closest = closestMap.get(pixel);
-		if (closest == null) {		
+		if (closest == null) {
 			closest = new Array(4);
 			closest[2] = closest[3] = 0xFFFF;
 			
