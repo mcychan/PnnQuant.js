@@ -410,7 +410,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			if (nMaxColors >= 64)
 				quan_rt = 0;
 		}
-		if (nMaxColors < 64) {
+		if (nMaxColors > 16 && nMaxColors < 64) {
 			var weightB = nMaxColors / 8000.0;
 			if (Math.abs(weightB - weight) < .001)
 				quan_rt = 2;
