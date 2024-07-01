@@ -13,7 +13,7 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var c = channel / 255.0;
 		return c < 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
-	
+
 	function Y_Diff(R, G, B, R2, G2, B2)
 	{
 		function color2Y(R, G, B) {
@@ -27,7 +27,18 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		var y2 = color2Y(R2, G2, B2);
 		return Math.abs(y2 - y) * 100;
 	}
-		
+
+	function U_Diff(R, G, B, R2, G2, B2)
+	{
+		function color2U(R, G, B) {
+			return -0.09991 * R - 0.33609 * G + 0.436 * B;
+		}
+
+		var u = color2U(R, G, B);
+		var u2 = color2U(R2, G2, B2);
+		return Math.abs(u2 - u);
+	}
+
 	function ErrorBox(pixel) {
 		var r = (pixel & 0xff),
 			g = (pixel >>> 8) & 0xff,
@@ -83,7 +94,8 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 				lookup[offset] = ditherFn(palette, c2, bidx) + 1;
 			qPixels[bidx] = lookup[offset] - 1;
 			
-			if(saliencies != null && Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > Math.max(1, nMaxColors - margin)) {
+			var acceptedDiff = Math.max(1, nMaxColors - margin);
+			if(saliencies != null && (Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
 				var strength = 1 / 3.0;
 				c2 = new BlueNoise({weight: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				qPixels[bidx] = ditherFn(palette, c2, bidx);
