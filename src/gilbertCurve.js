@@ -239,7 +239,8 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 		
 		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
-		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge), 2) : DITHER_MAX;
+		var deviation = weight > .002 ? -.75 : 1;
+		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : DITHER_MAX;
 		var density = this.opts.palette.length > 16 ? 3200 : 1500;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
 			ditherMax = Math.pow(5 + edge, 2);
