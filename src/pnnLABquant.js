@@ -456,7 +456,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 				ratio = Math.min(1.0, 1.0 - weight);
 			else if(proportional > .04)
 				ratio = Math.min(1.0, weight * Math.exp(1.56));
-			else if(proportional > .025 && weight < .002)
+			else if(proportional > .025 && (weight < .002 || weight > .0022))
 				ratio = Math.min(1.0, proportional + weight * Math.exp(3.66));
 			else
 				ratio = Math.min(1.0, proportional + weight * Math.exp(1.718));
