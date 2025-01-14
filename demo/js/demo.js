@@ -229,11 +229,20 @@ function readImageData(img, gl, opts) {
 	return false;
 }
 
+function isMobile() {
+    return window.innerWidth <= 800 && window.innerHeight <= 600;
+}
+
 function drawImageScaled(img){
 	if(!isExternal(img.src))
 		return null;
 
 	var maxWidth = 640, maxHeight = 512;
+	if(!isMobile()) {
+		maxWidth = window.innerWidth;
+		maxHeight = window.innerHeight;
+	}
+		
 	var width = img.naturalWidth | img.width;
 	var height = img.naturalHeight | img.height;
 	if(width <= maxWidth && height <= maxHeight)
