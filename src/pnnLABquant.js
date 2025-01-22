@@ -1,6 +1,6 @@
 /* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
 Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
-Copyright (c) 2018-2023 Miller Cy Chan
+Copyright (c) 2018-2025 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function(){
@@ -720,12 +720,6 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		}
 
 		var MAX_ERR = palette.length;
-		if(palette.length > 32) {
-			MAX_ERR <<= 1;
-			if(r > 0xF0 && g > 0xF0 && b > 0xF0)
-				MAX_ERR >>= 1;
-		}
-		
 		if(PG < coeffs[0][1] && TELL_BLUE_NOISE[pos & 4095] > -88)
 			return nearestColorIndex(palette, pixel, pos);
 		
@@ -928,13 +922,30 @@ Copyright (c) 2018-2023 Miller Cy Chan
 				this.palette[0] = (0xff << 24);
 				this.palette[1] = 0xffffffff;
 			}
+
+			if(this.opts.dithering && !hasAlpha) {
+				var saliencies = new Float32Array(pixels.length);
+				var saliencyBase = .1;
+
+				for (var i = 0; i < pixels.length; ++i) {
+					var r = (pixels[i] & 0xff),
+					g = (pixels[i] >>> 8) & 0xff,
+					b = (pixels[i] >>> 16) & 0xff,
+					a = (pixels[i] >>> 24) & 0xff;
+
+					var lab1 = getLab(a, r, g, b);
+
+					saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100;
+				}
+				this.opts.saliencies = saliencies;
+			}
 		}
 
 		if(!this.opts.dithering) {
 			var delta = sqr(nMaxColors) / pixelMap.size;
 			this.opts.weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
 		}
-		
+
 		if (hasSemiTransparency)
 			this.opts.weight *= -1;
 

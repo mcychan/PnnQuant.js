@@ -1,5 +1,5 @@
 /* Generalized Hilbert ("gilbert") space-filling curve for rectangular domains of arbitrary (non-power of two) sizes.
-Copyright (c) 2022 - 2023 Miller Cy Chan
+Copyright (c) 2022 - 2025 Miller Cy Chan
 * A general rectangle with a known orientation is split into three regions ("up", "right", "down"), for which the function calls itself recursively, until a trivial path can be produced. */
 
 (function(){
@@ -88,7 +88,15 @@ Copyright (c) 2022 - 2023 Miller Cy Chan
 			b0 = (pixel >>> 16) & 0xff;
 
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
-		if(nMaxColors <= 32 && a_pix > 0xF0) {
+		if(saliencies != null && nMaxColors < 3) {
+			var acceptedDiff = 1;
+			if(Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff) {
+				var strength = 1 / 3.0;
+				c2 = new BlueNoise({weight: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+			}
+			qPixels[bidx] = ditherFn(palette, c2, bidx);
+		}
+		else if(nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
 			if (lookup[offset] == 0)
 				lookup[offset] = ditherFn(palette, c2, bidx) + 1;
