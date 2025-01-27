@@ -90,7 +90,10 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
 		if(saliencies != null && nMaxColors < 3) {
 			var strength = 1 / 3.0;
-			c2 = new BlueNoise({weightB: 0.5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+			if (saliencies[bidx] > .2 && saliencies[bidx] < .25)
+				c2 = new BlueNoise({weightB: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+			else
+				c2 = new BlueNoise({weightB: .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 			qPixels[bidx] = ditherFn(palette, c2, bidx);
 		}
 		else if(nMaxColors <= 32 && a_pix > 0xF0) {
