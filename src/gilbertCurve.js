@@ -101,7 +101,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				g1 = (c2 >>> 8) & 0xff,
 				b1 = (c2 >>> 16) & 0xff;
 			if (nMaxColors > 8 && Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
-				var kappa = saliencies[bidx] < .5 ? beta * .5 * saliencies[bidx] : beta * .5 / saliencies[bidx];
+				var kappa = saliencies[bidx] < .5 ? beta * .5 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
 				r1 = (c2 & 0xff);
