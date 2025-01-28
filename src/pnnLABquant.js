@@ -376,7 +376,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			tb.Ac += lab1.A;
 			tb.Bc += lab1.B;
 			tb.cnt += 1.0;
-			if(a > alphaThreshold && nMaxColors < 128)
+			if(a > alphaThreshold)
 				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100;
 		}
 		this.opts.saliencies = saliencies;
