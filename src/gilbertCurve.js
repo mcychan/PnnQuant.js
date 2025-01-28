@@ -87,7 +87,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			g0 = (pixel >>> 8) & 0xff,
 			b0 = (pixel >>> 16) & 0xff;
 
-		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
+		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 		if(saliencies != null && (nMaxColors < 3 || margin > 6)) {
 			var strength = 1 / 3.0;
 			var beta = nMaxColors > 8 ? .7 : 1;
@@ -96,7 +96,14 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 			else if (nMaxColors <= 8 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff))
 				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
-			qPixels[bidx] = ditherFn(palette, c2, bidx);
+
+			if (nMaxColors > 8 && Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))
+				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse((a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix, palette[qPixels[bidx]], strength, x, y);
+
+			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
+			if (lookup[offset] == 0)
+				lookup[offset] = ditherFn(palette, c2, bidx) + 1;
+			qPixels[bidx] = lookup[offset] - 1;
 		}
 		else if(nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
