@@ -97,11 +97,15 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			else if (nMaxColors <= 8 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff))
 				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 
+			r_pix = (c2 & 0xff);
+			g_pix = (c2 >>> 8) & 0xff;
+			b_pix = (c2 >>> 16) & 0xff;
+			a_pix = (c2 >>> 24) & 0xff;
 			if (nMaxColors > 8 && Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff)) {
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
 			}
-
+			
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
 			if (lookup[offset] == 0)
 				lookup[offset] = ditherFn(palette, c2, bidx) + 1;
