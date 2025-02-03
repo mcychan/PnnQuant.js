@@ -258,7 +258,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		return lab1;
 	}
 	
-	function find_nn(bins, idx, nMaxColors, texicab) {
+	function find_nn(bins, idx, texicab) {
 		var nn = 0;
 		var err = 1e100;
 
@@ -269,7 +269,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		for (var i = bin1.fw; i != 0; i = bins[i].fw) {
 			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
 			if (nerr2 >= err)
-                continue;
+				continue;
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
@@ -470,7 +470,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		/* Initialize nearest neighbors and build heap of them */
 		var heap = new Uint32Array(bins.length + 1);
 		for (var i = 0; i < maxbins; ++i) {
-			find_nn(bins, i, nMaxColors, texicab);
+			find_nn(bins, i, texicab);
 			/* Push slot on heap */
 			var err = bins[i].err;
 			for (l = ++heap[0]; l > 1; l = l2)
@@ -505,7 +505,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 					b1 = heap[1] = heap[heap[0]--];
 				else /* Too old error value */
 				{
-					find_nn(bins, b1, nMaxColors, texicab && proportional < 1);
+					find_nn(bins, b1, texicab && proportional < 1);
 					tb.tm = i;
 				}
 				/* Push slot down */
@@ -525,10 +525,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			var n1 = tb.cnt;
 			var n2 = nb.cnt;
 			var d = 1.0 / (n1 + n2);
-			tb.ac = d * (n1 * tb.ac + n2 * nb.ac);
-			tb.Lc = d * (n1 * tb.Lc + n2 * nb.Lc);
-			tb.Ac = d * (n1 * tb.Ac + n2 * nb.Ac);
-			tb.Bc = d * (n1 * tb.Bc + n2 * nb.Bc);
+			tb.ac = Math.fround(d * (n1 * tb.ac + n2 * nb.ac));
+			tb.Lc = Math.fround(d * (n1 * tb.Lc + n2 * nb.Lc));
+			tb.Ac = Math.fround(d * (n1 * tb.Ac + n2 * nb.Ac));
+			tb.Bc = Math.fround(d * (n1 * tb.Bc + n2 * nb.Bc));
 			tb.cnt += n2;
 			tb.mtm = ++i;
 
@@ -557,16 +557,16 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	};
 	
 	function nearestColorIndex(palette, pixel, pos) {
+		var nearest = nearestMap.get(pixel);
+		if (nearest != null)
+			return nearest;
+
 		var k = 0;
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold) {
 			pixel = transparentColor;
 			a = (pixel >>> 24) & 0xff;
 		}
-		
-		var nearest = nearestMap.get(pixel);
-		if (nearest != null)
-			return nearest;
 
 		if(palette.length > 2 && hasAlpha && a > alphaThreshold)
 			k = 1;
@@ -645,18 +645,18 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold)
 			return nearestColorIndex(palette, pixel, pos);
-		
-		var r = (pixel & 0xff),
-		g = (pixel >>> 8) & 0xff,
-		b = (pixel >>> 16) & 0xff;
 
 		var closest = closestMap.get(pixel);
 		if (closest == null) {
 			closest = new Array(4);
 			closest[2] = closest[3] = 0xffffffff;
-			
+
+			var r = (pixel & 0xff),
+			g = (pixel >>> 8) & 0xff,
+			b = (pixel >>> 16) & 0xff;
+
 			var start = 0;
-			if(TELL_BLUE_NOISE[pos & 4095] > -88)
+			if(a > 0xE0 && TELL_BLUE_NOISE[pos & 4095] > -88)
 				start = 1;
 
 			for (var k = 0; k < palette.length; ++k) {
@@ -989,8 +989,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var quant = this;
 		return new Promise(function(resolve, reject) {
 			var result = quant.quantizeImage();
-			if(quant.opts.paletteOnly)
+			if(quant.opts.paletteOnly) {
+				console.log(quant.opts.weight);
 				resolve({ pal8: result, indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
+			}
 			else
 				resolve({ img8: result, pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
 		});
