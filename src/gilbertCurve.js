@@ -88,7 +88,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			b0 = (pixel >>> 16) & 0xff;
 
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-		if(saliencies != null) {
+		if(saliencies != null && !sortedByYDiff) {
 			var strength = 1 / 3.0;
 			var beta = nMaxColors > 8 ? .7 : 1;
 			var acceptedDiff = Math.max(2, nMaxColors - margin);
