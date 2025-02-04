@@ -346,7 +346,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	PnnLABQuant.prototype.pnnquan = function pnnquan(pixels, nMaxColors) {
 		var quan_rt = 1;
 		var bins = new Array(65536);
-		var saliencies = new Float32Array(pixels.length);
+		var saliencies = nMaxColors >= 128 ? null : new Float32Array(pixels.length);
 		var saliencyBase = .1;
 
 		/* Build histogram */
@@ -376,7 +376,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			tb.Ac += lab1.A;
 			tb.Bc += lab1.B;
 			tb.cnt += 1.0;
-			if(a > alphaThreshold)
+			if (saliencies != null && a > alphaThreshold)
 				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100;
 		}
 		this.opts.saliencies = saliencies;
