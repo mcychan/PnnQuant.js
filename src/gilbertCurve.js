@@ -48,7 +48,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		this.p = [r, g, b, a];
 	}
 	
-	var ditherFn, getColorIndex, width, height, pixels, palette, saliencies, nMaxColors;
+	var ditherFn, getColorIndex, width, height, pixels, palette, saliencies, nMaxColors, beta;
 	
 	var qPixels;
 	var errorq = [];
@@ -90,7 +90,6 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 		if(saliencies != null && !sortedByYDiff) {
 			var strength = 1 / 3.0;
-			var beta = nMaxColors > 8 ? nMaxColors > 24 ? .25 : .7 : 1;
 			var acceptedDiff = Math.max(2, nMaxColors - margin);
 			if (nMaxColors <= 8 && saliencies[bidx] > .2 && saliencies[bidx] < .25)
 				c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
@@ -292,6 +291,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		palette = this.opts.palette;
 		saliencies = this.opts.saliencies;
 		nMaxColors = palette.length;
+		beta = nMaxColors > 8 ? nMaxColors > 24 ? .25 : .7 : 1;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
 		if(!sortedByYDiff)
