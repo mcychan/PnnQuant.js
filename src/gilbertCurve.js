@@ -110,7 +110,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				}
 			}
 			else if (nMaxColors > 8 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > acceptedDiff)) {
-				if(beta < .3)
+				if(beta < .3 && (nMaxColors <= 32 || saliencies[bidx] < beta))
 					c2 = new BlueNoise({weightB: beta * .4 * saliencies[bidx]}).diffuse(c2, palette[qPixels[bidx]], strength, x, y);
 				else
 					c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
