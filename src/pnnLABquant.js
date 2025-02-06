@@ -918,24 +918,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			else {
 				this.palette[0] = (0xff << 24);
 				this.palette[1] = 0xffffffff;
-			}
-
-			if(this.opts.dithering && !hasAlpha) {
-				var saliencies = new Float32Array(pixels.length);
-				var saliencyBase = .1;
-
-				for (var i = 0; i < pixels.length; ++i) {
-					var r = (pixels[i] & 0xff),
-					g = (pixels[i] >>> 8) & 0xff,
-					b = (pixels[i] >>> 16) & 0xff,
-					a = (pixels[i] >>> 24) & 0xff;
-
-					var lab1 = getLab(a, r, g, b);
-
-					saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100;
-				}
-				this.opts.saliencies = saliencies;
-			}
+			}			
 		}
 
 		if(!this.opts.dithering) {
@@ -945,6 +928,23 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 		if (hasSemiTransparency)
 			this.opts.weight *= -1;
+
+		if(this.opts.dithering && this.opts.saliencies == null && this.opts.weight < .052) {
+			var saliencies = new Float32Array(pixels.length);
+			var saliencyBase = .1;
+
+			for (var i = 0; i < pixels.length; ++i) {
+				var r = (pixels[i] & 0xff),
+				g = (pixels[i] >>> 8) & 0xff,
+				b = (pixels[i] >>> 16) & 0xff,
+				a = (pixels[i] >>> 24) & 0xff;
+
+				var lab1 = getLab(a, r, g, b);
+
+				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100;
+			}
+			this.opts.saliencies = saliencies;
+		}
 
 		if (this.m_transparentPixelIndex >= 0 && this.palette.length > 2) {
 			var k = nearestColorIndex(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
