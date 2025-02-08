@@ -292,9 +292,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		height = this.opts.height;
 		pixels = this.opts.pixels;
 		palette = this.opts.palette;
-		saliencies = this.opts.saliencies;
+		saliencies = hasAlpha ? null : this.opts.saliencies;
 		nMaxColors = palette.length;
-		beta = nMaxColors > 8 ? nMaxColors > 24 ? .25 : .7 : 1;
+		beta = nMaxColors > 8 ? Math.max(.25, 1 - .021875 * nMaxColors) : 1;
 		if (nMaxColors > 64 || this.opts.weight > .02)
 			beta *= .4;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
