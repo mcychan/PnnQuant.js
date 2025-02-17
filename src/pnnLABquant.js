@@ -911,6 +911,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if (nMaxColors > 2)
 			this.pnnquan(pixels, nMaxColors);
 		else {
+			this.opts.weight = 1;
 			if (this.m_transparentPixelIndex >= 0) {
 				this.palette[0] = this.m_transparentColor;
 				this.palette[1] = (0xff << 24);
