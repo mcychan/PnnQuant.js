@@ -92,9 +92,12 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			var strength = 1 / 3.0;
 			var acceptedDiff = Math.max(2, nMaxColors - margin);
 			if (nMaxColors <= 8 && saliencies[bidx] > .2 && saliencies[bidx] < .25)
-				c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
-			else if (nMaxColors <= 8 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff))
+				c2 = new BlueNoise({weightB: beta * 2 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+			else if (nMaxColors <= 8 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff)) {
 				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+				if (U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff))
+					c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+			}
 
 			var r1 = (c2 & 0xff),
 				g1 = (c2 >>> 8) & 0xff,
