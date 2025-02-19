@@ -99,7 +99,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 					g1 = (c2 >>> 8) & 0xff,
 					b1 = (c2 >>> 16) & 0xff;
 				if (U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff))
-					c2 = new BlueNoise({weightB: beta * 1.25 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+					c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
