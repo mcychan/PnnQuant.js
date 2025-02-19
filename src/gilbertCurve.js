@@ -95,8 +95,22 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				c2 = new BlueNoise({weightB: beta * 2 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 			else if (nMaxColors <= 8 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff)) {
 				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+				var r1 = (c2 & 0xff),
+					g1 = (c2 >>> 8) & 0xff,
+					b1 = (c2 >>> 16) & 0xff;
 				if (U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff))
 					c2 = new BlueNoise({weightB: beta * 1.25 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+
+				r1 = (c2 & 0xff);
+				g1 = (c2 >>> 8) & 0xff;
+				b1 = (c2 >>> 16) & 0xff;
+				if (nMaxColors > 8 && U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff)) {
+					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
+					c2 = new BlueNoise({weightB: beta * saliencies[bidx]}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
+					r1 = (c2 & 0xff);
+					g1 = (c2 >>> 8) & 0xff;
+					b1 = (c2 >>> 16) & 0xff;
+				}
 			}
 
 			var r1 = (c2 & 0xff),
