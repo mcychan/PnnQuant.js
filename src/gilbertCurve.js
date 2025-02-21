@@ -311,8 +311,12 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		palette = this.opts.palette;
 		saliencies = hasAlpha ? null : this.opts.saliencies;
 		nMaxColors = palette.length;
-		beta = nMaxColors > 8 ? Math.max(.25, 1 - (.022 + this.opts.weight) * nMaxColors) : 1;
-		if (nMaxColors > 64 || (beta < 1 && this.opts.weight > .02))
+		beta = nMaxColors > 8 ? (1.05 - .0125 * nMaxColors) : 1;
+		if (nMaxColors > 8) {
+			var boundary = .01 - .000063 * nMaxColors;
+			beta = Math.fround(this.opts.weight > boundary ? Math.max(.25, beta - nMaxColors * this.opts.weight) : Math.min(1.5, beta + nMaxColors * this.opts.weight));
+		}
+		if (nMaxColors > 64 || (nMaxColors > 8 && this.opts.weight > .02))
 			beta *= .4;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
