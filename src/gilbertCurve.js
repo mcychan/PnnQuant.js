@@ -313,7 +313,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		nMaxColors = palette.length;
 		beta = nMaxColors > 8 ? (1.05 - .0125 * nMaxColors) : 1;
 		if (nMaxColors > 8) {
-			var boundary = .01 - .000063 * nMaxColors;
+			var boundary = .005 - .0000625 * nMaxColors;
 			beta = Math.fround(this.opts.weight > boundary ? Math.max(.25, beta - nMaxColors * this.opts.weight) : Math.min(1.5, beta + nMaxColors * this.opts.weight));
 		}
 		if (nMaxColors > 64 || (nMaxColors > 8 && this.opts.weight > .02))
