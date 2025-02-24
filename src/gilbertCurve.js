@@ -311,7 +311,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		palette = this.opts.palette;
 		saliencies = hasAlpha ? null : this.opts.saliencies;
 		nMaxColors = palette.length;
-		beta = nMaxColors > 8 ? (1.05 - .0125 * nMaxColors) : 1;
+		beta = nMaxColors > 8 ? (.6 - .00625 * nMaxColors) : 1;
 		if (nMaxColors > 8) {
 			var boundary = .005 - .0000625 * nMaxColors;
 			beta = Math.fround(this.opts.weight > boundary ? Math.max(.25, beta - nMaxColors * this.opts.weight) : Math.min(1.5, beta + nMaxColors * this.opts.weight));
