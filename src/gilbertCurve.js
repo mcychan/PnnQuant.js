@@ -91,14 +91,14 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		if(saliencies != null && !sortedByYDiff) {
 			var strength = 1 / 3.0;
 			var acceptedDiff = Math.max(2, nMaxColors - margin);
-			if (nMaxColors <= 8 && saliencies[bidx] > .2 && saliencies[bidx] < .25)
+			if (nMaxColors <= 4 && saliencies[bidx] > .2 && saliencies[bidx] < .25)
 				c2 = new BlueNoise({weightB: beta * 2 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
-			else if (nMaxColors <= 8 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff)) {
+			else if (nMaxColors <= 4 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff)) {
 				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				var r1 = (c2 & 0xff),
 					g1 = (c2 >>> 8) & 0xff,
 					b1 = (c2 >>> 16) & 0xff;				
-				if (nMaxColors <= 8 && U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff)) {
+				if (nMaxColors <= 4 && U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff)) {
 					var c1 = saliencies[bidx] > .65 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 					c2 = new BlueNoise({weightB: beta * saliencies[bidx]}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
 					r1 = (c2 & 0xff);
@@ -311,12 +311,12 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		palette = this.opts.palette;
 		saliencies = hasAlpha ? null : this.opts.saliencies;
 		nMaxColors = palette.length;
-		beta = nMaxColors > 8 ? (.6 - .00625 * nMaxColors) : 1;
-		if (nMaxColors > 8) {
+		beta = nMaxColors > 4 ? (.6 - .00625 * nMaxColors) : 1;
+		if (nMaxColors > 4) {
 			var boundary = .005 - .0000625 * nMaxColors;
 			beta = Math.fround(this.opts.weight > boundary ? Math.max(.25, beta - nMaxColors * this.opts.weight) : Math.min(1.5, beta + nMaxColors * this.opts.weight));
 		}
-		if (nMaxColors > 64 || (nMaxColors > 8 && this.opts.weight > .02))
+		if (nMaxColors > 64 || (nMaxColors > 4 && this.opts.weight > .02))
 			beta *= .4;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
