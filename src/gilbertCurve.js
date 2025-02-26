@@ -318,6 +318,8 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			if (nMaxColors < 16)
 				beta *= .75;
 		}
+		else
+			beta *= .95;
 		if (nMaxColors > 64 || (nMaxColors > 4 && this.opts.weight > .02))
 			beta *= .4;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
