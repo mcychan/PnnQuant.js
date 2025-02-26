@@ -592,7 +592,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				if(hasSemiTransparency)
 					curdist += sqr(a2 - a);
 			}
-			else if (hasSemiTransparency) {
+			else if (hasSemiTransparency || palette.length < 16) {
 				curdist += sqr(lab2.L - lab1.L);
 				if (curdist > mindist)
 					continue;
