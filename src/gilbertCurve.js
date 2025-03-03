@@ -295,7 +295,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		var deviation = !hasAlpha && this.opts.weight > .002 ? -.25 : 1;
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : DITHER_MAX;
 		var density = this.opts.palette.length > 16 ? 3200 : 1500;
-		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length <= 64)))
+		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length < 64)))
 			ditherMax = Math.pow(5 + edge, 2);
 		else if(this.opts.weight < .03 && this.opts.palette.length / this.opts.weight < density && this.opts.palette.length >= 16 && this.opts.palette.length < 128)
 			ditherMax = Math.pow(5 + edge, 2);
@@ -315,7 +315,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		if (nMaxColors > 4) {
 			var boundary = .005 - .0000625 * nMaxColors;
 			beta = Math.fround(this.opts.weight > boundary ? Math.max(.25, beta - nMaxColors * this.opts.weight) : Math.min(1.5, beta + nMaxColors * this.opts.weight));
-			if (nMaxColors < 16)
+			if(nMaxColors > 32)
+				beta += .1;
+			else if (nMaxColors < 16)
 				beta *= .75;
 		}
 		else
