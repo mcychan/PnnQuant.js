@@ -109,7 +109,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				}
 
 				if (Math.abs(uDiff) > (margin * acceptedDiff))
-					c2 = new BlueNoise({weightB: uDiff < 0 ? beta / saliencies[bidx] : beta * saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+					c2 = new BlueNoise({weightB: uDiff < 0 ? beta / saliencies[bidx] : beta * saliencies[bidx]}).diffuse(c2, palette[qPixels[bidx]], strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
 				b1 = (c2 >>> 16) & 0xff;
