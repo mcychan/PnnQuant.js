@@ -25,7 +25,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 		var y = color2Y(R, G, B);
 		var y2 = color2Y(R2, G2, B2);
-		return (y2 - y) * 100;
+		return Math.abs(y2 - y) * 100;
 	}
 
 	function U_Diff(R, G, B, R2, G2, B2)
@@ -36,7 +36,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 		var u = color2U(R, G, B);
 		var u2 = color2U(R2, G2, B2);
-		return u2 - u;
+		return Math.abs(u2 - u);
 	}
 
 	function ErrorBox(pixel) {
@@ -97,19 +97,17 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				var r1 = (c2 & 0xff),
 					g1 = (c2 >>> 8) & 0xff,
-					b1 = (c2 >>> 16) & 0xff;
-				var uDiff = U_Diff(r0, g0, b0, r1, g1, b1);
-				if (nMaxColors <= 4 && Math.abs(uDiff) > (8 * acceptedDiff)) {
+					b1 = (c2 >>> 16) & 0xff;				
+				if (nMaxColors <= 4 && U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff)) {
 					var c1 = saliencies[bidx] > .65 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 					c2 = new BlueNoise({weightB: beta * saliencies[bidx]}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
 					r1 = (c2 & 0xff);
 					g1 = (c2 >>> 8) & 0xff;
 					b1 = (c2 >>> 16) & 0xff;
-					uDiff = U_Diff(r0, g0, b0, r1, g1, b1);
 				}
 
-				if (Math.abs(uDiff) > (margin * acceptedDiff))
-					c2 = new BlueNoise({weightB: uDiff < 0 ? beta / saliencies[bidx] : beta * saliencies[bidx]}).diffuse(c2, palette[qPixels[bidx]], strength, x, y);
+				if (U_Diff(r0, g0, b0, r1, g1, b1) > (margin * acceptedDiff))
+					c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
 				b1 = (c2 >>> 16) & 0xff;
@@ -118,10 +116,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			var r1 = (c2 & 0xff),
 				g1 = (c2 >>> 8) & 0xff,
 				b1 = (c2 >>> 16) & 0xff;
-			var yDiff = Y_Diff(r0, g0, b0, r1, g1, b1), uDiff = U_Diff(r0, g0, b0, r1, g1, b1);
 			if (nMaxColors < 3 || margin > 6) {
-				if (nMaxColors > 8 && (Math.abs(yDiff) > (beta * acceptedDiff) || Math.abs(uDiff) > (2 * acceptedDiff))) {
-					var kappa = (yDiff > 0 || uDiff > 0) ? beta * .4 * saliencies[bidx] : beta * .2 * saliencies[bidx];
+				if (nMaxColors > 8 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > (2 * acceptedDiff))) {
+					var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 					c2 = new BlueNoise({weightB: kappa}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
 					r1 = (c2 & 0xff);
@@ -129,11 +126,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 					b1 = (c2 >>> 16) & 0xff;
 				}
 			}
-			else if (nMaxColors > 8 && (Math.abs(yDiff) > (beta * acceptedDiff) || Math.abs(uDiff) > acceptedDiff)) {
-				if(beta < .3 && (nMaxColors <= 32 || saliencies[bidx] < beta)) {
-					var kappa = (yDiff > 0 || uDiff > 0) ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
-					c2 = new BlueNoise({weightB: kappa}).diffuse(c2, palette[qPixels[bidx]], strength, x, y);
-				}
+			else if (nMaxColors > 8 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > acceptedDiff)) {
+				if(beta < .3 && (nMaxColors <= 32 || saliencies[bidx] < beta))
+					c2 = new BlueNoise({weightB: beta * .4 * saliencies[bidx]}).diffuse(c2, palette[qPixels[bidx]], strength, x, y);
 				else
 					c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 				r1 = (c2 & 0xff);
@@ -153,7 +148,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			qPixels[bidx] = lookup[offset] - 1;
 			
 			var acceptedDiff = Math.max(2, nMaxColors - margin);
-			if(saliencies != null && (Math.abs(Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix)) > acceptedDiff || Math.abs(U_Diff(r0, g0, b0, r_pix, g_pix, b_pix)) > (2 * acceptedDiff))) {
+			if(saliencies != null && (Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
 				var strength = 1 / 3.0;
 				c2 = new BlueNoise({weightB: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				qPixels[bidx] = ditherFn(palette, c2, bidx);
@@ -180,7 +175,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 		var denoise = palette.length > 2;
 		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
-		error.yDiff = sortedByYDiff ? Math.abs(Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix)) : 1;
+		error.yDiff = sortedByYDiff ? Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) : 1;
 		var illusion = !diffuse && TELL_BLUE_NOISE[((error.yDiff * 4096) | 0) & 4095] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
@@ -320,7 +315,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		if (nMaxColors > 4) {
 			var boundary = .005 - .0000625 * nMaxColors;
 			beta = Math.fround(this.opts.weight > boundary ? Math.max(.25, beta - nMaxColors * this.opts.weight) : Math.min(1.5, beta + nMaxColors * this.opts.weight));
-			if (nMaxColors < 16)
+			if(nMaxColors > 32)
+				beta += .1;
+			else if (nMaxColors < 16)
 				beta *= .75;
 		}
 		else
