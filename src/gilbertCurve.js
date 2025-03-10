@@ -350,7 +350,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	GilbertCurve.prototype.getResult = function getResult() {
 		var hc = this;
 		return new Promise(function(resolve, reject) {
-			if(hc.opts.dithering)
+			if(hc.opts.dithering || hc.opts.colors <= 32)
 				resolve({ img8: hc.dither(), indexedPixels: hc.getIndexedPixels() });
 			else
 				resolve({ indexedPixels: hc.dither() });
