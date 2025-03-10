@@ -161,7 +161,7 @@ async function getResult(opts) {
 	opts.paletteOnly = true;
 
 	const result = await quant.getResult();
-	if(opts.dithering)
+	if (opts.dithering || opts.colors <= 32)
 		return Promise.all([result, new GilbertCurve(opts).getResult()]);
 
 	const gc = await new GilbertCurve(opts).getResult();
