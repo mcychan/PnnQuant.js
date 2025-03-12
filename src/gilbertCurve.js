@@ -297,7 +297,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		margin = this.opts.weight < .0025 ? 12 : this.opts.weight < .004 ? 8 : 6;
 		sortedByYDiff = this.opts.palette.length >= 128 && (hasAlpha ? this.opts.weight < .18 : this.opts.weight >= .052);
 		
-		DITHER_MAX = this.opts.weight < .01 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
+		DITHER_MAX = this.opts.weight < .015 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
 		var deviation = !hasAlpha && this.opts.weight > .002 ? -.25 : 1;
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : DITHER_MAX;
