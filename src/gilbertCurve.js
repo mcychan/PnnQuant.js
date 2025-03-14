@@ -119,7 +119,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			if (nMaxColors < 3 || margin > 6) {
 				if (nMaxColors > 8 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > (2 * acceptedDiff))) {
 					var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
-					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
+					var c1 = saliencies[bidx] < .6 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 					c2 = new BlueNoise({weightB: kappa}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
 					r1 = (c2 & 0xff);
 					g1 = (c2 >>> 8) & 0xff;
@@ -322,7 +322,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		beta = nMaxColors > 4 ? (.6 - .00625 * nMaxColors) : 1;
 		if (nMaxColors > 4) {
 			var boundary = .005 - .0000625 * nMaxColors;
-			beta = Math.fround(this.opts.weight > boundary ? Math.max(.25, beta - nMaxColors * this.opts.weight) : Math.min(1.5, beta + nMaxColors * this.opts.weight));
+			beta = Math.fround(this.opts.weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * this.opts.weight));
 			if(nMaxColors > 32)
 				beta += .1;
 			else if (nMaxColors < 16)
