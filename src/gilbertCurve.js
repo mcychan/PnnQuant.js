@@ -117,7 +117,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				g1 = (c2 >>> 8) & 0xff,
 				b1 = (c2 >>> 16) & 0xff;
 			if (nMaxColors < 3 || margin > 6) {
-				if (nMaxColors > 8 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > (2 * acceptedDiff))) {
+				if (nMaxColors > 4 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > (2 * acceptedDiff))) {
 					var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 					var c1 = saliencies[bidx] < .6 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 					c2 = new BlueNoise({weightB: kappa}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
@@ -126,7 +126,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 					b1 = (c2 >>> 16) & 0xff;
 				}
 			}
-			else if (nMaxColors > 8 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > acceptedDiff)) {
+			else if (nMaxColors > 4 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > acceptedDiff)) {
 				if(beta < .3 && (nMaxColors <= 32 || saliencies[bidx] < beta))
 					c2 = new BlueNoise({weightB: beta * .4 * saliencies[bidx]}).diffuse(c2, palette[qPixels[bidx]], strength, x, y);
 				else
@@ -325,8 +325,6 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			beta = Math.fround(this.opts.weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * this.opts.weight));
 			if(nMaxColors > 32)
 				beta += .1;
-			else if (nMaxColors < 16)
-				beta *= .75;
 		}
 		else
 			beta *= .95;
