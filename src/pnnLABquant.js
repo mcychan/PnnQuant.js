@@ -930,7 +930,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if (hasSemiTransparency)
 			this.opts.weight *= -1;
 
-		if(this.opts.dithering && !hasSemiTransparency && this.opts.saliencies == null && (nMaxColors <= 128 || this.opts.weight > .99)) {
+		if(this.opts.dithering && !hasSemiTransparency && this.opts.saliencies == null && (this.opts.weight < .052 || this.opts.weight > .99)) {
 			var saliencies = new Float32Array(pixels.length);
 			var saliencyBase = .1;
 
