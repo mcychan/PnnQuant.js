@@ -182,7 +182,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 		var denoise = palette.length > 2;
 		var diffuse = TELL_BLUE_NOISE[bidx & 4095] > thresold;
-		error.yDiff = sortedByYDiff ? Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) : 1;
+		error.yDiff = sortedByYDiff ? Y_Diff(r0, g0, b0, r2, g2, b2) : 1;
 		var illusion = !diffuse && TELL_BLUE_NOISE[((error.yDiff * 4096) | 0) & 4095] > thresold;
 
 		var errLength = denoise ? error.p.length - 1 : 0;
@@ -200,7 +200,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		errorq.push(error);
 		if(sortedByYDiff)
 			errorq.sort(function(o1, o2) {
-				return Math.sign(o1.yDiff - o2.yDiff); // descending order
+				return Math.sign(o2.yDiff - o1.yDiff); // descending order
 			});
 	}
 
@@ -300,7 +300,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		DITHER_MAX = this.opts.weight < .015 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
 		var deviation = !hasAlpha && this.opts.weight > .002 ? -.25 : 1;
-		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : DITHER_MAX;
+		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : (DITHER_MAX * Math.E);
 		var density = this.opts.palette.length > 16 ? 3200 : 1500;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length < 64)))
 			ditherMax = Math.pow(5 + edge, 2);
