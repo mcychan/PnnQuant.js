@@ -88,7 +88,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var zr = tmp > XYZ_EPSILON ? tmp : (116.0 * fz - 16) / XYZ_KAPPA;
 		var x = xr * XYZ_WHITE_REFERENCE_X;
 		var y = yr * XYZ_WHITE_REFERENCE_Y;
-		var z = zr * XYZ_WHITE_REFERENCE_Z;       
+		var z = zr * XYZ_WHITE_REFERENCE_Z;
 		
 		var r = (x * 3.2406 + y * -1.5372 + z * -0.4986) / 100.0;
 		var g = (x * -0.9689 + y * 1.8758 + z * 0.0415) / 100.0;
@@ -97,10 +97,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		g = g > 0.0031308 ? 1.055 * Math.pow(g, 1 / 2.4) - 0.055 : 12.92 * g;
 		b = b > 0.0031308 ? 1.055 * Math.pow(b, 1 / 2.4) - 0.055 : 12.92 * b;
 
-		var a = Math.clamp(Math.round(lab.alpha), 0, 0xff);
-		r = Math.clamp(Math.round(r * 0xff), 0, 0xff),
-		g = Math.clamp(Math.round(g * 0xff), 0, 0xff),
-		b = Math.clamp(Math.round(b * 0xff), 0, 0xff);
+		var a = Math.clamp(Math.round(lab.alpha), 0, 0xff) | 0;
+		r = Math.clamp(Math.round(r * 0xff), 0, 0xff) | 0,
+		g = Math.clamp(Math.round(g * 0xff), 0, 0xff) | 0,
+		b = Math.clamp(Math.round(b * 0xff), 0, 0xff) | 0;
 		return (a << 24) | (b << 16) | (g << 8) | r;
 	}
 	
@@ -112,7 +112,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	function L_prime_div_k_L_S_L(lab1, lab2)
 	{
 		var k_L = 1.0;
-		var deltaLPrime = lab2.L - lab1.L;	
+		var deltaLPrime = lab2.L - lab1.L;
 		var barLPrime = (lab1.L + lab2.L) / 2.0;
 		var S_L = 1 + ((0.015 * sqr(barLPrime - 50.0)) / Math.sqrt(20 + sqr(barLPrime - 50.0)));
 		return Math.fround(deltaLPrime / (k_L * S_L));
@@ -204,7 +204,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var S_H = 1 + (0.015 * barCPrime.value * T);
 		return Math.fround(deltaHPrime / (k_H * S_H));
 	}
-	
+
 	function R_T(barCPrime, barhPrime, C_prime_div_k_L_S_L, H_prime_div_k_L_S_L)
 	{
 		var pow25To7 = 6103515625.0; /* Math.pow(25, 7) */
@@ -213,7 +213,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var R_T = (-Math.sin(2.0 * deltaTheta)) * R_C;
 		return Math.fround(R_T * C_prime_div_k_L_S_L * H_prime_div_k_L_S_L);
 	}
-	
+
 	/* From the paper "The CIEDE2000 Color-Difference Formula: Implementation Notes, */
 	/* Supplementary Test Data, and Mathematical Observations", by */
 	/* Gaurav Sharma, Wencheng Wu and Edul N. Dalal, */
@@ -233,7 +233,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			sqr(deltaH_prime_div_k_L_S_L) +
 			deltaR_T;
 	}
-	
+
 	function getARGBIndex(a, r, g, b, hasSemiTransparency, hasTransparency) {
 		if (hasSemiTransparency)
 			return (a & 0xF0) << 8 | (r & 0xF0) << 4 | (g & 0xF0) | (b >> 4);
@@ -241,11 +241,11 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return (a & 0x80) << 8 | (r & 0xF8) << 7 | (g & 0xF8) << 2 | (b >> 3);
 		return (r & 0xF8) << 8 | (g & 0xFC) << 3 | (b >> 3);
 	}
-	
+
 	function sqr(value) {
 		return value * value;
 	}
-	
+
 	function getLab(a, r, g, b)
 	{
 		var argb = (a << 24) | (b << 16) | (g << 8) | r;
@@ -257,7 +257,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 		return lab1;
 	}
-	
+
 	function find_nn(bins, idx, texicab) {
 		var nn = 0;
 		var err = 1e100;
@@ -320,7 +320,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			nerr += ratio * nerr2 * R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
 			if (nerr >= err)
 				continue;
-				
+
 			err = nerr;
 			nn = i;
 		}
@@ -424,7 +424,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				this.palette[k++] = pixel;
 
 				if(k > 1 && ((pixel >>> 24) & 0xff) == 0) {
-					this.palette[k] = this.palette[0]; this.palette[0] = pixel;
+					this.palette[k - 1] = this.palette[0]; this.palette[0] = pixel;
 				}
 			}
 
@@ -489,7 +489,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			var delta = weight > margin && weight < .003 ? 1.872 : 1.632;
 			ratio = Math.min(1.0, proportional + dir * weight * Math.exp(delta));
 		}
-		
+
 		/* Merge bins which increase error the least */
 		var extbins = maxbins - nMaxColors;
 		for (var i = 0; i < extbins;) {
@@ -665,7 +665,6 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				b2 = (palette[k] >>> 16) & 0xff,
 				a2 = (palette[k] >>> 24) & 0xff;
 
-				var lab2 = getLab(a2, r2, g2, b2);
 				var err = PR * (1 - ratio) * sqr(r2 - r);
 				if (err >= closest[3])
 					continue;
@@ -919,7 +918,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			else {
 				this.palette[0] = (0xff << 24);
 				this.palette[1] = 0xffffffff;
-			}			
+			}
 		}
 
 		if(!this.opts.dithering) {
@@ -990,10 +989,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var quant = this;
 		return new Promise(function(resolve, reject) {
 			var result = quant.quantizeImage();
-			if(quant.opts.paletteOnly) {
-				console.log(quant.opts.weight);
+			if(quant.opts.paletteOnly)
 				resolve({ pal8: result, indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
-			}
 			else
 				resolve({ img8: result, pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
 		});
