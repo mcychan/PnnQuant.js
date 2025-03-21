@@ -27,7 +27,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var ratio = 1.0;
-	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
+	var closestMap, pixelMap, nearestMap;
 	
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
 	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
@@ -874,9 +874,9 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if(this.opts.alphaThreshold)
 			alphaThreshold = this.opts.alphaThreshold;
 		
-		pixelMap.clear();
-		closestMap.clear();
-		nearestMap.clear();
+		pixelMap = new Map();
+		closestMap = new Map();
+		nearestMap = new Map();
 		
 		hasAlpha = false;
 		var semiTransCount = 0;

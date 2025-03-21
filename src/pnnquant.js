@@ -23,7 +23,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var ratio = .5;
-	var closestMap = new Map(), nearestMap = new Map();
+	var closestMap, nearestMap;
 	
 	var coeffs = [
 		[0.299, 0.587, 0.114],
@@ -559,8 +559,8 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		if(this.opts.alphaThreshold)
 			alphaThreshold = this.opts.alphaThreshold;
 
-		closestMap.clear();
-		nearestMap.clear();
+		closestMap = new Map();
+		nearestMap = new Map();
 
 		hasAlpha = false;
 		var semiTransCount = 0;
