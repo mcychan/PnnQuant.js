@@ -420,13 +420,13 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			/* Fill palette */
 			this.palette = new Uint32Array(pixelMap.size);
 			var k = 0;
-			for (var pixel of pixelMap.keys()) {
+			pixelMap.forEach (function(value, pixel) {
 				this.palette[k++] = pixel;
 
 				if(k > 1 && ((pixel >>> 24) & 0xff) == 0) {
 					this.palette[k - 1] = this.palette[0]; this.palette[0] = pixel;
 				}
-			}
+			});
 
 			return;
 		}
@@ -648,7 +648,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 		var closest = closestMap.get(pixel);
 		if (closest == null) {
-			closest = new Array(4);
+			closest = new Uint32Array(4);
 			closest[2] = closest[3] = 0xffffffff;
 
 			var r = (pixel & 0xff),

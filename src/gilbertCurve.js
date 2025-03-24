@@ -3,6 +3,13 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 * A general rectangle with a known orientation is split into three regions ("up", "right", "down"), for which the function calls itself recursively, until a trivial path can be produced. */
 
 (function(){
+	if(!Math.tanh) {
+		Math.tanh = function(x){
+			var a = Math.exp(+x), b = Math.exp(-x);
+			return a == Infinity ? 1 : b == Infinity ? -1 : (a - b) / (a + b);
+		};
+	}
+	
 	function GilbertCurve(opts) {
 		this.opts = opts;
 		this.qPixels = [];
