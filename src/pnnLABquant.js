@@ -558,7 +558,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	
 	function nearestColorIndex(palette, pixel, pos) {
 		var nearest = nearestMap.get(pixel);
-		if (nearest != null)
+		if (nearestMap.has(pixel))
 			return nearest;
 
 		var k = 0;
@@ -647,7 +647,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return nearestColorIndex(palette, pixel, pos);
 
 		var closest = closestMap.get(pixel);
-		if (closest == null) {
+		if (!closestMap.has(pixel)) {
 			closest = new Uint32Array(4);
 			closest[2] = closest[3] = 0xffffffff;
 
