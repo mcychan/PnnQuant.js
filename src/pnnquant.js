@@ -293,7 +293,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		}
 
 		var nearest = nearestMap.get(pixel);
-		if (nearest != null)
+		if (nearestMap.has(pixel))
 			return nearest;
 
 		if(palette.length > 2 && hasAlpha && a > alphaThreshold)
@@ -348,9 +348,9 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		b = (pixel >>> 16) & 0xff;
 
 		var closest = closestMap.get(pixel);
-		if (!closest)
+		if (!closestMap.has(pixel))
 		{
-			closest = new Array(4);
+			closest = new Uint32Array(4);
 			closest[2] = closest[3] = 0xFFFF;
 			
 			var pr = PR, pg = PG, pb = PB;
