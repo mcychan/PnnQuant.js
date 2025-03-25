@@ -641,6 +641,9 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	}
 	
 	function closestColorIndex(palette, pixel, pos) {
+		if (PG < coeffs[0][1] && TELL_BLUE_NOISE[pos & 4095] > -88)
+			return nearestColorIndex(palette, pixel, pos);
+
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold)
 			return nearestColorIndex(palette, pixel, pos);
@@ -653,10 +656,6 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			var r = (pixel & 0xff),
 			g = (pixel >>> 8) & 0xff,
 			b = (pixel >>> 16) & 0xff;
-
-			var start = 0;
-			if(a > 0xE0 && TELL_BLUE_NOISE[pos & 4095] > -88)
-				start = 1;
 
 			for (var k = 0; k < palette.length; ++k) {
 				var r2 = (palette[k] & 0xff),
@@ -676,12 +675,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				if (err >= closest[3])
 					continue;
 
-				if(hasSemiTransparency) {
+				if(hasSemiTransparency)
 					err += PA * sqr(a2 - a);
-					start = 1;
-				}
 
-				for (var i = start; i < coeffs.length; ++i) {
+				for (var i = 0; i < coeffs.length; ++i) {
 					err += ratio * sqr(coeffs[i][0] * (r2 - r));
 					if (err >= closest[3])
 						break;
@@ -714,14 +711,12 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			closestMap.set(pixel, closest);
 		}
 
-		var MAX_ERR = palette.length;
-		if(PG < coeffs[0][1] && TELL_BLUE_NOISE[pos & 4095] > -88)
-			return nearestColorIndex(palette, pixel, pos);
 		
 		var idx = 1;
-		if (closest[2] == 0 || (Math.randomInt(32767) % (closest[3] + closest[2])) <= closest[3])
+		if (closest[2] == 0 || (Math.randomInt(closest[3] + closest[2])) <= closest[3])
 			idx = 0;
-		
+
+		var MAX_ERR = palette.length;
 		if (closest[idx + 2] >= MAX_ERR || (hasAlpha && closest[idx] == 0))
 			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];

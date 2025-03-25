@@ -241,10 +241,10 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			return;
 		}
 
-		var ax2 = (ax / 2) | 0;
-		var ay2 = (ay / 2) | 0;
-		var bx2 = (bx / 2) | 0;
-		var by2 = (by / 2) | 0;
+		var ax2 = ax >> 1;
+		var ay2 = ay >> 1;
+		var bx2 = bx >> 1;
+		var by2 = by >> 1;
 
 		var w2 = Math.abs(ax2 + ay2);
 		var h2 = Math.abs(bx2 + by2);
@@ -311,7 +311,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		DITHER_MAX = this.opts.weight < .015 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
 		var deviation = !hasAlpha && this.opts.weight > .002 ? -.25 : 1;
-		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : DITHER_MAX;
+		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : (DITHER_MAX * Math.E);
 		var density = this.opts.palette.length > 16 ? 3200 : 1500;
 		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length < 64)))
 			ditherMax = Math.pow(5 + edge, 2);
