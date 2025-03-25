@@ -11,7 +11,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	}
 	
 	Math.randomInt = function(max) {
-		return Math.floor(Math.random() * max);
+		return Math.floor(Math.random() * (max + 1));
 	}
 	
 	function PnnLABQuant(opts) {
@@ -250,7 +250,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	{
 		var argb = (a << 24) | (b << 16) | (g << 8) | r;
 		var lab1 = pixelMap.get(argb);
-		if (lab1 == null)
+		if (!pixelMap.has(argb))
 		{
 			lab1 = RGB2LAB(a, r, g, b);
 			pixelMap.set(argb, lab1);
@@ -420,7 +420,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			/* Fill palette */
 			this.palette = new Uint32Array(pixelMap.size);
 			var k = 0;
-			pixelMap.forEach (function(value, pixel) {
+			pixelMap.forEach(function(value, pixel) {
 				this.palette[k++] = pixel;
 
 				if(k > 1 && ((pixel >>> 24) & 0xff) == 0) {
@@ -543,7 +543,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			this.palette = new Uint32Array(maxbins);
 		
 		var k = 0;
-		for (var i = 0;  ; ++k) {
+		for (var i = 0; k < this.palette.length; ++k) {
 			var lab1 = new Lab();
 			lab1.alpha = (this.hasSemiTransparency || this.m_transparentPixelIndex >= 0) ? 
 				(Math.clamp(Math.round(bins[i].ac), 0, 0xff) | 0) : 0xff,
@@ -551,8 +551,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 			this.palette[k] = LAB2RGB(lab1);
 
-			if ((i = bins[i].fw) == 0)
-				break;
+			i = bins[i].fw;
 		}
 	};
 	
@@ -668,17 +667,17 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				var err = PR * (1 - ratio) * sqr(r2 - r);
 				if (err >= closest[3])
 					continue;
-						
+
 				err += PG * (1 - ratio) * sqr(g2 - g);
 				if (err >= closest[3])
 					continue;
-					
+
 				err += PB * (1 - ratio) * sqr(b2 - b);
 				if (err >= closest[3])
 					continue;
 
 				if(hasSemiTransparency) {
-					err += PA * (1 - ratio) * sqr(a2 - a);
+					err += PA * sqr(a2 - a);
 					start = 1;
 				}
 
@@ -686,11 +685,11 @@ Copyright (c) 2018-2025 Miller Cy Chan
 					err += ratio * sqr(coeffs[i][0] * (r2 - r));
 					if (err >= closest[3])
 						break;
-						
+
 					err += ratio * sqr(coeffs[i][1] * (g2 - g));
 					if (err >= closest[3])
 						break;
-						
+
 					err += ratio * sqr(coeffs[i][2] * (b2 - b));
 					if (err >= closest[3])
 						break;
@@ -723,7 +722,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if (closest[2] == 0 || (Math.randomInt(32767) % (closest[3] + closest[2])) <= closest[3])
 			idx = 0;
 		
-		if(closest[idx + 2] >= MAX_ERR || (hasAlpha && closest[idx] == 0))
+		if (closest[idx + 2] >= MAX_ERR || (hasAlpha && closest[idx] == 0))
 			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];
 	}
@@ -898,6 +897,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 		
 		this.hasSemiTransparency = hasSemiTransparency = semiTransCount > 0;
+
 		if (nMaxColors <= 32)
 			PR = PG = PB = PA = 1;
 		else {

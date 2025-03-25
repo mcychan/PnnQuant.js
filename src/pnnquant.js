@@ -265,7 +265,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		/* Fill palette */
 		this.palette = new Uint32Array(extbins > 0 ? nMaxColors : maxbins);
 		var k = 0;
-		for (var i = 0; ; ++k)
+		for (var i = 0; k < this.palette.length; ++k)
 		{
 			var a = Math.clamp(bins[i].ac, 0, 0xff) | 0,
 			r = Math.clamp(bins[i].rc, 0, 0xff) | 0,
@@ -279,8 +279,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 				this.palette[k] = temp;
 			}
 
-			if ((i = bins[i].fw) == 0)
-				break;
+			i = bins[i].fw;
 		}
 	};
 	
