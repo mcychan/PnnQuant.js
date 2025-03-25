@@ -418,16 +418,17 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		
 		if(pixelMap.size <= nMaxColors) {
 			/* Fill palette */
-			this.palette = new Uint32Array(pixelMap.size);
+			var palette = new Uint32Array(pixelMap.size);
 			var k = 0;
 			pixelMap.forEach(function(value, pixel) {
-				this.palette[k++] = pixel;
+				palette[k++] = pixel;
 
 				if(k > 1 && ((pixel >>> 24) & 0xff) == 0) {
-					this.palette[k - 1] = this.palette[0]; this.palette[0] = pixel;
+					palette[k - 1] = palette[0]; palette[0] = pixel;
 				}
 			});
 
+			this.palette = palette;
 			return;
 		}
 		
