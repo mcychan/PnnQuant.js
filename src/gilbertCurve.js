@@ -219,10 +219,8 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			}
 		}
 
-		if (unaccepted) {
+		if (unaccepted)
 			qPixels[bidx] = ditherPixel(x, y, c2, 1.25);
-			c2 = palette[qPixels[bidx]];
-		}
 
 		errorq.push(error);
 		if (sortedByYDiff)
