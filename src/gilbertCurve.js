@@ -69,6 +69,10 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	{
 		var bidx = x + y * width;
 		var pixel = pixels[bidx];
+		var r0 = (pixel & 0xff),
+			g0 = (pixel >>> 8) & 0xff,
+			b0 = (pixel >>> 16) & 0xff;
+
 		var r_pix = (c2 & 0xff),
 			g_pix = (c2 >>> 8) & 0xff,
 			b_pix = (c2 >>> 16) & 0xff,
@@ -134,7 +138,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		return lookup[offset] - 1;
 	}
 
-	function ditherPixel(x, y)
+	function diffusePixel(x, y)
 	{
 		var bidx = x + y * width;
 		var pixel = pixels[bidx];
@@ -243,7 +247,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 		if (h == 1) {
 			for (var i = 0; i < w; ++i){
-				ditherPixel(x, y);
+				diffusePixel(x, y);
 				x += dax;
 				y += day;
 			}
@@ -252,7 +256,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 		if (w == 1) {
 			for (var i = 0; i < h; ++i){
-				ditherPixel(x, y);
+				diffusePixel(x, y);
 				x += dbx;
 				y += dby;
 			}
