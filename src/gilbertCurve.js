@@ -55,7 +55,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		this.p = [r, g, b, a];
 	}
 
-	var ditherFn, getColorIndex, width, height, pixels, palette, saliencies, nMaxColors, beta;
+	var ditherFn, getColorIndex, width, height, weight, pixels, palette, saliencies, nMaxColors, beta;
 	
 	var qPixels;
 	var errorq = [];
@@ -106,7 +106,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			g1 = (c2 >>> 8) & 0xff,
 			b1 = (c2 >>> 16) & 0xff;
 		if (nMaxColors < 3 || margin > 6) {
-			if (nMaxColors > 16 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > (2 * acceptedDiff))) {
+			if (nMaxColors > 4 && weight < .0025 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > (2 * acceptedDiff))) {
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = saliencies[bidx] < .6 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
@@ -326,7 +326,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	{
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
-		this.opts.weight = Math.abs(this.opts.weight);
+		this.opts.weight = weight = Math.abs(this.opts.weight);
 		margin = this.opts.weight < .0025 ? 12 : this.opts.weight < .004 ? 8 : 6;
 		sortedByYDiff = this.opts.palette.length >= 128 && (!hasAlpha || this.opts.weight < .18);
 
