@@ -68,7 +68,6 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			
 			var nerr = 0.0;
 			if(hasSemiTransparency) {
-				start = 1;
 				nerr += nerr2 * PA * sqr(bins[i].ac - wa);
 				if (nerr >= err)
 					continue;
