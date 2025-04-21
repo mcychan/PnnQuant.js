@@ -60,10 +60,6 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		var wg = bin1.gc;
 		var wb = bin1.bc;
 		
-		var start = 0;
-		if(TELL_BLUE_NOISE[idx & 4095] > -88)
-			start = (PG < coeffs[0][1]) ? coeffs.length : 1;
-		
 		for (var i = bin1.fw; i != 0; i = bins[i].fw)
 		{
 			var n2 = bins[i].cnt, nerr2 = (n1 * n2) / (n1 + n2);
@@ -73,7 +69,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			var nerr = 0.0;
 			if(hasSemiTransparency) {
 				start = 1;
-				nerr += nerr2 * (1 - ratio) * PA * sqr(bins[i].ac - wa);
+				nerr += nerr2 * PA * sqr(bins[i].ac - wa);
 				if (nerr >= err)
 					continue;
 			}
@@ -90,7 +86,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			if (nerr >= err)
 				continue;
 			
-			for (var j = start; j < coeffs.length; ++j) {
+			for (var j = 0; j < coeffs.length; ++j) {
 				nerr += nerr2 * ratio * sqr(coeffs[j][0] * (bins[i].rc - wr));
 				if (nerr >= err)
 					break;
