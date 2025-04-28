@@ -222,10 +222,20 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				else
 					error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
 			}
+
+			if (sortedByYDiff && saliencies == null && Math.abs(error.p[j]) >= DITHER_MAX)
+				unaccepted = true;
 		}
 
-		if (unaccepted)
-			qPixels[bidx] = ditherPixel(x, y, c2, 1.25);
+		if (unaccepted) {
+			if (saliencies != null)
+				qPixels[bidx] = ditherPixel(x, y, c2, 1.25);
+			else if (Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > 3 && U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > 3) {
+				var strength = 1 / 3.0;
+				c2 = new BlueNoise({weightB: strength}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+				qPixels[bidx] = ditherFn(palette, c2, bidx);
+			}
+		}
 
 		errorq.push(error);
 		if (sortedByYDiff)
