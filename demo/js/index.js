@@ -195,20 +195,23 @@ class Readme extends preact.Component {
 
 	render() {
 		const childrenData = [
-			"<b>Click an image to quantize it.</b>",
-			"<b>Please input number of colors wanted.</b>",
-			"<b>Config</b> values can be edited &amp; re-processed via <b>update</b>.",
-			"If your browser can't load an image fully, just try again."
+			preact.createElement("b", {}, "Click an image to quantize it."),
+			preact.createElement("b", {}, "Please input number of colors wanted."),
+			preact.createElement("span", {},
+				[
+					preact.createElement("b", {}, "Config"),
+					preact.createElement("span", {}, " values can be edited & re-processed via "),
+					preact.createElement("b", {}, "update")
+				]),
+			preact.createElement("span", {}, "If your browser can't load an image fully, just try again."),
 		];
 		const cols = Math.min(this.state.cols, this.state.pal.length);
 		
 		return preact.createElement("div", {key: "help", id: "help", className: "box", style: {paddingRight: "1em", maxWidth: "100vw"}},
 			[
 				preact.createElement("ul", {key: "readme", id: "readme"}, 
-					childrenData.map((text, index) => {
-						if(text.match(/^/))
-							return preact.createElement("li", {key: `li_${index}`, dangerouslySetInnerHTML: { __html:  text} })
-						return preact.createElement("li", {key: `li_${index}`}, text)
+					childrenData.map((ele, index) => {
+						return preact.createElement("li", {key: `li_${index}`, style: {mixBlendMode: "hard-light"}}, ele)
 					})
 				),
 				preact.createElement("div", {key: "palt", id: "palt", className: "grid", ref: el => (this.container = el),
@@ -256,10 +259,10 @@ class Config extends preact.Component {
 				preact.createElement("h5", {key: "h5_config"}, "Config"),
 				preact.createElement("div", {key: "pre_config", id: "config", style: {paddingLeft: "1em", right: 0}}, 
 					[
-						preact.createElement("span", {}, 'var opts = {\n'),
+						preact.createElement("span", {style: {mixBlendMode: "hard-light"}}, 'var opts = {\n'),
 						preact.createElement("div", {style: {paddingLeft: "4em"}}, 
 							[
-								preact.createElement("span", {}, 'colors: '),
+								preact.createElement("span", {style: {mixBlendMode: "hard-light"}}, 'colors: '),
 								preact.createElement("input", {key: "colors", id: "colors", type: "number", min: 2, max: 65536, size: 6, className: "autosize",
 								value: colors, onChange: this.colorsChange, onKeyUp: this.onKeyUp })
 							]
@@ -268,21 +271,21 @@ class Config extends preact.Component {
 							[
 								preact.createElement("input", {key: "dithering", id: "dithering", type: "checkbox",
 									checked: dithering, onChange: this.ditheringChange }),
-								preact.createElement("span", {}, 'dithering,')
+								preact.createElement("span", {style: {mixBlendMode: "hard-light"}}, 'dithering,')
 							]
 						),
-						preact.createElement("span", {}, '};')
+						preact.createElement("span", {style: {mixBlendMode: "hard-light"}}, '};')
 					]
 				),
 				preact.createElement("span", {key: "input_config", style: {paddingLeft: "1em", paddingBottom: "1em"}},
 					[
-						preact.createElement("span", {}, 'Quality: '),
+						preact.createElement("span", {style: {mixBlendMode: "hard-light"}}, 'Quality: '),
 						preact.createElement("input", {key: "radNQ", name: "quality", type: "radio", value: "N",
 							checked: !isHQ, onChange: this.qualityChange }),
-						preact.createElement("span", {}, 'Normal '),
+						preact.createElement("span", {style: {mixBlendMode: "hard-light"}}, 'Normal '),
 						preact.createElement("input", {key: "radHQ", id: "radHQ", name: "quality", type: "radio", value: "H",
 							checked: isHQ, onChange: this.qualityChange }),
-						preact.createElement("span", {}, ' High')
+						preact.createElement("span", {style: {mixBlendMode: "hard-light"}}, ' High')
 					]
 				),
 				preact.createElement("div", {key: "btn_config", style: {padding: "0.5em 1em 0.5em 11em"}}, 
