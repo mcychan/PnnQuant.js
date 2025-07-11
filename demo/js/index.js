@@ -114,13 +114,14 @@ class Scene extends preact.Component {
 
 	render() {
 		const {background, boxWidth, display, imgName, imgUrl, imgBase64, width, height} = this.state;
-		const reduDisplay = this.props.isEnabled() ? display : "none";
+		const opacity = display ? 1 : 0;
+		const reduOpacity = this.props.isEnabled() ? opacity : 0;
 		return preact.createElement("div", {id: "scene", style: {overflow: "auto"}},
 			[
-				preact.createElement("div", {key: "box1", className: "box", style: {background: background, display: display, margin: "0 auto", maxWidth: "49%", maxHeight: "35%"}}, 
+				preact.createElement("div", {key: "box1", className: "box", style: {background: background, margin: "0 auto", maxWidth: "49%", maxHeight: "35%"}}, 
 					[
 						preact.createElement("h4", {}, "Original"),
-						preact.createElement("div", {key: "orig", id: "orig", style: {overflow: "auto"},
+						preact.createElement("div", {key: "orig", id: "orig", style: {display: display, overflow: "auto"},
 							onClick: this.onClick, onDrop: this.onDrop, 
 							onDragOver: this.onDragOver, onDragLeave: this.onDragLeave },
 							[
@@ -135,7 +136,8 @@ class Scene extends preact.Component {
 						})
 					]
 				),
-				preact.createElement("div", {key: "box2",  className: "box", style: {background: background, display: reduDisplay, margin: "0 auto", maxWidth: "49%", maxHeight: "35%"}}, 
+				preact.createElement("div", {key: "box2",  className: "box", style: {background: background, display: display, margin: "0 auto", maxWidth: "49%", maxHeight: "35%", 
+				  transition: "opacity 1s", opacity: reduOpacity}}, 
 					preact.createElement("h4", {}, "Quantized"),
 					preact.createElement("div", {key: "redu", id: "redu", style: {overflow: "auto"} },
 						[
