@@ -114,9 +114,10 @@ class Scene extends preact.Component {
 
 	render() {
 		const {background, display, imgName, imgUrl, imgBase64} = this.state;
+		const imgB64 = this.props.isEnabled() ? imgBase64 : imgUrl;
 		const opacity = display ? 1 : 0;
 		const reduOpacity = this.props.isEnabled() ? opacity : .5;
-		const imgB64 = this.props.isEnabled() ? imgBase64 : 'data:image/svg+xml;base64,PHN2ZyBmaWxsPSJoc2woMjI4LCA5NyUsIDQyJSkiIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjMiIHI9IjAiPjxhbmltYXRlIGlkPSJzcGlubmVyXzMxOGwiIGJlZ2luPSIwO3NwaW5uZXJfY3ZrVS5lbmQtMC41cyIgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgZHVyPSIwLjZzIiB2YWx1ZXM9IjA7MjswIiBrZXlUaW1lcz0iMDsuMjsxIiBrZXlTcGxpbmVzPSIwLDEsMCwxOy41MywwLC42MSwuNzMiIGZpbGw9ImZyZWV6ZSIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjE2LjUwIiBjeT0iNC4yMSIgcj0iMCI+PGFuaW1hdGUgaWQ9InNwaW5uZXJfZzVHaiIgYmVnaW49InNwaW5uZXJfMzE4bC5iZWdpbiswLjFzIiBhdHRyaWJ1dGVOYW1lPSJyIiBjYWxjTW9kZT0ic3BsaW5lIiBkdXI9IjAuNnMiIHZhbHVlcz0iMDsyOzAiIGtleVRpbWVzPSIwOy4yOzEiIGtleVNwbGluZXM9IjAsMSwwLDE7LjUzLDAsLjYxLC43MyIgZmlsbD0iZnJlZXplIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iNy41MCIgY3k9IjQuMjEiIHI9IjAiPjxhbmltYXRlIGlkPSJzcGlubmVyX2N2a1UiIGJlZ2luPSJzcGlubmVyX1V1azAuYmVnaW4rMC4xcyIgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgZHVyPSIwLjZzIiB2YWx1ZXM9IjA7MjswIiBrZXlUaW1lcz0iMDsuMjsxIiBrZXlTcGxpbmVzPSIwLDEsMCwxOy41MywwLC42MSwuNzMiIGZpbGw9ImZyZWV6ZSIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjE5Ljc5IiBjeT0iNy41MCIgcj0iMCI+PGFuaW1hdGUgaWQ9InNwaW5uZXJfZThyTSIgYmVnaW49InNwaW5uZXJfZzVHai5iZWdpbiswLjFzIiBhdHRyaWJ1dGVOYW1lPSJyIiBjYWxjTW9kZT0ic3BsaW5lIiBkdXI9IjAuNnMiIHZhbHVlcz0iMDsyOzAiIGtleVRpbWVzPSIwOy4yOzEiIGtleVNwbGluZXM9IjAsMSwwLDE7LjUzLDAsLjYxLC43MyIgZmlsbD0iZnJlZXplIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iNC4yMSIgY3k9IjcuNTAiIHI9IjAiPjxhbmltYXRlIGlkPSJzcGlubmVyX1V1azAiIGJlZ2luPSJzcGlubmVyX3o3b2wuYmVnaW4rMC4xcyIgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgZHVyPSIwLjZzIiB2YWx1ZXM9IjA7MjswIiBrZXlUaW1lcz0iMDsuMjsxIiBrZXlTcGxpbmVzPSIwLDEsMCwxOy41MywwLC42MSwuNzMiIGZpbGw9ImZyZWV6ZSIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjIxLjAwIiBjeT0iMTIuMDAiIHI9IjAiPjxhbmltYXRlIGlkPSJzcGlubmVyX01vb0wiIGJlZ2luPSJzcGlubmVyX2U4ck0uYmVnaW4rMC4xcyIgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgZHVyPSIwLjZzIiB2YWx1ZXM9IjA7MjswIiBrZXlUaW1lcz0iMDsuMjsxIiBrZXlTcGxpbmVzPSIwLDEsMCwxOy41MywwLC42MSwuNzMiIGZpbGw9ImZyZWV6ZSIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjMuMDAiIGN5PSIxMi4wMCIgcj0iMCI+PGFuaW1hdGUgaWQ9InNwaW5uZXJfejdvbCIgYmVnaW49InNwaW5uZXJfS0Vvby5iZWdpbiswLjFzIiBhdHRyaWJ1dGVOYW1lPSJyIiBjYWxjTW9kZT0ic3BsaW5lIiBkdXI9IjAuNnMiIHZhbHVlcz0iMDsyOzAiIGtleVRpbWVzPSIwOy4yOzEiIGtleVNwbGluZXM9IjAsMSwwLDE7LjUzLDAsLjYxLC43MyIgZmlsbD0iZnJlZXplIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMTkuNzkiIGN5PSIxNi41MCIgcj0iMCI+PGFuaW1hdGUgaWQ9InNwaW5uZXJfYnR5ViIgYmVnaW49InNwaW5uZXJfTW9vTC5iZWdpbiswLjFzIiBhdHRyaWJ1dGVOYW1lPSJyIiBjYWxjTW9kZT0ic3BsaW5lIiBkdXI9IjAuNnMiIHZhbHVlcz0iMDsyOzAiIGtleVRpbWVzPSIwOy4yOzEiIGtleVNwbGluZXM9IjAsMSwwLDE7LjUzLDAsLjYxLC43MyIgZmlsbD0iZnJlZXplIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iNC4yMSIgY3k9IjE2LjUwIiByPSIwIj48YW5pbWF0ZSBpZD0ic3Bpbm5lcl9LRW9vIiBiZWdpbj0ic3Bpbm5lcl8xSVlELmJlZ2luKzAuMXMiIGF0dHJpYnV0ZU5hbWU9InIiIGNhbGNNb2RlPSJzcGxpbmUiIGR1cj0iMC42cyIgdmFsdWVzPSIwOzI7MCIga2V5VGltZXM9IjA7LjI7MSIga2V5U3BsaW5lcz0iMCwxLDAsMTsuNTMsMCwuNjEsLjczIiBmaWxsPSJmcmVlemUiLz48L2NpcmNsZT48Y2lyY2xlIGN4PSIxNi41MCIgY3k9IjE5Ljc5IiByPSIwIj48YW5pbWF0ZSBpZD0ic3Bpbm5lcl8xc0lTIiBiZWdpbj0ic3Bpbm5lcl9idHlWLmJlZ2luKzAuMXMiIGF0dHJpYnV0ZU5hbWU9InIiIGNhbGNNb2RlPSJzcGxpbmUiIGR1cj0iMC42cyIgdmFsdWVzPSIwOzI7MCIga2V5VGltZXM9IjA7LjI7MSIga2V5U3BsaW5lcz0iMCwxLDAsMTsuNTMsMCwuNjEsLjczIiBmaWxsPSJmcmVlemUiLz48L2NpcmNsZT48Y2lyY2xlIGN4PSI3LjUwIiBjeT0iMTkuNzkiIHI9IjAiPjxhbmltYXRlIGlkPSJzcGlubmVyXzFJWUQiIGJlZ2luPSJzcGlubmVyX05XaGguYmVnaW4rMC4xcyIgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgZHVyPSIwLjZzIiB2YWx1ZXM9IjA7MjswIiBrZXlUaW1lcz0iMDsuMjsxIiBrZXlTcGxpbmVzPSIwLDEsMCwxOy41MywwLC42MSwuNzMiIGZpbGw9ImZyZWV6ZSIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMjEiIHI9IjAiPjxhbmltYXRlIGlkPSJzcGlubmVyX05XaGgiIGJlZ2luPSJzcGlubmVyXzFzSVMuYmVnaW4rMC4xcyIgYXR0cmlidXRlTmFtZT0iciIgY2FsY01vZGU9InNwbGluZSIgZHVyPSIwLjZzIiB2YWx1ZXM9IjA7MjswIiBrZXlUaW1lcz0iMDsuMjsxIiBrZXlTcGxpbmVzPSIwLDEsMCwxOy41MywwLC42MSwuNzMiIGZpbGw9ImZyZWV6ZSIvPjwvY2lyY2xlPjwvc3ZnPg==';
+		const reduClazz = this.props.isEnabled() ? "no-blur" : "blurry-load";
 			return preact.createElement("div", {id: "scene", style: {overflow: "auto"}},
 			[
 				preact.createElement("div", {key: "box1", className: "box", style: {background: background, margin: "0 auto", maxWidth: "49%", maxHeight: "35%"}}, 
@@ -138,12 +139,12 @@ class Scene extends preact.Component {
 					]
 				),
 				preact.createElement("div", {key: "box2", className: "box", style: {background: background, margin: "0 auto", maxWidth: "49%", maxHeight: "35%", 
-				  transition: "opacity 1s", opacity: reduOpacity}}, 
+				  transition: "opacity 1s", opacity: reduOpacity}},  
 					preact.createElement("h4", {}, "Quantized"),
 					preact.createElement("div", {key: "redu", id: "redu", style: {overflow: "auto"} },
 						[
 							preact.createElement("div", {style: {width: "100%"} }),
-							preact.createElement("img", {key: "reducedImg", src: imgB64})
+							preact.createElement("img", {key: "reducedImg", className: reduClazz, src: imgB64})
 						])
 				)
 			]
