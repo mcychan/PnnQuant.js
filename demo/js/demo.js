@@ -115,7 +115,7 @@ function quantizeImage(gl, result, width) {
 	var height = Math.ceil(result.img8.length / width);
 	
 	console.time("palette");
-	eventBus.dispatch("scene", {background: result.transparent < 0 ? "none" : "", colors: result.pal8.length});
+	eventBus.dispatch("scene", {background: result.transparent < 0 ? "none" : ""});
 	eventBus.dispatch("palt", {pal: pal});
 		
 	if(!pngOnly && "image/gif" == result.type) {
@@ -318,7 +318,7 @@ async function origLoad(opts) {
 }
 
 function createImage(id, imgUrl, ev) {
-	eventBus.dispatch("scene", {imgName: id, imgUrl: imgUrl});
+	eventBus.dispatch("scene", {colors: document.querySelector("#colors").value, imgName: id, imgUrl: imgUrl});
 }
 
 function process(imgUrl) {
