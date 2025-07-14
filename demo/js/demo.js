@@ -115,7 +115,7 @@ function quantizeImage(gl, result, width) {
 	var height = Math.ceil(result.img8.length / width);
 	
 	console.time("palette");
-	eventBus.dispatch("scene", {boxWidth: (width - 10) + "px", background: result.transparent < 0 ? "none" : ""});
+	eventBus.dispatch("scene", {background: result.transparent < 0 ? "none" : "", colors: result.pal8.length});
 	eventBus.dispatch("palt", {pal: pal});
 		
 	if(!pngOnly && "image/gif" == result.type) {

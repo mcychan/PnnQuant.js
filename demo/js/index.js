@@ -15,7 +15,7 @@ if(typeof eventBus === 'undefined') {
 class Scene extends preact.Component {
 	constructor(props) {
 		super(props);
-		this.state = { background: "none", transparent: -1,
+		this.state = { background: "none", colors: 256, transparent: -1,
 			display: "none", imgName: "", imgBase64: "", imgUrl: ""
 		};
 		this.orig = preact.createRef();
@@ -113,12 +113,15 @@ class Scene extends preact.Component {
 	}
 
 	render() {
-		const {background, display, imgName, imgUrl, imgBase64} = this.state;
-		const imgB64 = this.props.isEnabled() ? imgBase64 : imgUrl;
+		const {background, colors, display, imgName, imgUrl, imgBase64} = this.state;
 		const opacity = display ? 1 : 0;
-		const reduOpacity = this.props.isEnabled() ? opacity : .5;
-		const reduClazz = this.props.isEnabled() ? "no-blur" : "blurry-load";
-			return preact.createElement("div", {id: "scene", style: {overflow: "auto"}},
+		var imgB64 = imgUrl, reduOpacity = .5, reduClazz = (colors > 2) ? "blurry-load" : "blurry-load-grey";
+		if (this.props.isEnabled()) {
+			imgB64 = imgBase64;
+			reduOpacity = opacity;
+			reduClazz = "no-blur";
+		}
+		return preact.createElement("div", {id: "scene", style: {overflow: "auto"}},
 			[
 				preact.createElement("div", {key: "box1", className: "box", style: {background: background, margin: "0 auto", maxWidth: "49%", maxHeight: "35%"}}, 
 					[
