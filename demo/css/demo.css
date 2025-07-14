@@ -185,6 +185,10 @@ pre {
   filter: blur(8px);
 }
 
+.blurry-load-grey {
+  filter: blur(8px) grayscale(1);
+}
+
 @keyframes blurOut {
   0% {
     filter: blur(20px);
@@ -203,16 +207,6 @@ pre {
 
 .blur-out {
   animation: blurOut 0.5s ease-out;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -100vw 0;
-  }
-
-  100% {
-    background-position: 100vw 0;
-  }
 }
 
 .no-blur {
