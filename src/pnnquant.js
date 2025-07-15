@@ -175,7 +175,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 		var weight = this.opts.weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
 		if (weight > .003 && weight < .005)
 			quan_rt = 0;
-		if (weight < .03 && PG >= coeffs[0][1]) {
+		if (weight < .04 && PG >= coeffs[0][1]) {
 			PR = PG = PB = PA = 1;
 			if (nMaxColors >= 64)
 				quan_rt = 0;
