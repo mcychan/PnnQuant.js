@@ -345,7 +345,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		var hasAlpha = this.opts.weight < 0;
 		this.opts.weight = weight = Math.abs(this.opts.weight);
 		margin = this.opts.weight < .0025 ? 12 : this.opts.weight < .004 ? 8 : 6;
-		sortedByYDiff = this.opts.palette.length >= 128 && (!hasAlpha || this.opts.weight < .18);
+		sortedByYDiff = this.opts.palette.length >= 128 && this.opts.weight >= .02 && (!hasAlpha || this.opts.weight < .18);
 
 		DITHER_MAX = this.opts.weight < .015 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
@@ -379,8 +379,11 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		}
 		else
 			beta *= .95;
+		
 		if (nMaxColors > 64 || (nMaxColors > 4 && this.opts.weight > .02))
 			beta *= .4;
+		if (nMaxColors > 128 && this.opts.weight < .02)
+			beta = .2;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
 		if(!sortedByYDiff)
