@@ -78,25 +78,26 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			b_pix = (c2 >>> 16) & 0xff,
 			a_pix = (c2 >>> 24) & 0xff;
 
+		var qPixel = palette[qPixels[bidx]];
 		var strength = 1 / 3.0;
 		var acceptedDiff = Math.max(2, nMaxColors - margin);
 		if (nMaxColors <= 4 && saliencies[bidx] > .2 && saliencies[bidx] < .25)
-			c2 = new BlueNoise({weightB: beta * 2 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+			c2 = new BlueNoise({weightB: beta * 2 / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 		else if (nMaxColors <= 4 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff)) {
-			c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+			c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 			var r1 = (c2 & 0xff),
 				g1 = (c2 >>> 8) & 0xff,
 				b1 = (c2 >>> 16) & 0xff;
 			if (nMaxColors <= 4 && U_Diff(r0, g0, b0, r1, g1, b1) > (8 * acceptedDiff)) {
 				var c1 = saliencies[bidx] > .65 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-				c2 = new BlueNoise({weightB: beta * saliencies[bidx]}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
+				c2 = new BlueNoise({weightB: beta * saliencies[bidx]}).diffuse(c1, qPixel, strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
 				b1 = (c2 >>> 16) & 0xff;
 			}
 
 			if (U_Diff(r0, g0, b0, r1, g1, b1) > (margin * acceptedDiff))
-				c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+				c2 = new BlueNoise({weightB: beta / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 			r1 = (c2 & 0xff);
 			g1 = (c2 >>> 8) & 0xff;
 			b1 = (c2 >>> 16) & 0xff;
@@ -110,15 +111,15 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			if (nMaxColors > 4 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (delta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > (margin * acceptedDiff))) {
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = saliencies[bidx] < .6 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, palette[qPixels[bidx]], strength, x, y);
+				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, qPixel, strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
 				b1 = (c2 >>> 16) & 0xff;
 			}
 		}
 		else if (nMaxColors > 4 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > acceptedDiff)) {
-			if(beta < .3 && (nMaxColors <= 32 || saliencies[bidx] < beta))
-				c2 = new BlueNoise({weightB: beta * .4 * saliencies[bidx]}).diffuse(c2, palette[qPixels[bidx]], strength, x, y);
+			if(beta < .4 && (nMaxColors <= 32 || saliencies[bidx] < beta))
+				c2 = new BlueNoise({weightB: beta * .4 * saliencies[bidx]}).diffuse(c2, qPixel, strength, x, y);
 			else
 				c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 			r1 = (c2 & 0xff);
@@ -186,7 +187,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			var acceptedDiff = Math.max(2, nMaxColors - margin);
 			if (saliencies != null && (Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
 				var strength = 1 / 3.0;
-				c2 = new BlueNoise({weightB: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
+				c2 = new BlueNoise({weightB: 1 / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 				qPixels[bidx] = ditherFn(palette, c2, bidx);
 			}
 		}
@@ -344,17 +345,17 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		errorq = [];
 		var hasAlpha = this.opts.weight < 0;
 		this.opts.weight = weight = Math.abs(this.opts.weight);
-		margin = this.opts.weight < .0025 ? 12 : this.opts.weight < .004 ? 8 : 6;
-		sortedByYDiff = this.opts.palette.length >= 128 && this.opts.weight >= .02 && (!hasAlpha || this.opts.weight < .18);
+		margin = weight < .0025 ? 12 : weight < .004 ? 8 : 6;
+		sortedByYDiff = this.opts.palette.length >= 128 && weight >= .02 && (!hasAlpha || weight < .18);
 
-		DITHER_MAX = this.opts.weight < .015 ? (this.opts.weight > .0025) ? 25 : 16 : 9;
-		var edge = hasAlpha ? 1 : Math.exp(this.opts.weight) - .25;
-		var deviation = !hasAlpha && this.opts.weight > .002 ? -.25 : 1;
+		DITHER_MAX = weight < .015 ? (weight > .0025) ? 25 : 16 : 9;
+		var edge = hasAlpha ? 1 : Math.exp(weight) - .25;
+		var deviation = !hasAlpha && weight > .002 ? -.25 : 1;
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : (DITHER_MAX * (saliencies != null ? 2 : Math.E));
 		var density = this.opts.palette.length > 16 ? 3200 : 1500;
-		if(this.opts.palette.length / this.opts.weight > 5000 && (this.opts.weight > .045 || (this.opts.weight > .01 && this.opts.palette.length < 64)))
+		if(this.opts.palette.length / weight > 5000 && (weight > .045 || (weight > .01 && this.opts.palette.length < 64)))
 			ditherMax = Math.pow(5 + edge, 2);
-		else if(this.opts.weight < .03 && this.opts.palette.length / this.opts.weight < density && this.opts.palette.length >= 16 && this.opts.palette.length < 128)
+		else if(weight < .03 && this.opts.palette.length / weight < density && this.opts.palette.length >= 16 && this.opts.palette.length < 256)
 			ditherMax = Math.pow(5 + edge, 2);
 		ditherMax |= 0;
 		thresold = DITHER_MAX > 9 ? -112 : -64;
@@ -373,16 +374,16 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		beta = nMaxColors > 4 ? (.6 - .00625 * nMaxColors) : 1;
 		if (nMaxColors > 4) {
 			var boundary = .005 - .0000625 * nMaxColors;
-			beta = Math.fround(this.opts.weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * this.opts.weight));
+			beta = Math.fround(weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * weight));
 			if(nMaxColors > 32 && nMaxColors < 256)
 				beta += .1;
 		}
 		else
 			beta *= .95;
 		
-		if (nMaxColors > 64 || (nMaxColors > 4 && this.opts.weight > .02))
+		if (nMaxColors > 64 || (nMaxColors > 4 && weight > .02))
 			beta *= .4;
-		if (nMaxColors > 128 && this.opts.weight < .02)
+		if (nMaxColors > 128 && weight < .02)
 			beta = .2;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
