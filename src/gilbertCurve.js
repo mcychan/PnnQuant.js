@@ -84,7 +84,8 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		if (nMaxColors <= 4 && saliencies[bidx] > .2 && saliencies[bidx] < .25)
 			c2 = new BlueNoise({weightB: beta * 2 / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 		else if (nMaxColors <= 4 || Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff)) {
-			c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
+			if (nMaxColors <= 128 || TELL_BLUE_NOISE[bidx & 4095] > 0)
+				c2 = new BlueNoise({weightB: beta * .5 / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 			var r1 = (c2 & 0xff),
 				g1 = (c2 >>> 8) & 0xff,
 				b1 = (c2 >>> 16) & 0xff;
@@ -383,7 +384,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		
 		if (nMaxColors > 64 || (nMaxColors > 4 && weight > .02))
 			beta *= .4;
-		if (nMaxColors > 128 && weight < .02)
+		if (nMaxColors > 64 && weight < .02)
 			beta = .2;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
