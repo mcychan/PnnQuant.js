@@ -376,8 +376,10 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		if (nMaxColors > 4) {
 			var boundary = .005 - .0000625 * nMaxColors;
 			beta = Math.fround(weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * weight));
-			if(nMaxColors > 32 && nMaxColors < 256)
+			if (nMaxColors > 32 && nMaxColors < 256)
 				beta += .1;
+			if (nMaxColors >= 64 && weight > .006 && weight < .0125)
+				beta = .7;
 		}
 		else
 			beta *= .95;
