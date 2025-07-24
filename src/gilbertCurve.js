@@ -119,7 +119,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			}
 		}
 		else if (nMaxColors > 4 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > acceptedDiff)) {
-			if(beta < .4 && (nMaxColors <= 32 || saliencies[bidx] < beta))
+			if (beta < .4 && (nMaxColors <= 32 || saliencies[bidx] < beta))
 				c2 = new BlueNoise({weightB: beta * .4 * saliencies[bidx]}).diffuse(c2, qPixel, strength, x, y);
 			else
 				c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
@@ -378,7 +378,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			beta = Math.fround(weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * weight));
 			if (nMaxColors > 32 && nMaxColors < 256)
 				beta += .1;
-			if (nMaxColors >= 64 && weight > .006 && weight < .0125)
+			if (nMaxColors >= 64 && (weight > .01 && weight < .0125) || (weight > .025 && weight < .03))
 				beta = .7;
 		}
 		else
@@ -390,7 +390,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			beta = .2;
 		qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
 
-		if(!sortedByYDiff)
+		if (!sortedByYDiff)
 			initWeights(DITHER_MAX);
 
 		if (width >= height)
@@ -400,7 +400,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		
 		this.opts.indexedPixels = this.qPixels = qPixels;
 
-		if(!this.opts.dithering)
+		if (!this.opts.dithering)
 			return qPixels;
 		
 		return processImagePixels();
