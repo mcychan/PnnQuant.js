@@ -154,7 +154,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		var error = new ErrorBox(pixel);
 		var i = sortedByYDiff ? weights.length - 1 : 0;
 		var maxErr = DITHER_MAX - 1;
-		for(var c = 0; c < errorq.length; ++c) {
+		for (var c = 0; c < errorq.length; ++c) {
 			var eb = errorq[c];
 			if(i < 0 || i >= weights.length)
 				break;
@@ -177,9 +177,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			b0 = (pixel >>> 16) & 0xff;
 
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-		if(saliencies != null && dither && !sortedByYDiff)
+		if (saliencies != null && dither && !sortedByYDiff)
 			qPixels[bidx] = ditherPixel(x, y, c2, beta);
-		else if(nMaxColors <= 32 && a_pix > 0xF0) {
+		else if (nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
 			if (lookup[offset] == 0)
 				lookup[offset] = ditherFn(palette, c2, bidx) + 1;
@@ -195,9 +195,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		else
 			qPixels[bidx] = ditherFn(palette, c2, bidx);
 
-		if(errorq.length >= DITHER_MAX)
+		if (errorq.length >= DITHER_MAX)
 			errorq.shift();
-		else if(errorq.length > 0)
+		else if (errorq.length > 0)
 			initWeights(errorq.length);
 
 		c2 = palette[qPixels[bidx]];
@@ -225,7 +225,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 				if (diffuse)
 					error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (ditherMax - 1);
-				else if(illusion)
+				else if (illusion)
 					error.p[j] = Math.fround(error.p[j] / maxErr * error.yDiff) * (ditherMax - 1);
 				else
 					error.p[j] /= Math.fround(1 + Math.sqrt(ditherMax));
@@ -378,8 +378,8 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			beta = Math.fround(weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * weight));
 			if (nMaxColors > 32 && nMaxColors < 256)
 				beta += .1;
-			if (nMaxColors >= 64 && (weight > .01 && weight < .0125) || (weight > .025 && weight < .03))
-				beta = .7;
+			if (nMaxColors >= 64 && (weight > .012 && weight < .0125) || (weight > .025 && weight < .03))
+				beta *= 2;
 		}
 		else
 			beta *= .95;
