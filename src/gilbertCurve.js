@@ -188,7 +188,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			var acceptedDiff = Math.max(2, nMaxColors - margin);
 			if (saliencies != null && (Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
 				var strength = 1 / 3.0;
-				c2 = new BlueNoise({weightB: 1 / saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
+				c2 = new BlueNoise({weightB: 1 / saliencies[bidx]}).diffuse(pixel, palette[qPixels[bidx]], strength, x, y);
 				qPixels[bidx] = ditherFn(palette, c2, bidx);
 			}
 		}
