@@ -376,8 +376,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			tb.Ac += lab1.A;
 			tb.Bc += lab1.B;
 			tb.cnt += 1.0;
-			if (saliencies != null && a > alphaThreshold)
-				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100;
+			if (saliencies != null)
+				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 		}
 		this.opts.saliencies = saliencies;
 
@@ -922,7 +922,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if (hasSemiTransparency)
 			this.opts.weight *= -1;
 
-		if(this.opts.dithering && !hasSemiTransparency && this.opts.saliencies == null && (nMaxColors <= 256 || this.opts.weight > .99)) {
+		if(this.opts.dithering && this.opts.saliencies == null && (nMaxColors <= 256 || this.opts.weight > .99)) {
 			var saliencies = new Float32Array(pixels.length);
 			var saliencyBase = .1;
 
@@ -934,7 +934,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 				var lab1 = getLab(a, r, g, b);
 
-				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100;
+				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 			}
 			this.opts.saliencies = saliencies;
 		}
@@ -998,3 +998,4 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	}
 
 }).call(this);
+
