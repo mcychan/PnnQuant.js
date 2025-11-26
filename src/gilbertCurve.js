@@ -171,7 +171,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			a0 = (pixel >>> 24) & 0xff;
 
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-		if (saliencies != null && dither && !sortedByYDiff && a0 < a_pix)
+		if (saliencies != null && dither && !sortedByYDiff && a0 > 240 && a0 < a_pix)
 			qPixels[bidx] = ditherPixel(x, y, c2, beta);
 		else if (nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
@@ -363,7 +363,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		height = this.opts.height;
 		pixels = this.opts.pixels;
 		palette = this.opts.palette;
-		saliencies = hasAlpha ? null : this.opts.saliencies;
+		saliencies = this.opts.saliencies;
 		dither = this.opts.dithering;
 		nMaxColors = palette.length;
 		beta = nMaxColors > 4 ? (.6 - .00625 * nMaxColors) : 1;
@@ -425,3 +425,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	}
 
 }).call(this);
+
+
+
+
