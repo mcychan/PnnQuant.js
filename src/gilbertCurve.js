@@ -99,7 +99,8 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 		var r1 = (c2 & 0xff),
 			g1 = (c2 >>> 8) & 0xff,
-			b1 = (c2 >>> 16) & 0xff;
+			b1 = (c2 >>> 16) & 0xff,
+			a1 = (c2 >>> 24) & 0xff;
 		if (nMaxColors < 3 || margin > 6) {
 			var delta = (weight > .0015 && weight < .0025) ? beta : Math.PI;
 			if (nMaxColors > 4 && Y_Diff(r0, g0, b0, r1, g1, b1) > (delta * acceptedDiff)) {
@@ -109,6 +110,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
 				b1 = (c2 >>> 16) & 0xff;
+				a1 = (c2 >>> 24) & 0xff;
 			}
 		}
 		else if (nMaxColors > 4 && (Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff) || U_Diff(r0, g0, b0, r1, g1, b1) > acceptedDiff)) {
@@ -119,6 +121,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			r1 = (c2 & 0xff);
 			g1 = (c2 >>> 8) & 0xff;
 			b1 = (c2 >>> 16) & 0xff;
+			a1 = (c2 >>> 24) & 0xff;
 		}
 
 		if (DITHER_MAX < 16 && nMaxColors > 4 && saliencies[bidx] < .6 && Y_Diff(r0, g0, b0, r1, g1, b1) > margin - 1) {
@@ -126,15 +129,17 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			r1 = r_pix;
 			g1 = g_pix;
 			b1 = b_pix;
+			a1 = a_pix;
 		}
 		if (beta > 1 && Y_Diff(r0, g0, b0, r1, g1, b1) > DITHER_MAX) {
 			c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 			r1 = r_pix;
 			g1 = g_pix;
 			b1 = b_pix;
+			a1 = a_pix;
 		}
 
-		var offset = getColorIndex(a_pix, r1, g1, b1);
+		var offset = getColorIndex(a1, r1, g1, b1);
 		if (lookup[offset] == 0)
 			lookup[offset] = ditherFn(palette, c2, bidx) + 1;
 		return lookup[offset] - 1;
@@ -171,7 +176,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			a0 = (pixel >>> 24) & 0xff;
 
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-		if (saliencies != null && dither && !sortedByYDiff && a0 > 224 && a0 < a_pix)
+		if (saliencies != null && dither && !sortedByYDiff && a0 > 0xE0 && a0 < a_pix)
 			qPixels[bidx] = ditherPixel(x, y, c2, beta);
 		else if (nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
@@ -425,5 +430,3 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	}
 
 }).call(this);
-
-
