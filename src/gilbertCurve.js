@@ -138,6 +138,10 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			b1 = b_pix;
 			a1 = a_pix;
 		}
+		
+		var a0 = (pixel >>> 24) & 0xff;
+		if (a0 <= 0xE0)
+			return ditherFn(palette, c2, bidx);
 
 		var offset = getColorIndex(a1, r1, g1, b1);
 		if (lookup[offset] == 0)
@@ -176,7 +180,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			a0 = (pixel >>> 24) & 0xff;
 
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-		if (saliencies != null && dither && !sortedByYDiff && a0 > 0xE0 && a0 < a_pix)
+		if (saliencies != null && dither && !sortedByYDiff && a0 < a_pix)
 			qPixels[bidx] = ditherPixel(x, y, c2, beta);
 		else if (nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
