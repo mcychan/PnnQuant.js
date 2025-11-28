@@ -378,7 +378,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			tb.Bc += lab1.B;
 			tb.cnt += 1.0;
 			if (saliencies != null)
-				saliencies[i] = (saliencyBase + (1 - saliencyBase) * lab1.L / 100) * a / 255;
+				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 		}
 		this.opts.saliencies = saliencies;
 
@@ -934,7 +934,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 				var lab1 = getLab(a, r, g, b);
 
-				saliencies[i] = (saliencyBase + (1 - saliencyBase) * lab1.L / 100) * a / 255;
+				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 			}
 			this.opts.saliencies = saliencies;
 		}
