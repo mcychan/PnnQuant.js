@@ -363,6 +363,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				g = (this.m_transparentColor >>> 8) & 0xff,
 				b = (this.m_transparentColor >>> 16) & 0xff,
 				a = (this.m_transparentColor >>> 24) & 0xff;
+				pixels[i] = this.m_transparentColor;
 			}
 			
 			var index = getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
@@ -377,7 +378,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			tb.Bc += lab1.B;
 			tb.cnt += 1.0;
 			if (saliencies != null)
-				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
+				saliencies[i] = (saliencyBase + (1 - saliencyBase) * lab1.L / 100) * a / 255;
 		}
 		this.opts.saliencies = saliencies;
 
@@ -562,7 +563,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold) {
 			pixel = transparentColor;
-			a = (pixel >>> 24) & 0xff;
+			a = 0;
 		}
 
 		if(palette.length > 2 && hasAlpha && a > alphaThreshold)
@@ -607,8 +608,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				
 				curdist += Math.sqrt(sqr(lab2.A - lab1.A) + sqr(lab2.B - lab1.B));
 			}
-			else {
-				
+			else {				
 				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
 				curdist += sqr(deltaL_prime_div_k_L_S_L);
 				if (curdist > mindist)
@@ -934,7 +934,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 				var lab1 = getLab(a, r, g, b);
 
-				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
+				saliencies[i] = (saliencyBase + (1 - saliencyBase) * lab1.L / 100) * a / 255;
 			}
 			this.opts.saliencies = saliencies;
 		}
@@ -971,6 +971,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	};
 	
 	PnnLABQuant.prototype.getDitherFn = function getDitherFn() {
+		if (this.m_transparentPixelIndex > -1 || this.opts.colors < 4)
+			return nearestColorIndex;
 		return closestColorIndex;
 	};
 	
