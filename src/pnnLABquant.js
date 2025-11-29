@@ -363,7 +363,6 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				g = (this.m_transparentColor >>> 8) & 0xff,
 				b = (this.m_transparentColor >>> 16) & 0xff,
 				a = (this.m_transparentColor >>> 24) & 0xff;
-				pixels[i] = this.m_transparentColor;
 			}
 			
 			var index = getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
