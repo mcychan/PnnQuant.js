@@ -140,7 +140,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		}
 		
 		var a0 = (pixel >>> 24) & 0xff;
-		if (a0 <= 0xE0)
+		if (a0 <= 0xF0)
 			return ditherFn(palette, c2, bidx);
 
 		var offset = getColorIndex(a1, r1, g1, b1);
@@ -364,7 +364,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		ditherMax |= 0;
 		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = [];
-		lookup = new Uint32Array(65536);
+		lookup = new Uint16Array(65536);
 
 		ditherFn = this.opts.ditherFn;
 		getColorIndex = this.opts.getColorIndex;
