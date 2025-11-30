@@ -62,7 +62,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	var weights = [];
 	var lookup;
 
-	var DITHER_MAX = 9, ditherMax, dither, sortedByYDiff, margin, thresold;
+	var DITHER_MAX = 9, ditherMax, dither, hasAlpha, sortedByYDiff, margin, thresold;
 	var BLOCK_SIZE = 343.0;
 
 	function ditherPixel(x, y, c2, beta)
@@ -180,7 +180,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			a0 = (pixel >>> 24) & 0xff;
 
 		var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-		if (saliencies != null && dither && !sortedByYDiff && a0 < a_pix)
+		if (saliencies != null && dither && !sortedByYDiff && (!hasAlpha || a0 <= a_pix))
 			qPixels[bidx] = ditherPixel(x, y, c2, beta);
 		else if (nMaxColors <= 32 && a_pix > 0xF0) {
 			var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
@@ -224,7 +224,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		for(var j = 0; j < errLength; ++j) {
 			if (Math.abs(error.p[j]) >= ditherMax) {
 				if (sortedByYDiff && saliencies != null)
-					unaccepted = a0 < a_pix;
+					unaccepted = true;
 
 				if (diffuse)
 					error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (ditherMax - 1);
@@ -235,7 +235,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			}
 
 			if (sortedByYDiff && saliencies == null && Math.abs(error.p[j]) >= DITHER_MAX)
-				unaccepted = a0 < a_pix;
+				unaccepted = true;
 		}
 
 		if (unaccepted) {
@@ -347,7 +347,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	GilbertCurve.prototype.dither = function()
 	{
 		errorq = [];
-		var hasAlpha = this.opts.weight < 0;
+		hasAlpha = this.opts.weight < 0;
 		this.opts.weight = weight = Math.abs(this.opts.weight);
 		margin = weight < .0025 ? 12 : weight < .004 ? 8 : 6;
 		sortedByYDiff = this.opts.palette.length >= 128 && weight >= .02 && (!hasAlpha || weight < .18);
