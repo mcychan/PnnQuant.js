@@ -873,10 +873,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var semiTransCount = 0;
 		for (var i = 0; i < pixels.length; ++i) {
 			var a = (pixels[i] >>> 24) & 0xff;
-			if(this.m_transparentPixelIndex > -1 && a > alphaThreshold) {
-				if (this.m_transparentColor == (pixels[i] & 0xffffff))
-					pixels[i] = this.m_transparentColor;
-			}
+			if(this.m_transparentPixelIndex > -1 && a == 0)
+				pixels[i] = this.m_transparentColor;
 			
 			if (a < 0xE0) {
 				if (a == 0) {
@@ -1003,3 +1001,4 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	}
 
 }).call(this);
+
