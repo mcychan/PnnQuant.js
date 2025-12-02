@@ -102,10 +102,11 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			b1 = (c2 >>> 16) & 0xff,
 			a1 = (c2 >>> 24) & 0xff;
 		if (nMaxColors < 3 || margin > 6) {
-			var delta = (weight > .0015 && weight < .0025) ? beta : Math.PI;
-			if (nMaxColors > 4 && Y_Diff(r0, g0, b0, r1, g1, b1) > (delta * acceptedDiff)) {
+			if (nMaxColors > 4 && Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
-				var c1 = saliencies[bidx] < .6 ? pixel : (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
+				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
+				if (weight >= .0015 && saliencies[bidx] < .6)
+					c1 = pixel;
 				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, qPixel, strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
@@ -381,7 +382,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			beta = Math.fround(weight > boundary ? .25 : Math.min(1.5, beta + nMaxColors * weight));
 			if (nMaxColors > 16 && nMaxColors <= 32 && weight < .003)
 				beta += .075;
-			else if (nMaxColors > 32 && nMaxColors < 256)
+			else if (weight < .0015 || (nMaxColors > 32 && nMaxColors < 256))
 				beta += .1;
 			if (nMaxColors >= 64 && (weight > .012 && weight < .0125) || (weight > .025 && weight < .03))
 				beta *= 2;
