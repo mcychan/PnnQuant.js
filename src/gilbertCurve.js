@@ -107,6 +107,8 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 				if (weight >= .0015 && saliencies[bidx] < .6)
 					c1 = pixel;
+				if (Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff))
+					kappa = beta * .55 / saliencies[bidx];
 				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, qPixel, strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
