@@ -105,10 +105,11 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			if (nMaxColors > 4 && Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-				if (weight >= .0015 && saliencies[bidx] < .6)
+				if (weight >= .0015 && saliencies[bidx] < .6) {
 					c1 = pixel;
-				if (Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff))
-					kappa = beta * .55 / saliencies[bidx];
+					if (Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff))
+						kappa = beta * .55 / saliencies[bidx];
+				}
 				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, qPixel, strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
@@ -142,8 +143,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			a1 = a_pix;
 		}
 		
-		var a0 = (pixel >>> 24) & 0xff;
-		if (a0 <= 0xF0)
+		if (hasAlpha)
 			return ditherFn(palette, c2, bidx);
 
 		var offset = getColorIndex(a1, r1, g1, b1);
