@@ -108,7 +108,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				if (weight >= .0015 && saliencies[bidx] < .6)
 					c1 = pixel;
 				if (Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff))
-					kappa = beta * (nMaxColors < 64 ? .55 : .5) / saliencies[bidx];
+					kappa = beta * (weight < .0025 ? .55 : .5) / saliencies[bidx];
 
 				c2 = new BlueNoise({weightB: kappa}).diffuse(c1, qPixel, strength, x, y);
 				r1 = (c2 & 0xff);
