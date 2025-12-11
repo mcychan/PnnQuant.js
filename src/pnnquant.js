@@ -414,8 +414,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if(this.opts.alphaThreshold)
 			alphaThreshold = this.opts.alphaThreshold;
 
-		closestMap.clear();
-		nearestMap.clear();
+		this.clear();
 
 		hasAlpha = false;
 		var semiTransCount = 0;
@@ -514,10 +513,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	};
 
 	PnnQuant.prototype.clear = function() {
-		if (closestMap)
-			closestMap.clear();
-		if (nearestMap)
-			nearestMap.clear();
+		closestMap = new Map();
+		nearestMap = new Map();
 	};
 
 	// expose

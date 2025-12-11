@@ -327,7 +327,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		bin1.nn = nn;
 	}
 	
-	function getQuanFn(nMaxColors, quan_rt) {
+	function GetQuanFn(nMaxColors, quan_rt) {
 		if (quan_rt > 0) {
 			if (quan_rt > 1)
 				return function(cnt) { return Math.fround(Math.pow(cnt, 0.75)); };
@@ -428,7 +428,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return;
 		}
 		
-		var quanFn = getQuanFn(nMaxColors, quan_rt);
+		var quanFn = GetQuanFn(nMaxColors, quan_rt);
 		
 		var j = 0;
 		for (; j < maxbins - 1; ++j) {
@@ -843,12 +843,9 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	};
 	
 	PnnLABQuant.prototype.clear = function() {
-		if (_closestMap)
-			_closestMap.clear();
-		if (_pixelMap)
-			_pixelMap.clear();
-		if (_nearestMap)
-			_nearestMap.clear();
+		_closestMap = new Map();
+		_pixelMap = new Map();
+		_nearestMap = new Map();
 	};
 
 	// expose
