@@ -9,7 +9,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return this.max(b, this.min(c, a));
 		};
 	}
-	
+
 	function PnnQuant(opts) {
 		this.opts = opts;
 		this.hasSemiTransparency = false;
@@ -18,25 +18,24 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		this.palette = [];
 		this.qPixels = [];
 	}
-		
-	
+
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var ratio = .5;
 	var closestMap = new Map(), nearestMap = new Map();
-	
+
 	var coeffs = [
 		[0.299, 0.587, 0.114],
 		[-0.14713, -0.28886, 0.436],
 		[0.615, -0.51499, -0.10001]
 	];
-	
+
 	function PnnBin() {
 		this.ac = this.rc = this.gc = this.bc = 0;
 		this.cnt = this.err = 0.0;
 		this.nn = this.fw = this.bk = this.tm = this.mtm = 0;
 	}
-	
+
 	function getARGBIndex(a, r, g, b, hasSemiTransparency, hasTransparency) {
 		if (hasSemiTransparency)
 			return (a & 0xF0) << 8 | (r & 0xF0) << 4 | (g & 0xF0) | (b >> 4);
@@ -44,11 +43,11 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return (a & 0x80) << 8 | (r & 0xF8) << 7 | (g & 0xF8) << 2 | (b >> 3);
 		return (r & 0xF8) << 8 | (g & 0xFC) << 3 | (b >> 3);
 	}
-	
+
 	function sqr(value) {
 		return value * value;
 	}
-	
+
 	function find_nn(bins, idx) {
 		var nn = 0;
 		var err = 1e100;
@@ -109,7 +108,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		bin1.err = Math.fround(err);
 		bin1.nn = nn;
 	}
-	
+
 	function getQuanFn(nMaxColors, quan_rt) {
 		if (quan_rt > 0) {
 			if (nMaxColors < 64)
@@ -120,7 +119,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return function(cnt) { return Math.cbrt(cnt) | 0; };
 		return function(cnt) { return cnt; };
 	}
-	
+
 	PnnQuant.prototype.pnnquan = function(pixels, nMaxColors) {
 		this.clear();
 		var quan_rt = 1;
@@ -334,7 +333,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		nearestMap.set(pixel, k);
 		return k;
 	}
-	
+
 	function closestColorIndex(palette, pixel, pos) {
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold)
@@ -475,17 +474,17 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			var k = this.getDitherFn()(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
 			this.palette[k] = this.m_transparentColor;
 		}
-		
+
 		this.opts.ditherFn = this.getDitherFn();
 		this.opts.getColorIndex = this.getColorIndex;
 		this.opts.palette = this.palette;
 		return this.palette;
 	};
-	
+
 	PnnQuant.prototype.getIndexedPixels = function() {
 		return this.qPixels;
 	};
-	
+
 	PnnQuant.prototype.getPalette = function() {
 		return this.palette.buffer;
 	};
@@ -510,10 +509,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var quant = this;
 		return new Promise(function(resolve, reject) {
 			var result = quant.quantizeImage();
-			if(quant.opts.paletteOnly)
-				resolve({ pal8: result, indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
-			else
-				resolve({ img8: result, pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
+			resolve({ pal8: result, indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
 		});
 	};
 
