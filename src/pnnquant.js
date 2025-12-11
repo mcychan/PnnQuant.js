@@ -121,9 +121,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		return function(cnt) { return cnt; };
 	}
 	
-	PnnQuant.prototype.pnnquan = function pnnquan(pixels, nMaxColors) {
-		closestMap.clear();
-		nearestMap.clear();
+	PnnQuant.prototype.pnnquan = function(pixels, nMaxColors) {
+		this.clear();
 		var quan_rt = 1;
 		var bins = new Array(65536);
 
@@ -410,7 +409,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		return closest[idx];
 	}
 
-	PnnQuant.prototype.quantizeImage = function quantizeImage() {
+	PnnQuant.prototype.quantizeImage = function() {
 		var pixels = this.opts.pixels, width = this.opts.width, height = this.opts.height,
 			nMaxColors = this.opts.colors, dither = this.opts.dithering;
 		if(this.opts.alphaThreshold)
@@ -483,31 +482,31 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		return this.palette;
 	};
 	
-	PnnQuant.prototype.getIndexedPixels = function getIndexedPixels() {
+	PnnQuant.prototype.getIndexedPixels = function() {
 		return this.qPixels;
 	};
 	
-	PnnQuant.prototype.getPalette = function getPalette() {
+	PnnQuant.prototype.getPalette = function() {
 		return this.palette.buffer;
 	};
 	
-	PnnQuant.prototype.getImgType = function getImgType() {
+	PnnQuant.prototype.getImgType = function() {
 		return this.opts.colors > 256 || this.hasSemiTransparency ? "image/png" : "image/gif";
 	};
 	
-	PnnQuant.prototype.getTransparentIndex = function getTransparentIndex() {
+	PnnQuant.prototype.getTransparentIndex = function() {
 		return this.m_transparentPixelIndex > -1 ? 0 : -1;
 	};
 	
-	PnnQuant.prototype.getDitherFn = function getDitherFn() {
+	PnnQuant.prototype.getDitherFn = function() {
 		return this.opts.dithering ? nearestColorIndex : closestColorIndex;
 	};
 	
-	PnnQuant.prototype.getColorIndex = function getColorIndex(a, r, g, b) {
+	PnnQuant.prototype.getColorIndex = function(a, r, g, b) {
 		return getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
 	};
 	
-	PnnQuant.prototype.getResult = function getResult() {
+	PnnQuant.prototype.getResult = function() {
 		var quant = this;
 		return new Promise(function(resolve, reject) {
 			var result = quant.quantizeImage();
@@ -516,6 +515,13 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			else
 				resolve({ img8: result, pal8: quant.getPalette(), indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
 		});
+	};
+
+	PnnQuant.prototype.clear = function() {
+		if (closestMap)
+			closestMap.clear();
+		if (nearestMap)
+			nearestMap.clear();
 	};
 
 	// expose
