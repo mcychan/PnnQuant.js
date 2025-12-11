@@ -118,7 +118,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 				if (nMaxColors > 32)
-					beta * normalDistribution(beta) * saliencies[bidx];
+					kappa = beta * normalDistribution(beta) * saliencies[bidx];
 				else {
 					if (weight >= .0015 && saliencies[bidx] < .6)
 						c1 = pixel;

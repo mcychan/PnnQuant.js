@@ -14,6 +14,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		return Math.floor(Math.random() * (max + 1));
 	};
 
+	function Sqr(value) {
+		return value * value;
+	}
+
 	function PnnLABQuant(opts) {
 		this.opts = opts;
 		this.hasSemiTransparency = false;
@@ -42,7 +46,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		[0.615, -0.51499, -0.10001]
 	];
 
-	function Pnnbin() {
+	function _Pnnbin() {
 		this.ac = this.Lc = this.Ac = this.Bc = 0;
 		this.cnt = 0;
 		this.nn = this.fw = this.bk = this.tm = this.mtm = 0;
@@ -51,8 +55,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 	function pivotXyzComponent(component) {
 		return component > XYZ_EPSILON
-				? Math.fround(Math.cbrt(component))
-				: Math.fround((XYZ_KAP_PA * component + 16) / 116.0);
+			? Math.fround(Math.cbrt(component))
+			: Math.fround((XYZ_KAP_PA * component + 16) / 116.0);
 	}
 
 	function RGB2LAB(A, R, G, B)
@@ -233,16 +237,12 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			deltaR_T;
 	}
 
-	function GetARGBIndex(a, r, g, b, _hasSemiTransparency, hasTransparency) {
-		if (_hasSemiTransparency)
+	function GetARGBIndex(a, r, g, b, hasSemiTransparency, hasTransparency) {
+		if (hasSemiTransparency)
 			return (a & 0xF0) << 8 | (r & 0xF0) << 4 | (g & 0xF0) | (b >> 4);
 		if (hasTransparency)
 			return (a & 0x80) << 8 | (r & 0xF8) << 7 | (g & 0xF8) << 2 | (b >> 3);
 		return (r & 0xF8) << 8 | (g & 0xFC) << 3 | (b >> 3);
-	}
-
-	function Sqr(value) {
-		return value * value;
 	}
 
 	function getLab(a, r, g, b)
@@ -368,7 +368,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			var lab1 = getLab(a, r, g, b);
 			
 			if (bins[index] == null)
-				bins[index] = new Pnnbin();
+				bins[index] = new _Pnnbin();
 			var tb = bins[index];
 			tb.ac += a;
 			tb.Lc += lab1.L;
@@ -732,7 +732,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			var a = (pixels[i] >>> 24) & 0xff;
 			if(this.m_transparentPixelIndex > -1 && a == 0)
 				pixels[i] = this.m_transparentColor;
-			
+
 			if (a < 0xE0) {
 				if (a == 0) {
 					this.m_transparentPixelIndex = i;
