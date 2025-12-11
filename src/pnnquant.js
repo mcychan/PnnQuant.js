@@ -1,6 +1,6 @@
 /* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
 Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
-Copyright (c) 2018-2023 Miller Cy Chan
+Copyright (c) 2018-2025 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function(){
@@ -136,9 +136,9 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			a = (pixels[i] >>> 24) & 0xff;
 			
 			if (a <= alphaThreshold) {
-				r = this.m_transparentColor & 0xff,
-				g = (this.m_transparentColor >>> 8) & 0xff,
-				b = (this.m_transparentColor >>> 16) & 0xff,
+				r = this.m_transparentColor & 0xff;
+				g = (this.m_transparentColor >>> 8) & 0xff;
+				b = (this.m_transparentColor >>> 16) & 0xff;
 				a = (this.m_transparentColor >>> 24) & 0xff;
 			}
 			
@@ -409,148 +409,7 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];
 	}
-	
-	function CalcDitherPixel(a, r, g, b, clamp, rowerr, cursor, noBias)
-	{
-		var ditherPixel = new Int32Array(4);
-		if (noBias) {
-			ditherPixel[0] = clamp[((rowerr[cursor] + 0x1008) >> 4) + r];
-			ditherPixel[1] = clamp[((rowerr[cursor + 1] + 0x1008) >> 4) + g];
-			ditherPixel[2] = clamp[((rowerr[cursor + 2] + 0x1008) >> 4) + b];
-			ditherPixel[3] = clamp[((rowerr[cursor + 3] + 0x1008) >> 4) + a];
-			return ditherPixel;
-		}
 
-		ditherPixel[0] = clamp[((rowerr[cursor] + 0x2010) >> 5) + r];
-		ditherPixel[1] = clamp[((rowerr[cursor + 1] + 0x1008) >> 4) + g];
-		ditherPixel[2] = clamp[((rowerr[cursor + 2] + 0x2010) >> 5) + b];
-		ditherPixel[3] = a;
-		return ditherPixel;
-	}
-	
-	PnnQuant.prototype.quantize_image = function quantize_image(pixels, nMaxColors, width, height, dither) {
-		var qPixels = nMaxColors > 256 ? new Uint16Array(pixels.length) : new Uint8Array(pixels.length);
-		var pixelIndex = 0;
-		if (dither)
-		{
-			const DJ = 4, BLOCK_SIZE = 256, DITHER_MAX = 20;
-			var err_len = (width + 2) * DJ;
-			var clamp = new Int32Array(DJ * BLOCK_SIZE);
-			var limtb = new Int32Array(2 * BLOCK_SIZE);
-
-			for (var i = 0; i < BLOCK_SIZE; ++i)
-			{
-				clamp[i] = 0;
-				clamp[i + BLOCK_SIZE] = i;
-				clamp[i + BLOCK_SIZE * 2] = 0xff;
-				clamp[i + BLOCK_SIZE * 3] = 0xff;
-
-				limtb[i] = -DITHER_MAX;
-				limtb[i + BLOCK_SIZE] = DITHER_MAX;
-			}
-			for (var i = -DITHER_MAX; i <= DITHER_MAX; ++i)
-				limtb[i + BLOCK_SIZE] = i;
-
-			var noBias = this.hasSemiTransparency || nMaxColors < 64;
-			var dir = 1;
-			var row0 = new Int32Array(err_len);
-			var row1 = new Int32Array(err_len);
-			var lookup = new Int32Array(65536);
-			for (var i = 0; i < height; ++i)
-			{
-				if (dir < 0)
-					pixelIndex += width - 1;
-
-				var cursor0 = DJ, cursor1 = width * DJ;
-				row1[cursor1] = row1[cursor1 + 1] = row1[cursor1 + 2] = row1[cursor1 + 3] = 0;
-				for (var j = 0; j < width; ++j)
-				{
-					var r = (pixels[pixelIndex] & 0xff),
-					g = (pixels[pixelIndex] >>> 8) & 0xff,
-					b = (pixels[pixelIndex] >>> 16) & 0xff,
-					a = (pixels[pixelIndex] >>> 24) & 0xff;
-
-					var ditherPixel = CalcDitherPixel(a, r, g, b, clamp, row0, cursor0, noBias);
-					var r_pix = ditherPixel[0];
-					var g_pix = ditherPixel[1];
-					var b_pix = ditherPixel[2];
-					var a_pix = ditherPixel[3];
-
-					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
-					if(noBias) {
-						var offset = getARGBIndex(a_pix, r_pix, g_pix, b_pix, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
-						if (lookup[offset] == 0)
-							lookup[offset] = (a == 0) ? 1 : nearestColorIndex(this.palette, c1, i + j) + 1;
-						qPixels[pixelIndex] = lookup[offset] - 1;
-					}
-					else 
-						qPixels[pixelIndex] = (a == 0) ? 0 : nearestColorIndex(this.palette, c1, i + j);
-
-					var c2 = this.palette[qPixels[pixelIndex]];
-					var r2 = (c2 & 0xff),
-					g2 = (c2 >>> 8) & 0xff,
-					b2 = (c2 >>> 16) & 0xff,
-					a2 = (c2 >>> 24) & 0xff;
-
-					r_pix = limtb[r_pix - r2 + BLOCK_SIZE];
-					g_pix = limtb[g_pix - g2 + BLOCK_SIZE];
-					b_pix = limtb[b_pix - b2 + BLOCK_SIZE];
-					a_pix = limtb[a_pix - a2 + BLOCK_SIZE];
-
-					var k = r_pix * 2;
-					row1[cursor1 - DJ] = r_pix;
-					row1[cursor1 + DJ] += (r_pix += k);
-					row1[cursor1] += (r_pix += k);
-					row0[cursor0 + DJ] += (r_pix + k);
-
-					k = g_pix * 2;
-					row1[cursor1 + 1 - DJ] = g_pix;
-					row1[cursor1 + 1 + DJ] += (g_pix += k);
-					row1[cursor1 + 1] += (g_pix += k);
-					row0[cursor0 + 1 + DJ] += (g_pix + k);
-
-					k = b_pix * 2;
-					row1[cursor1 + 2 - DJ] = b_pix;
-					row1[cursor1 + 2 + DJ] += (b_pix += k);
-					row1[cursor1 + 2] += (b_pix += k);
-					row0[cursor0 + 2 + DJ] += (b_pix + k);
-
-					k = a_pix * 2;
-					row1[cursor1 + 3 - DJ] = a_pix;
-					row1[cursor1 + 3 + DJ] += (a_pix += k);
-					row1[cursor1 + 3] += (a_pix += k);
-					row0[cursor0 + 3 + DJ] += (a_pix + k);
-
-					cursor0 += DJ;
-					cursor1 -= DJ;
-					pixelIndex += dir;
-				}
-				if ((i % 2) == 1)
-					pixelIndex += width + 1;
-
-				dir *= -1;
-				var temp = row0; row0 = row1; row1 = temp;
-			}
-			
-			this.qPixels = qPixels;
-			return this.qPixels;
-		}
-
-		for (var i = 0; i < qPixels.length; ++i)
-			qPixels[i] = this.getDitherFn()(this.palette, pixels[i], i);
-
-		this.qPixels = qPixels;
-		return this.qPixels;
-	};
-	
-	function processImagePixels(palette, qPixels) {
-		var qPixel32s = new Uint32Array(qPixels.length);
-		for (var i = 0; i < qPixels.length; ++i)
-			qPixel32s[i] = palette[qPixels[i]];
-
-		return qPixel32s;
-	}
-	
 	PnnQuant.prototype.quantizeImage = function quantizeImage() {
 		var pixels = this.opts.pixels, width = this.opts.width, height = this.opts.height,
 			nMaxColors = this.opts.colors, dither = this.opts.dithering;
@@ -618,15 +477,10 @@ Copyright (c) 2018-2023 Miller Cy Chan
 			this.palette[k] = this.m_transparentColor;
 		}
 		
-		if(this.opts.paletteOnly) {
-			this.opts.ditherFn = this.getDitherFn();
-			this.opts.getColorIndex = this.getColorIndex;
-			this.opts.palette = this.palette;
-			return this.palette;
-		}
-
-		this.qPixels = this.quantize_image(pixels, nMaxColors, width, height, dither);
-		return processImagePixels(this.palette, this.qPixels);
+		this.opts.ditherFn = this.getDitherFn();
+		this.opts.getColorIndex = this.getColorIndex;
+		this.opts.palette = this.palette;
+		return this.palette;
 	};
 	
 	PnnQuant.prototype.getIndexedPixels = function getIndexedPixels() {

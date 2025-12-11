@@ -5,8 +5,7 @@ importScripts('pnnLABquant.min.js');
 
 function quantizeImage(opts) {
 	var quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);
-	opts.paletteOnly = true;
-	
+
 	return quant.getResult().then(function(result) {
 		if (opts.dithering || opts.colors <= 32)
 			return Promise.all([result, new GilbertCurve(opts).getResult()]);
