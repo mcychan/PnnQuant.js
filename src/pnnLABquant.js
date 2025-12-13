@@ -10,8 +10,26 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		};
 	}
 
+	function randn_bm(min, max, skew) {
+		var u = 0, v = 0;
+		while(u === 0)
+			u = Math.random(); //Converting [0,1) to (0,1)
+		while(v === 0)
+			v = Math.random();
+		var num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+	  
+		num = num / 10.0 + 0.5; // Translate to 0 -> 1
+		if (num > 1 || num < 0) 
+			num = randn_bm(min, max, skew); // resample between 0 and 1 if out of range	  
+		else {
+			num = Math.pow(num, skew); // Skew
+			num *= max - min; // Stretch to fill range
+			num += min; // offset to min
+		}
+		return num;
+	}
 	Math.randomInt = function(max) {
-		return Math.floor(Math.random() * (max + 1));
+		return Math.floor(randn_bm(0, max, 1));
 	};
 
 	function Sqr(value) {
