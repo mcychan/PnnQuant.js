@@ -10,27 +10,11 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		};
 	}
 
-	function randn_bm(min, max, skew) {
-		var u = 0, v = 0;
-		while(u === 0)
-			u = Math.random(); //Converting [0,1) to (0,1)
-		while(v === 0)
-			v = Math.random();
-		var num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-	  
-		num = num / 10.0 + 0.5; // Translate to 0 -> 1
-		if (num > 1 || num < 0) 
-			num = randn_bm(min, max, skew); // resample between 0 and 1 if out of range	  
-		else {
-			num = Math.pow(num, skew); // Skew
-			num *= max - min; // Stretch to fill range
-			num += min; // offset to min
-		}
-		return num;
+	function Random() {
+		this.nextInt = function(max) {
+		    return Math.floor(Math.random() * (max + 1));
+		};
 	}
-	Math.randomInt = function(max) {
-		return Math.floor(randn_bm(0, max, 1));
-	};
 
 	function Sqr(value) {
 		return value * value;
@@ -47,7 +31,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 	var _alphaThreshold = 0xF, _hasAlpha = false, _hasSemiTransparency = false, _transparentColor;
 	var _PR = 0.299, _PG = 0.587, _PB = 0.114, _PA = .3333;
-	var _ratio = 1.0;
+	var _random = new Random(), _ratio = 1.0;
 	var _closestMap = new Map(), _pixelMap = new Map(), _nearestMap = new Map();
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
@@ -727,7 +711,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 		
 		var idx = 1;
-		if (closest[2] == 0 || (Math.randomInt(closest[3] + closest[2])) <= closest[3])
+		if (closest[2] == 0 || (_random.nextInt(closest[3] + closest[2])) <= closest[3])
 			idx = 0;
 
 		var MAX_ERR = palette.length;
@@ -864,6 +848,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		_closestMap = new Map();
 		_pixelMap = new Map();
 		_nearestMap = new Map();
+		_random = new Random()
 	};
 
 	// expose
