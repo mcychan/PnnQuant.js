@@ -3,20 +3,20 @@ Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
 Copyright (c) 2018-2025 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
-(function(){
-	if(!Math.clamp) {
-		Math.clamp = function(a,b,c){
+(function () {
+	if (!Math.clamp) {
+		Math.clamp = function (a,b,c) {
 			return this.max(b, this.min(c, a));
 		};
 	}
 
 	function Random() {
-		this.nextInt = function(max) {
-		    return Math.floor(Math.random() * (max + 1));
+		this.nextInt = function (max) {
+			return Math.floor(Math.random() * (max + 1));
 		};
 	}
 
-	function Sqr(value) {
+	function sqr(value) {
 		return value * value;
 	}
 
@@ -29,26 +29,26 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		this.qPixels = [];
 	}
 
-	var _alphaThreshold = 0xF, _hasAlpha = false, _hasSemiTransparency = false, _transparentColor;
-	var _PR = 0.299, _PG = 0.587, _PB = 0.114, _PA = .3333;
-	var _random = new Random(), _ratio = 1.0;
-	var _closestMap = new Map(), _pixelMap = new Map(), _nearestMap = new Map();
+	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
+	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
+	var random = new Random(), ratio = 1.0;
+	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
-	var XYZ_EPSILON = 0.008856, XYZ_KAP_PA = 903.3;
+	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
 	
 	function Lab() {
 		this.alpha = 255;
 		this.A = this.B = this.L = 0;
 	}
 
-	var _coeffs = [
+	var coeffs = [
 		[0.299, 0.587, 0.114],
 		[-0.14713, -0.28886, 0.436],
 		[0.615, -0.51499, -0.10001]
 	];
 
-	function _Pnnbin() {
+	function Pnnbin() {
 		this.ac = this.Lc = this.Ac = this.Bc = 0;
 		this.cnt = 0;
 		this.nn = this.fw = this.bk = this.tm = this.mtm = 0;
@@ -58,7 +58,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	function pivotXyzComponent(component) {
 		return component > XYZ_EPSILON
 			? Math.fround(Math.cbrt(component))
-			: Math.fround((XYZ_KAP_PA * component + 16) / 116.0);
+			: Math.fround((XYZ_KAPPA * component + 16) / 116.0);
 	}
 
 	function RGB2LAB(A, R, G, B)
@@ -74,10 +74,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var z = pivotXyzComponent(100 * (sr * 0.0193 + sg * 0.1192 + sb * 0.9505) / XYZ_WHITE_REFERENCE_Z); 
 
 		var lab = new Lab();
-		lab.alpha = A,
-			lab.L = Math.max(0, 116 * y - 16),
-			lab.A = 500 * (x - y),
-			lab.B = 200 * (y - z);
+		lab.alpha = A;
+		lab.L = Math.max(0, 116 * y - 16);
+		lab.A = 500 * (x - y);
+		lab.B = 200 * (y - z);
 		return lab;
 	}
 
@@ -87,10 +87,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var fx = lab.A / 500 + fy;
 		var fz = fy - lab.B / 200.0;
 		var tmp = fx * fx * fx;
-		var xr = tmp > XYZ_EPSILON ? tmp : (116.0 * fx - 16) / XYZ_KAP_PA;
-		var yr = lab.L > XYZ_KAP_PA * XYZ_EPSILON ? fy * fy * fy : lab.L / XYZ_KAP_PA;
+		var xr = tmp > XYZ_EPSILON ? tmp : (116.0 * fx - 16) / XYZ_KAPPA;
+		var yr = lab.L > XYZ_KAPPA * XYZ_EPSILON ? fy * fy * fy : lab.L / XYZ_KAPPA;
 		tmp = fz * fz * fz;
-		var zr = tmp > XYZ_EPSILON ? tmp : (116.0 * fz - 16) / XYZ_KAP_PA;
+		var zr = tmp > XYZ_EPSILON ? tmp : (116.0 * fz - 16) / XYZ_KAPPA;
 		var x = xr * XYZ_WHITE_REFERENCE_X;
 		var y = yr * XYZ_WHITE_REFERENCE_Y;
 		var z = zr * XYZ_WHITE_REFERENCE_Z;
@@ -119,7 +119,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var k_L = 1.0;
 		var deltaLPrime = lab2.L - lab1.L;
 		var barLPrime = (lab1.L + lab2.L) / 2.0;
-		var S_L = 1 + ((0.015 * Sqr(barLPrime - 50.0)) / Math.sqrt(20 + Sqr(barLPrime - 50.0)));
+		var S_L = 1 + ((0.015 * sqr(barLPrime - 50.0)) / Math.sqrt(20 + sqr(barLPrime - 50.0)));
 		return Math.fround(deltaLPrime / (k_L * S_L));
 	}
 
@@ -232,14 +232,10 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		var barCPrime = {}, barhPrime = {};
 		var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
 		var deltaR_T = R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
-		return
-			Sqr(deltaL_prime_div_k_L_S_L) +
-			Sqr(deltaC_prime_div_k_L_S_L) +
-			Sqr(deltaH_prime_div_k_L_S_L) +
-			deltaR_T;
+		return sqr(deltaL_prime_div_k_L_S_L) + sqr(deltaC_prime_div_k_L_S_L) + sqr(deltaH_prime_div_k_L_S_L) + deltaR_T;
 	}
 
-	function GetARGBIndex(a, r, g, b, hasSemiTransparency, hasTransparency) {
+	function getARGBIndex(a, r, g, b, hasSemiTransparency, hasTransparency) {
 		if (hasSemiTransparency)
 			return (a & 0xF0) << 8 | (r & 0xF0) << 4 | (g & 0xF0) | (b >> 4);
 		if (hasTransparency)
@@ -250,16 +246,16 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	function getLab(a, r, g, b)
 	{
 		var argb = (a << 24) | (b << 16) | (g << 8) | r;
-		var lab1 = _pixelMap.get(argb);
-		if (!_pixelMap.has(argb))
+		var lab1 = pixelMap.get(argb);
+		if (!pixelMap.has(argb))
 		{
 			lab1 = RGB2LAB(a, r, g, b);
-			_pixelMap.set(argb, lab1);
+			pixelMap.set(argb, lab1);
 		}
 		return lab1;
 	}
 
-	function Find_nn(bins, idx, texicab) {
+	function find_nn(bins, idx, texicab) {
 		var nn = 0;
 		var err = 1e100;
 
@@ -274,51 +270,51 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 			var lab2 = new Lab();
 			lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
-			var alphaDiff = _hasSemiTransparency ? Sqr(lab2.alpha - lab1.alpha) / Math.exp(1.5) : 0;
+			var alphaDiff = hasSemiTransparency ? sqr(lab2.alpha - lab1.alpha) / Math.exp(1.5) : 0;
 			var nerr = nerr2 * alphaDiff;
 			if (nerr >= err)
 				continue;
 			
-			if(!texicab) {
-				nerr += (1 - _ratio) * nerr2 * Sqr(lab2.L - lab1.L);
+			if (!texicab) {
+				nerr += (1 - ratio) * nerr2 * sqr(lab2.L - lab1.L);
 				if (nerr >= err)
 					continue;
 
-				nerr += (1 - _ratio) * nerr2 * Sqr(lab2.A - lab1.A);
+				nerr += (1 - ratio) * nerr2 * sqr(lab2.A - lab1.A);
 				if (nerr >= err)
 					continue;
 
-				nerr += (1 - _ratio) * nerr2 * Sqr(lab2.B - lab1.B);
+				nerr += (1 - ratio) * nerr2 * sqr(lab2.B - lab1.B);
 			}
 			else {
-				nerr += (1 - _ratio) * nerr2 * Math.abs(lab2.L - lab1.L);
+				nerr += (1 - ratio) * nerr2 * Math.abs(lab2.L - lab1.L);
 				if (nerr >= err)
 					continue;
 	
-				nerr += (1 - _ratio) * nerr2 * Math.sqrt(Sqr(lab2.A - lab1.A) + Sqr(lab2.B - lab1.B));
+				nerr += (1 - ratio) * nerr2 * Math.sqrt(sqr(lab2.A - lab1.A) + sqr(lab2.B - lab1.B));
 			}
 
 			if (nerr >= err)
 				continue;
 
 			var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
-			nerr += _ratio * nerr2 * Sqr(deltaL_prime_div_k_L_S_L);
+			nerr += ratio * nerr2 * sqr(deltaL_prime_div_k_L_S_L);
 			if (nerr >= err)
 				continue;
 
 			var a1Prime = {}, a2Prime = {}, CPrime1 = {}, CPrime2 = {};
 			var deltaC_prime_div_k_L_S_L = C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2);
-			nerr += _ratio * nerr2 * Sqr(deltaC_prime_div_k_L_S_L);
+			nerr += ratio * nerr2 * sqr(deltaC_prime_div_k_L_S_L);
 			if (nerr >= err)
 				continue;
 
 			var barCPrime = {}, barhPrime = {};
 			var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
-			nerr += _ratio * nerr2 * Sqr(deltaH_prime_div_k_L_S_L);
+			nerr += ratio * nerr2 * sqr(deltaH_prime_div_k_L_S_L);
 			if (nerr >= err)
 				continue;
 
-			nerr += _ratio * nerr2 * R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
+			nerr += ratio * nerr2 * R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
 			if (nerr >= err)
 				continue;
 
@@ -329,22 +325,22 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		bin1.nn = nn;
 	}
 	
-	function GetQuanFn(nMaxColors, quan_rt) {
+	function getQuanFn(nMaxColors, quan_rt) {
 		if (quan_rt > 0) {
 			if (quan_rt > 1)
-				return function(cnt) { return Math.fround(Math.pow(cnt, 0.75)); };
+				return function (cnt) { return Math.fround(Math.pow(cnt, 0.75)); };
 			if (nMaxColors < 64)
-				return function(cnt) {
+				return function (cnt) {
 					return Math.sqrt(cnt) | 0;
 				};
-			return function(cnt) {
+			return function (cnt) {
 				return Math.fround(Math.sqrt(cnt));
 			};
 		}
-		return function(cnt) { return cnt; };
+		return function (cnt) { return cnt; };
 	}
 	
-	PnnLABQuant.prototype.pnnquan = function(pixels, nMaxColors) {
+	PnnLABQuant.prototype.pnnquan = function (pixels, nMaxColors) {
 		var quan_rt = 1;
 		var bins = new Array(65536);
 		var saliencies = nMaxColors >= 128 ? null : new Float32Array(pixels.length);
@@ -359,18 +355,18 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			b = (pixels[i] >>> 16) & 0xff,
 			a = (pixels[i] >>> 24) & 0xff;
 
-			if (a <= _alphaThreshold) {
+			if (a <= alphaThreshold) {
 				r = this.m_transparentColor & 0xff;
 				g = (this.m_transparentColor >>> 8) & 0xff;
 				b = (this.m_transparentColor >>> 16) & 0xff;
 				a = (this.m_transparentColor >>> 24) & 0xff;
 			}
 			
-			var index = GetARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
+			var index = getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
 			var lab1 = getLab(a, r, g, b);
 			
 			if (bins[index] == null)
-				bins[index] = new _Pnnbin();
+				bins[index] = new Pnnbin();
 			var tb = bins[index];
 			tb.ac += a;
 			tb.Lc += lab1.L;
@@ -397,14 +393,14 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			bins[maxbins++] = bins[i];
 		}
 		
-		var proportional = Sqr(nMaxColors) / maxbins;
+		var proportional = sqr(nMaxColors) / maxbins;
 		if ((this.m_transparentPixelIndex >= 0 || this.hasSemiTransparency) && nMaxColors < 32)
 			quan_rt = -1;
 		
 		var weight = this.opts.weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
 		if ((nMaxColors < 16 && weight < .0075) || weight < .001 || (weight > .0015 && weight < .0022))
 			quan_rt = 2;
-		if (weight < .04 && _PG < 1 && _PG >= _coeffs[0][1]) {
+		if (weight < .04 && PG < 1 && PG >= coeffs[0][1]) {
 			if (nMaxColors >= 64)
 				quan_rt = 0;
 		}
@@ -414,14 +410,14 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				quan_rt = 2;
 		}
 		
-		if(_pixelMap.size <= nMaxColors) {
+		if (pixelMap.size <= nMaxColors) {
 			/* Fill palette */
-			var palette = new Uint32Array(_pixelMap.size);
+			var palette = new Uint32Array(pixelMap.size);
 			var k = 0;
-			_pixelMap.forEach(function(value, pixel) {
+			pixelMap.forEach(function (value, pixel) {
 				palette[k++] = pixel;
 
-				if(k > 1 && ((pixel >>> 24) & 0xff) == 0) {
+				if (k > 1 && ((pixel >>> 24) & 0xff) == 0) {
 					palette[k - 1] = palette[0]; palette[0] = pixel;
 				}
 			});
@@ -430,7 +426,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return;
 		}
 		
-		var quanFn = GetQuanFn(nMaxColors, quan_rt);
+		var quanFn = getQuanFn(nMaxColors, quan_rt);
 		
 		var j = 0;
 		for (; j < maxbins - 1; ++j) {
@@ -443,33 +439,33 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		
 		var texicab = proportional > .0275;
 		
-		if(this.hasSemiTransparency)
-			_ratio = .5;
+		if (this.hasSemiTransparency)
+			ratio = .5;
 		else if (quan_rt != 0 && nMaxColors < 64) {
 			if (proportional > .018 && proportional < .022)
-				_ratio = Math.min(1.0, proportional + weight * Math.exp(3.13));
-			else if(proportional > .1)
-				_ratio = Math.min(1.0, 1.0 - weight);
-			else if(proportional > .04)
-				_ratio = Math.min(1.0, weight * Math.exp(1.56));
-			else if(proportional > .025 && (weight < .002 || weight > .0022))
-				_ratio = Math.min(1.0, proportional + weight * Math.exp(3.66));
+				ratio = Math.min(1.0, proportional + weight * Math.exp(3.13));
+			else if (proportional > .1)
+				ratio = Math.min(1.0, 1.0 - weight);
+			else if (proportional > .04)
+				ratio = Math.min(1.0, weight * Math.exp(1.56));
+			else if (proportional > .025 && (weight < .002 || weight > .0022))
+				ratio = Math.min(1.0, proportional + weight * Math.exp(3.66));
 			else
-				_ratio = Math.min(1.0, proportional + weight * Math.exp(1.718));
+				ratio = Math.min(1.0, proportional + weight * Math.exp(1.718));
 		}
-		else if(nMaxColors > 256)
-			_ratio = Math.min(1.0, 1 - 1.0 / proportional);
+		else if (nMaxColors > 256)
+			ratio = Math.min(1.0, 1 - 1.0 / proportional);
 		else
-			_ratio = Math.min(1.0, 1 - weight * .7);
+			ratio = Math.min(1.0, 1 - weight * .7);
 		
 		if (!this.hasSemiTransparency && quan_rt < 0)
-			_ratio = Math.min(1.0, weight * Math.exp(3.13));
+			ratio = Math.min(1.0, weight * Math.exp(3.13));
 		
 		var h, l, l2;
 		/* Initialize nearest neighbors and build heap of them */
 		var heap = new Uint32Array(bins.length + 1);
 		for (var i = 0; i < maxbins; ++i) {
-			Find_nn(bins, i, texicab);
+			find_nn(bins, i, texicab);
 			/* Push slot on heap */
 			var err = bins[i].err;
 			for (l = ++heap[0]; l > 1; l = l2)
@@ -486,7 +482,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			var dir = proportional > .04 ? 1 : -1;
 			var margin = dir > 0 ? .002 : .0025;
 			var delta = weight > margin && weight < .003 ? 1.872 : 1.632;
-			_ratio = Math.min(1.0, proportional + dir * weight * Math.exp(delta));
+			ratio = Math.min(1.0, proportional + dir * weight * Math.exp(delta));
 		}
 
 		/* Merge bins which increase error the least */
@@ -504,7 +500,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 					b1 = heap[1] = heap[heap[0]--];
 				else /* Too old error value */
 				{
-					Find_nn(bins, b1, texicab && proportional < 1);
+					find_nn(bins, b1, texicab && proportional < 1);
 					tb.tm = i;
 				}
 				/* Push slot down */
@@ -538,7 +534,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 
 		/* Fill palette */
-		if(extbins < 0)
+		if (extbins < 0)
 			this.palette = new Uint32Array(maxbins);
 		
 		var k = 0;
@@ -554,19 +550,19 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 	};
 	
-	function NearestColorIndex(palette, pixel, pos) {
-		var nearest = _nearestMap.get(pixel);
-		if (_nearestMap.has(pixel))
+	function nearestColorIndex(palette, pixel, pos) {
+		var nearest = nearestMap.get(pixel);
+		if (nearestMap.has(pixel))
 			return nearest;
 
 		var k = 0;
 		var a = (pixel >>> 24) & 0xff;
-		if (a <= _alphaThreshold) {
-			pixel = _transparentColor;
+		if (a <= alphaThreshold) {
+			pixel = transparentColor;
 			a = 0;
 		}
 
-		if(palette.length > 2 && _hasAlpha && a > _alphaThreshold)
+		if (palette.length > 2 && hasAlpha && a > alphaThreshold)
 			k = 1;
 
 		var r = (pixel & 0xff),
@@ -580,49 +576,49 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			g2 = (palette[i] >>> 8) & 0xff,
 			b2 = (palette[i] >>> 16) & 0xff,
 			a2 = (palette[i] >>> 24) & 0xff;
-			var curdist = _hasSemiTransparency ? Sqr(a2 - a) / Math.exp(1.5) : 0;
+			var curdist = hasSemiTransparency ? sqr(a2 - a) / Math.exp(1.5) : 0;
 			if (curdist > mindist)
 				continue;
 			
 			var lab2 = getLab(a2, r2, g2, b2);
 			if (palette.length <= 4) {
-				curdist = Sqr(r2 - r) + Sqr(g2 - g) + Sqr(b2 - b);
-				if(_hasSemiTransparency)
-					curdist += Sqr(a2 - a);
+				curdist = sqr(r2 - r) + sqr(g2 - g) + sqr(b2 - b);
+				if (hasSemiTransparency)
+					curdist += sqr(a2 - a);
 			}
-			else if (_hasSemiTransparency || palette.length < 16) {
-				curdist += Sqr(lab2.L - lab1.L);
+			else if (hasSemiTransparency || palette.length < 16) {
+				curdist += sqr(lab2.L - lab1.L);
 				if (curdist > mindist)
 					continue;
 				
-				curdist += Sqr(lab2.A - lab1.A);
+				curdist += sqr(lab2.A - lab1.A);
 				if (curdist > mindist)
 					continue;
 				
-				curdist += Sqr(lab2.B - lab1.B);
+				curdist += sqr(lab2.B - lab1.B);
 			}
 			else if (palette.length > 32) {
 				curdist += Math.abs(lab2.L - lab1.L);
 				if (curdist > mindist)
 					continue;
 				
-				curdist += Math.sqrt(Sqr(lab2.A - lab1.A) + Sqr(lab2.B - lab1.B));
+				curdist += Math.sqrt(sqr(lab2.A - lab1.A) + sqr(lab2.B - lab1.B));
 			}
 			else {
 				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
-				curdist += Sqr(deltaL_prime_div_k_L_S_L);
+				curdist += sqr(deltaL_prime_div_k_L_S_L);
 				if (curdist > mindist)
 					continue;
 
 				var a1Prime = {}, a2Prime = {}, CPrime1 = {}, CPrime2 = {};
 				var deltaC_prime_div_k_L_S_L = C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2);
-				curdist += Sqr(deltaC_prime_div_k_L_S_L);
+				curdist += sqr(deltaC_prime_div_k_L_S_L);
 				if (curdist > mindist)
 					continue;
 
 				var barCPrime = {}, barhPrime = {};
 				var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
-				curdist += Sqr(deltaH_prime_div_k_L_S_L);
+				curdist += sqr(deltaH_prime_div_k_L_S_L);
 				if (curdist > mindist)
 					continue;
 
@@ -634,20 +630,20 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			mindist = curdist;
 			k = i;
 		}
-		_nearestMap.set(pixel, k);
+		nearestMap.set(pixel, k);
 		return k;
 	}
 
-	function ClosestColorIndex(palette, pixel, pos) {
-		if (_PG < _coeffs[0][1] && TELL_BLUE_NOISE[pos & 4095] > -88)
-			return NearestColorIndex(palette, pixel, pos);
+	function closestColorIndex(palette, pixel, pos) {
+		if (PG < coeffs[0][1] && TELL_BLUE_NOISE[pos & 4095] > -88)
+			return nearestColorIndex(palette, pixel, pos);
 
 		var a = (pixel >>> 24) & 0xff;
-		if (a <= _alphaThreshold)
-			return NearestColorIndex(palette, pixel, pos);
+		if (a <= alphaThreshold)
+			return nearestColorIndex(palette, pixel, pos);
 
-		var closest = _closestMap.get(pixel);
-		if (!_closestMap.has(pixel)) {
+		var closest = closestMap.get(pixel);
+		if (!closestMap.has(pixel)) {
 			closest = new Uint32Array(4);
 			closest[2] = closest[3] = 0xffffffff;
 
@@ -661,31 +657,31 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				b2 = (palette[k] >>> 16) & 0xff,
 				a2 = (palette[k] >>> 24) & 0xff;
 
-				var err = _PR * (1 - _ratio) * Sqr(r2 - r);
+				var err = PR * (1 - ratio) * sqr(r2 - r);
 				if (err >= closest[3])
 					continue;
 
-				err += _PG * (1 - _ratio) * Sqr(g2 - g);
+				err += PG * (1 - ratio) * sqr(g2 - g);
 				if (err >= closest[3])
 					continue;
 
-				err += _PB * (1 - _ratio) * Sqr(b2 - b);
+				err += PB * (1 - ratio) * sqr(b2 - b);
 				if (err >= closest[3])
 					continue;
 
-				if(_hasSemiTransparency)
-					err += _PA * Sqr(a2 - a);
+				if (hasSemiTransparency)
+					err += PA * sqr(a2 - a);
 
-				for (var i = 0; i < _coeffs.length; ++i) {
-					err += _ratio * Sqr(_coeffs[i][0] * (r2 - r));
+				for (var i = 0; i < coeffs.length; ++i) {
+					err += ratio * sqr(coeffs[i][0] * (r2 - r));
 					if (err >= closest[3])
 						break;
 
-					err += _ratio * Sqr(_coeffs[i][1] * (g2 - g));
+					err += ratio * sqr(coeffs[i][1] * (g2 - g));
 					if (err >= closest[3])
 						break;
 
-					err += _ratio * Sqr(_coeffs[i][2] * (b2 - b));
+					err += ratio * sqr(coeffs[i][2] * (b2 - b));
 					if (err >= closest[3])
 						break;
 				}
@@ -706,58 +702,57 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			if (closest[3] == 0xffffffff)
 				closest[1] = closest[0];
 			
-			_closestMap.set(pixel, closest);
+			closestMap.set(pixel, closest);
 		}
 
-		
 		var idx = 1;
-		if (closest[2] == 0 || (_random.nextInt(closest[3] + closest[2])) <= closest[3])
+		if (closest[2] == 0 || (random.nextInt(closest[3] + closest[2])) <= closest[3])
 			idx = 0;
 
 		var MAX_ERR = palette.length;
-		if (closest[idx + 2] >= MAX_ERR || (_hasAlpha && closest[idx] == 0))
-			return NearestColorIndex(palette, pixel, pos);
+		if (closest[idx + 2] >= MAX_ERR || (hasAlpha && closest[idx] == 0))
+			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];
 	}
 
-	PnnLABQuant.prototype.quantizeImage = function() {
+	PnnLABQuant.prototype.quantizeImage = function () {
 		var pixels = this.opts.pixels, width = this.opts.width, height = this.opts.height,
 			nMaxColors = this.opts.colors, dither = this.opts.dithering;
-		if(this.opts._alphaThreshold)
-			_alphaThreshold = this.opts._alphaThreshold;
+		if (this.opts.alphaThreshold)
+			alphaThreshold = this.opts.alphaThreshold;
 
 		this.clear();
 
-		_hasAlpha = false;
+		hasAlpha = false;
 		var semiTransCount = 0;
 		for (var i = 0; i < pixels.length; ++i) {
 			var a = (pixels[i] >>> 24) & 0xff;
-			if(this.m_transparentPixelIndex > -1 && a == 0)
+			if (this.m_transparentPixelIndex > -1 && a == 0)
 				pixels[i] = this.m_transparentColor;
 
 			if (a < 0xE0) {
 				if (a == 0) {
 					this.m_transparentPixelIndex = i;
-					_hasAlpha = true;
-					if(nMaxColors > 2)
+					hasAlpha = true;
+					if (nMaxColors > 2)
 						this.m_transparentColor = pixels[i];
 					else
 						pixels[i] = this.m_transparentColor;
 				}
-				else if(a > _alphaThreshold)
+				else if (a > alphaThreshold)
 					++semiTransCount;
 			}
 		}
 
-		this.hasSemiTransparency = _hasSemiTransparency = semiTransCount > 0;
+		this.hasSemiTransparency = hasSemiTransparency = semiTransCount > 0;
 
 		if (nMaxColors <= 32)
-			_PR = _PG = _PB = _PA = 1;
+			PR = PG = PB = PA = 1;
 		else {
-			_PR = _coeffs[0][0]; _PG = _coeffs[0][1]; _PB = _coeffs[0][2];
+			PR = coeffs[0][0]; PG = coeffs[0][1]; PB = coeffs[0][2];
 		}
 
-		_transparentColor = this.m_transparentColor;
+		transparentColor = this.m_transparentColor;
 
 		this.palette = new Uint32Array(nMaxColors);
 		if (nMaxColors > 2)
@@ -774,15 +769,15 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			}
 		}
 
-		if(!this.opts.dithering) {
-			var delta = Sqr(nMaxColors) / _pixelMap.size;
+		if (!this.opts.dithering) {
+			var delta = sqr(nMaxColors) / pixelMap.size;
 			this.opts.weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
 		}
 
-		if (_hasSemiTransparency)
+		if (hasSemiTransparency)
 			this.opts.weight *= -1;
 
-		if(this.opts.dithering && this.opts.saliencies == null && (nMaxColors <= 256 || this.opts.weight > .99)) {
+		if (this.opts.dithering && this.opts.saliencies == null && (nMaxColors <= 256 || this.opts.weight > .99)) {
 			var saliencies = new Float32Array(pixels.length);
 			var saliencyBase = .1;
 
@@ -800,55 +795,55 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 
 		if (this.m_transparentPixelIndex >= 0 && this.palette.length > 2) {
-			var k = NearestColorIndex(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
+			var k = nearestColorIndex(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
 			this.palette[k] = this.m_transparentColor;
 		}
-		
+
 		this.opts.ditherFn = this.getDitherFn();
 		this.opts.getColorIndex = this.getColorIndex;
 		this.opts.palette = this.palette;
 		return this.palette;
 	};
 	
-	PnnLABQuant.prototype.getIndexedPixels = function() {
+	PnnLABQuant.prototype.getIndexedPixels = function () {
 		return this.qPixels;
 	};
 	
-	PnnLABQuant.prototype.getPalette = function() {
+	PnnLABQuant.prototype.getPalette = function () {
 		return this.palette.buffer;
 	};
 	
-	PnnLABQuant.prototype.getImgType = function() {
+	PnnLABQuant.prototype.getImgType = function () {
 		return this.opts.colors > 256 || this.hasSemiTransparency ? "image/png" : "image/gif";
 	};
 	
-	PnnLABQuant.prototype.getTransparentIndex = function() {
+	PnnLABQuant.prototype.getTransparentIndex = function () {
 		return this.m_transparentPixelIndex > -1 ? 0 : -1;
 	};
 	
-	PnnLABQuant.prototype.getDitherFn = function() {
+	PnnLABQuant.prototype.getDitherFn = function () {
 		if (this.m_transparentPixelIndex > -1 || this.opts.colors < 4)
-			return NearestColorIndex;
-		return ClosestColorIndex;
+			return nearestColorIndex;
+		return closestColorIndex;
 	};
 	
-	PnnLABQuant.prototype.getColorIndex = function(a, r, g, b) {
-		return GetARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
+	PnnLABQuant.prototype.getColorIndex = function (a, r, g, b) {
+		return getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
 	};
 	
-	PnnLABQuant.prototype.getResult = function() {
+	PnnLABQuant.prototype.getResult = function () {
 		var quant = this;
-		return new Promise(function(resolve, reject) {
+		return new Promise(function (resolve, reject) {
 			var result = quant.quantizeImage();
 			resolve({ pal8: result, indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
 		});
 	};
 	
-	PnnLABQuant.prototype.clear = function() {
-		_closestMap = new Map();
-		_pixelMap = new Map();
-		_nearestMap = new Map();
-		_random = new Random()
+	PnnLABQuant.prototype.clear = function () {
+		closestMap = new Map();
+		pixelMap = new Map();
+		nearestMap = new Map();
+		random = new Random();
 	};
 
 	// expose

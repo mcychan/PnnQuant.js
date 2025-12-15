@@ -73,7 +73,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		var exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
 		var pdf = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
 		var maxPdf = 1 / (stdDev * Math.sqrt(2 * Math.PI)); // Peak at x = mean
-		var scaledPdf = (pdf / maxPdf) * 2; // Scale peak to y = 2
+		var scaledPdf = (pdf / maxPdf) * 2;
 		return Math.fround(Math.max(0, Math.min(2, scaledPdf)));
 	}
 
