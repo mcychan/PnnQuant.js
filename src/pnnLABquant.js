@@ -4,6 +4,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function () {
+	"use strict";
 	if (!Math.clamp) {
 		Math.clamp = function (a,b,c) {
 			return this.max(b, this.min(c, a));
@@ -828,7 +829,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	};
 	
 	PnnLABQuant.prototype.getColorIndex = function (a, r, g, b) {
-		return getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
+		return getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 	};
 	
 	PnnLABQuant.prototype.getResult = function () {

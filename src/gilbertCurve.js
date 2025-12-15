@@ -3,6 +3,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 * A general rectangle with a known orientation is split into three regions ("up", "right", "down"), for which the function calls itself recursively, until a trivial path can be produced. */
 
 (function(){
+	"use strict";
 	if(!Math.tanh) {
 		Math.tanh = function(x){
 			var a = Math.exp(+x), b = Math.exp(-x);
@@ -158,9 +159,6 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			b1 = b_pix;
 			a1 = a_pix;
 		}
-		
-		if (hasAlpha)
-			return ditherFn(palette, c2, bidx);
 
 		var offset = getColorIndex(a1, r1, g1, b1);
 		if (lookup[offset] == 0)

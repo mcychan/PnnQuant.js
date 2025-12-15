@@ -4,6 +4,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function () {
+	"use strict";
 	if (!Math.clamp) {
 		Math.clamp = function (a,b,c) {
 			return this.max(b, this.min(c, a));
@@ -443,7 +444,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			PR = coeffs[0][0]; PG = coeffs[0][1]; PB = coeffs[0][2];
 		}
 
-		transparentColor = this.m_transparentColor; 
+		transparentColor = this.m_transparentColor;
 		
 		this.palette = new Uint32Array(nMaxColors);
 		if (nMaxColors > 2)
@@ -500,7 +501,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	};
 	
 	PnnQuant.prototype.getColorIndex = function (a, r, g, b) {
-		return getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
+		return getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 	};
 	
 	PnnQuant.prototype.getResult = function () {
