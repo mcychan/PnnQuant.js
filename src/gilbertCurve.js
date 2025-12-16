@@ -66,7 +66,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	var DITHER_MAX = 9, ditherMax, dither, hasAlpha, sortedByYDiff, margin, thresold;
 	var BLOCK_SIZE = 343.0;
 	
-	function normalDistribution(x)
+	function normalDistribution(x, peak)
 	{
 		var mean = .5, stdDev = .1;
 
@@ -74,8 +74,8 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		var exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
 		var pdf = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
 		var maxPdf = 1 / (stdDev * Math.sqrt(2 * Math.PI)); // Peak at x = mean
-		var scaledPdf = (pdf / maxPdf) * 2;
-		return Math.fround(Math.max(0, Math.min(2, scaledPdf)));
+		var scaledPdf = (pdf / maxPdf) * peak;
+		return Math.fround(Math.max(0, Math.min(peak, scaledPdf)));
 	}
 
 	function ditherPixel(x, y, c2, beta)
@@ -119,11 +119,13 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 				if (nMaxColors > 32)
-					kappa = beta * normalDistribution(beta) * saliencies[bidx];
+					kappa = beta * normalDistribution(beta, 2) * saliencies[bidx];
 				else {
 					if (weight >= .0015 && saliencies[bidx] < .6)
 						c1 = pixel;
-					if (Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff))
+					if (saliencies[bidx] < .6)
+						kappa = beta * normalDistribution(beta, 1.75) * saliencies[bidx];
+					else if (Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff))
 						kappa = beta * (!sortedByYDiff && weight < .0025 ? .55 : .5) / saliencies[bidx];
 				}
 
