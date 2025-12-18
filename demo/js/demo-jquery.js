@@ -305,20 +305,20 @@ function createImage(id, imgUrl, ev) {
 					opts.height = srcImg.naturalHeight | srcImg.height;
 					$orig.find("div").css("width", (opts.width - 10) + "px");							
 				});
-				
-				if(worker != null) {			
-					worker.onmessage = function(e) {
-						ti.mark("reduced -> DOM", function() {
-							quantizeImage(gl, e.data, opts.width);
-							
-							$("#btn_upd").removeAttr("disabled").text("Update");
-							$orig.css("pointer-events", "");
-						});
-					}
-				}
 		
-				if(readImageData(srcImg, gl, opts))					
+				if(readImageData(srcImg, gl, opts))	{
+					if(worker != null) {			
+						worker.onmessage = function(e) {
+							ti.mark("reduced -> DOM", function() {
+								quantizeImage(gl, e.data, opts.width);
+								
+								$("#btn_upd").removeAttr("disabled").text("Update");
+								$orig.css("pointer-events", "");
+							});
+						}
+					}			
 					doProcess(gl, ti, opts);
+				}
 				else {
 					ti.mark("invalid image", function() {				
 						$("#btn_upd").removeAttr("disabled").text("Update");

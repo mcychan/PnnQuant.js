@@ -299,15 +299,15 @@ async function origLoad(opts) {
 		eventBus.dispatch("scene", {boxWidth: (opts.width - 10) + "px", display: "block"});
 
 		console.time("reduced -> DOM");
-		if(worker != null) {
-			worker.onmessage = function(e) {
-				quantizeImage(gl, e.data, opts.width);
-				allowChange(document.querySelector("#orig"));
-			}
-		}
 
 		if(readImageData(srcImg, gl, opts)) {
 			console.timeEnd("'" + id + "' -> DOM");
+			if(worker != null) {
+				worker.onmessage = function(e) {
+					quantizeImage(gl, e.data, opts.width);
+					allowChange(document.querySelector("#orig"));
+				}
+			}
 			doProcess(gl, opts);
 		}
 		else {

@@ -25,33 +25,6 @@ if (!Math.sign) {
 	};
 }
 
-if(!Map) {
-	function Map(init) {
-		this.clear();
-		if (init)
-			for(var i = 0; i < init.length; ++i)
-				this.set(init[i][0],init[i][1]);
-	}
-
-	Map.prototype.clear = function(){
-		this._map = {};
-		this._keys = [];
-		this.size = 0;
-	};
-
-	Map.prototype.get = function(key){
-		return this._map["map_"+key];
-	};
-
-	Map.prototype.set = function(key, value){
-		this._map["map_"+key] = value;
-		if (this._keys.indexOf(key) < 0)
-			this._keys.push(key);
-		this.size = this._keys.length;
-		return this;
-	};
-}
-
 var _quant;
 
 function quantizeImage(opts) {
