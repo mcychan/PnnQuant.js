@@ -30,15 +30,11 @@ var _quant;
 function quantizeImage(opts) {
 	_quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);
 
-	var pal8;
-	opts.ditherFn = _quant.getDitherFn();
-	opts.getColorIndex = _quant.getColorIndex;
-
 	var result = _quant.quantizeImage();
-	var hc = new GilbertCurve(opts, result);
+	var gc = new GilbertCurve(opts, result);
 	if(opts.dithering || opts.colors <= 32)
-		return { img8: hc.dither(), pal8: _quant.getPalette(), indexedPixels: hc.getIndexedPixels(), transparent: _quant.getTransparentIndex(), type: _quant.getImgType() };
-	opts.indexedPixels = hc.dither();
+		return { img8: gc.dither(), pal8: _quant.getPalette(), indexedPixels: gc.getIndexedPixels(), transparent: _quant.getTransparentIndex(), type: _quant.getImgType() };
+	result.indexedPixels = gc.dither();
 
 	var bn = new BlueNoise(opts, result);
 	return { img8: bn.dither(), pal8: _quant.getPalette(), indexedPixels: bn.getIndexedPixels(), transparent: _quant.getTransparentIndex(), type: _quant.getImgType() };

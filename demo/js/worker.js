@@ -13,6 +13,7 @@ function quantizeImage(opts) {
 			return Promise.all([new GilbertCurve(opts, result).getResult()]);
 
 		return new GilbertCurve(opts, result).getResult().then(function(gc) {
+			result.indexedPixels = gc.indexedPixels;
 			return Promise.all([new BlueNoise(opts, result).getResult()]);
 		});
 	});

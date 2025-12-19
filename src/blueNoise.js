@@ -173,6 +173,7 @@
 	];
 
 (function(){
+	"use strict";
 	function BlueNoise(opts, args) {
 		this.opts = opts;
 		this.args = args;
@@ -193,8 +194,8 @@
 
 		var adj = (TELL_BLUE_NOISE[(x & 63) | (y & 63) << 6] + 0.5) / 127.5;
 		adj += ((x + y & 1) - 0.5) * strength / 8.0;
-		if(this.opts.weightB)
-			adj *= this.opts.weightB;
+		if(this.args.weightB)
+			adj *= this.args.weightB;
 		
 		r_pix = Math.clamp(r_pix + (adj * (r_pix - r2)), 0, 0xff) | 0;
 		g_pix = Math.clamp(g_pix + (adj * (g_pix - g2)), 0, 0xff) | 0;
@@ -211,7 +212,7 @@
 		var width = this.opts.width;
 		var height = this.opts.height;
 		var pixels = this.opts.pixels;
-		var palette = this.args.pal8;
+		var palette = new Uint32Array(this.args.pal8);
 		var nMaxColors = palette.length;
 		var qPixels = this.args.indexedPixels;
 		

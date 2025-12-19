@@ -27,13 +27,12 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		this.m_transparentPixelIndex = -1;
 		this.m_transparentColor = 0xffffff;
 		this.palette = [];
-		this.qPixels = [];
 		this.saliencies = null;
 	}
 
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
-	var random = new Random(), ratio = 1.0, weight, weightB;
+	var random = new Random(), ratio = 1.0, weight;
 	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
@@ -407,7 +406,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				quan_rt = 0;
 		}
 		if (nMaxColors > 16 && nMaxColors < 64) {
-			weightB = nMaxColors / 8000.0;
+			var weightB = nMaxColors / 8000.0;
 			if (Math.abs(weightB - weight) < .001)
 				quan_rt = 2;
 		}
@@ -771,11 +770,6 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			}
 		}
 
-		if (!this.opts.dithering) {
-			var delta = sqr(nMaxColors) / pixelMap.size;
-			weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
-		}
-
 		if (hasSemiTransparency)
 			weight *= -1;
 
@@ -801,11 +795,12 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			this.palette[k] = this.m_transparentColor;
 		}
 		
-		return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), indexedPixels: this.getIndexedPixels(), pal8: this.getPalette(), saliencies: this.saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
-	};
-	
-	PnnLABQuant.prototype.getIndexedPixels = function () {
-		return this.qPixels;
+		if (this.opts.dithering)
+			return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: 1.0 };
+		
+		var delta = sqr(nMaxColors) / pixelMap.size;
+		var weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
+		return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
 	};
 	
 	PnnLABQuant.prototype.getPalette = function () {
@@ -821,7 +816,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	};
 	
 	PnnLABQuant.prototype.getDitherFn = function () {
-		if (this.m_transparentPixelIndex > -1 || this.opts.colors < 4)
+		if (this.m_transparentPixelIndex > -1 || this.palette.length < 4)
 			return nearestColorIndex;
 		return closestColorIndex;
 	};
