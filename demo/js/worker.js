@@ -10,10 +10,10 @@ function quantizeImage(opts) {
 
 	return _quant.getResult().then(function(result) {
 		if (opts.dithering || opts.colors <= 32)
-			return Promise.all([result, new GilbertCurve(opts).getResult()]);
+			return Promise.all([new GilbertCurve(opts, result).getResult()]);
 
-		return new GilbertCurve(opts).getResult().then(function(gc) {
-			return Promise.all([result, new BlueNoise(opts).getResult()]);
+		return new GilbertCurve(opts, result).getResult().then(function(gc) {
+			return Promise.all([new BlueNoise(opts, result).getResult()]);
 		});
 	});
 }

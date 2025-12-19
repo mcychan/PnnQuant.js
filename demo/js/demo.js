@@ -162,10 +162,10 @@ async function getResult(opts) {
 
 	const result = await quant.getResult();
 	if (opts.dithering || opts.colors <= 32)
-		return Promise.all([result, new GilbertCurve(opts).getResult()]);
+		return Promise.all([new GilbertCurve(opts).getResult()]);
 
 	const gc = await new GilbertCurve(opts).getResult();
-	return Promise.all([result, new BlueNoise(opts).getResult()]);
+	return Promise.all([new BlueNoise(opts).getResult()]);
 }
 
 function doProcess(gl, opts) {

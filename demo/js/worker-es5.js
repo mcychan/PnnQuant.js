@@ -34,14 +34,14 @@ function quantizeImage(opts) {
 	opts.ditherFn = _quant.getDitherFn();
 	opts.getColorIndex = _quant.getColorIndex;
 
-	opts.palette = pal8 = _quant.quantizeImage();
-	var hc = new GilbertCurve(opts);
+	var result = _quant.quantizeImage();
+	var hc = new GilbertCurve(opts, result);
 	if(opts.dithering || opts.colors <= 32)
-		return { img8: hc.dither(), pal8: pal8, indexedPixels: hc.getIndexedPixels(), transparent: _quant.getTransparentIndex(), type: _quant.getImgType() };
+		return { img8: hc.dither(), pal8: _quant.getPalette(), indexedPixels: hc.getIndexedPixels(), transparent: _quant.getTransparentIndex(), type: _quant.getImgType() };
 	opts.indexedPixels = hc.dither();
 
-	var bn = new BlueNoise(opts);
-	return { img8: bn.dither(), pal8: pal8, indexedPixels: bn.getIndexedPixels(), transparent: _quant.getTransparentIndex(), type: _quant.getImgType() };
+	var bn = new BlueNoise(opts, result);
+	return { img8: bn.dither(), pal8: _quant.getPalette(), indexedPixels: bn.getIndexedPixels(), transparent: _quant.getTransparentIndex(), type: _quant.getImgType() };
 }
 
 onmessage = function(e) {

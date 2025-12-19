@@ -11,9 +11,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 		};
 	}
 	
-	function GilbertCurve(opts) {
+	function GilbertCurve(opts, args) {
 		this.opts = opts;
-		this.qPixels = [];
+		this.args = args;
 	}
 	
 	function gammaToLinear(channel)
@@ -369,35 +369,36 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 
 	GilbertCurve.prototype.dither = function()
 	{
+		ditherFn = this.args.ditherFn;
+		getColorIndex = this.args.getColorIndex;
+		width = this.opts.width;
+		height = this.opts.height;
+		pixels = this.opts.pixels;
+		palette = new Uint32Array(this.args.pal8);
+		saliencies = this.args.saliencies;
+		dither = this.opts.dithering;
+		nMaxColors = palette.length;
+		
 		errorq = [];
-		hasAlpha = this.opts.weight < 0;
-		this.opts.weight = weight = Math.abs(this.opts.weight);
+		hasAlpha = this.args.weight < 0;
+		weight = Math.abs(this.args.weight);
 		margin = weight < .0025 ? 12 : weight < .004 ? 8 : 6;
-		sortedByYDiff = this.opts.palette.length >= 128 && weight >= .02 && (!hasAlpha || weight < .18);
+		sortedByYDiff = palette.length >= 128 && weight >= .02 && (!hasAlpha || weight < .18);
 
 		DITHER_MAX = weight < .015 ? (weight > .0025) ? 25 : 16 : 9;
 		var edge = hasAlpha ? 1 : Math.exp(weight) - .25;
 		var deviation = !hasAlpha && weight > .002 ? -.25 : 1;
 		ditherMax = (hasAlpha || DITHER_MAX > 9) ? Math.pow((Math.sqrt(DITHER_MAX) + edge * deviation), 2) : (DITHER_MAX * (saliencies != null ? 2 : Math.E));
-		var density = this.opts.palette.length > 16 ? 3200 : 1500;
-		if(this.opts.palette.length / weight > 5000 && (weight > .045 || (weight > .01 && this.opts.palette.length < 64)))
+		var density = palette.length > 16 ? 3200 : 1500;
+		if(palette.length / weight > 5000 && (weight > .045 || (weight > .01 && this.args.pal8.length < 64)))
 			ditherMax = Math.pow(5 + edge, 2);
-		else if(weight < .03 && this.opts.palette.length / weight < density && this.opts.palette.length >= 16 && this.opts.palette.length < 256)
+		else if(weight < .03 && palette.length / weight < density && palette.length >= 16 && palette.length < 256)
 			ditherMax = Math.pow(5 + edge, 2);
 		ditherMax |= 0;
 		thresold = DITHER_MAX > 9 ? -112 : -64;
 		weights = [];
 		lookup = new Uint16Array(65536);
 
-		ditherFn = this.opts.ditherFn;
-		getColorIndex = this.opts.getColorIndex;
-		width = this.opts.width;
-		height = this.opts.height;
-		pixels = this.opts.pixels;
-		palette = this.opts.palette;
-		saliencies = this.opts.saliencies;
-		dither = this.opts.dithering;
-		nMaxColors = palette.length;
 		beta = nMaxColors > 4 ? (.6 - .00625 * nMaxColors) : 1;
 		if (nMaxColors > 4) {
 			var boundary = .005 - .0000625 * nMaxColors;
@@ -425,8 +426,6 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			generate2d(0, 0, width, 0, 0, height);
 		else
 			generate2d(0, 0, 0, height, width, 0);
-		
-		this.opts.indexedPixels = this.qPixels = qPixels;
 
 		if (!this.opts.dithering)
 			return qPixels;
@@ -435,16 +434,16 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 	}
 	
 	GilbertCurve.prototype.getIndexedPixels = function getIndexedPixels() {
-		return this.qPixels;
+		return qPixels;
 	};
 	
 	GilbertCurve.prototype.getResult = function getResult() {
 		var hc = this;
 		return new Promise(function(resolve, reject) {
 			if(hc.opts.dithering || hc.opts.colors <= 32)
-				resolve({ img8: hc.dither(), indexedPixels: hc.getIndexedPixels() });
+				resolve({ img8: hc.dither(), indexedPixels: hc.getIndexedPixels(), pal8: hc.args.pal8, transparent: hc.args.transparent, type: hc.args.type });
 			else
-				resolve({ indexedPixels: hc.dither() });
+				resolve({ indexedPixels: hc.dither(), pal8: hc.args.pal8, transparent: hc.args.transparent, type: hc.args.type });
 		});
 	};
 

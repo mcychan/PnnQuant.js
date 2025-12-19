@@ -28,11 +28,12 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		this.m_transparentColor = 0xffffff;
 		this.palette = [];
 		this.qPixels = [];
+		this.saliencies = null;
 	}
 
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
-	var random = new Random(), ratio = 1.0;
+	var random = new Random(), ratio = 1.0, weight, weightB;
 	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
@@ -377,7 +378,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			if (saliencies != null)
 				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 		}
-		this.opts.saliencies = saliencies;
+		this.saliencies = saliencies;
 
 		/* Cluster nonempty bins at one end of array */
 		var maxbins = 0;
@@ -398,7 +399,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if ((this.m_transparentPixelIndex >= 0 || this.hasSemiTransparency) && nMaxColors < 32)
 			quan_rt = -1;
 		
-		var weight = this.opts.weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
+		weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
 		if ((nMaxColors < 16 && weight < .0075) || weight < .001 || (weight > .0015 && weight < .0022))
 			quan_rt = 2;
 		if (weight < .04 && PG < 1 && PG >= coeffs[0][1]) {
@@ -406,7 +407,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				quan_rt = 0;
 		}
 		if (nMaxColors > 16 && nMaxColors < 64) {
-			var weightB = nMaxColors / 8000.0;
+			weightB = nMaxColors / 8000.0;
 			if (Math.abs(weightB - weight) < .001)
 				quan_rt = 2;
 		}
@@ -759,7 +760,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if (nMaxColors > 2)
 			this.pnnquan(pixels, nMaxColors);
 		else {
-			this.opts.weight = 1;
+			weight = 1;
 			if (this.m_transparentPixelIndex >= 0) {
 				this.palette[0] = this.m_transparentColor;
 				this.palette[1] = (0xff << 24);
@@ -772,13 +773,13 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 		if (!this.opts.dithering) {
 			var delta = sqr(nMaxColors) / pixelMap.size;
-			this.opts.weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
+			weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
 		}
 
 		if (hasSemiTransparency)
-			this.opts.weight *= -1;
+			weight *= -1;
 
-		if (this.opts.dithering && this.opts.saliencies == null && (nMaxColors <= 256 || this.opts.weight > .99)) {
+		if (this.opts.dithering && this.saliencies == null && (nMaxColors <= 256 || weight > .99)) {
 			var saliencies = new Float32Array(pixels.length);
 			var saliencyBase = .1;
 
@@ -792,18 +793,15 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 			}
-			this.opts.saliencies = saliencies;
+			this.saliencies = saliencies;
 		}
 
 		if (this.m_transparentPixelIndex >= 0 && this.palette.length > 2) {
 			var k = nearestColorIndex(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
 			this.palette[k] = this.m_transparentColor;
 		}
-
-		this.opts.ditherFn = this.getDitherFn();
-		this.opts.getColorIndex = this.getColorIndex;
-		this.opts.palette = this.palette;
-		return this.palette;
+		
+		return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), indexedPixels: this.getIndexedPixels(), pal8: this.getPalette(), saliencies: this.saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
 	};
 	
 	PnnLABQuant.prototype.getIndexedPixels = function () {
@@ -835,8 +833,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	PnnLABQuant.prototype.getResult = function () {
 		var quant = this;
 		return new Promise(function (resolve, reject) {
-			var result = quant.quantizeImage();
-			resolve({ pal8: result, indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
+			resolve(quant.quantizeImage());
 		});
 	};
 	

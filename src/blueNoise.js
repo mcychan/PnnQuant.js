@@ -173,8 +173,9 @@
 	];
 
 (function(){
-	function BlueNoise(opts) {
-		this.opts = opts || {};
+	function BlueNoise(opts, args) {
+		this.opts = opts;
+		this.args = args;
 		this.qPixels = [];
 	}
 
@@ -205,14 +206,14 @@
 
 	BlueNoise.prototype.dither = function()
 	{
-		var ditherFn = this.opts.ditherFn;
-		var getColorIndex = this.opts.getColorIndex;
+		var ditherFn = this.args.ditherFn;
+		var getColorIndex = this.args.getColorIndex;
 		var width = this.opts.width;
 		var height = this.opts.height;
 		var pixels = this.opts.pixels;
-		var palette = this.opts.palette;
+		var palette = this.args.pal8;
 		var nMaxColors = palette.length;
-		var qPixels = this.opts.indexedPixels;
+		var qPixels = this.args.indexedPixels;
 		
 		var strength = 1 / 3.0;
 		for (var y = 0; y < height; ++y) {
@@ -241,7 +242,7 @@
 	BlueNoise.prototype.getResult = function getResult() {
 		var bn = this;
 		return new Promise(function(resolve, reject) {
-			resolve({ img8: bn.dither(), indexedPixels: bn.getIndexedPixels() });
+			resolve({ img8: bn.dither(), indexedPixels: bn.getIndexedPixels(), pal8: bn.args.pal8, transparent: bn.args.transparent, type: bn.args.type });
 		});
 	};
 

@@ -22,7 +22,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
-	var ratio = .5;
+	var ratio = .5, weight, weightB;
 	var closestMap = new Map(), nearestMap = new Map();
 
 	var coeffs = [
@@ -170,7 +170,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		if (nMaxColors < 16)
 			quan_rt = -1;
 		
-		var weight = this.opts.weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
+		weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
 		if (weight > .003 && weight < .005)
 			quan_rt = 0;
 		if (weight < .04 && PG >= coeffs[0][1]) {
@@ -463,21 +463,18 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 
 		if (!this.opts.dithering)
-			this.opts.weightB = 1.0;
+			weightB = 1.0;
 
 		if (hasSemiTransparency)
-			this.opts.weight *= -1;
+			weight *= -1;
 
 		if (this.m_transparentPixelIndex >= 0 && this.palette.length > 2)
 		{
 			var k = this.getDitherFn()(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
 			this.palette[k] = this.m_transparentColor;
 		}
-
-		this.opts.ditherFn = this.getDitherFn();
-		this.opts.getColorIndex = this.getColorIndex;
-		this.opts.palette = this.palette;
-		return this.palette;
+		
+		return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), indexedPixels: this.getIndexedPixels(), pal8: this.getPalette(), transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
 	};
 
 	PnnQuant.prototype.getIndexedPixels = function () {
@@ -507,8 +504,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	PnnQuant.prototype.getResult = function () {
 		var quant = this;
 		return new Promise(function (resolve, reject) {
-			var result = quant.quantizeImage();
-			resolve({ pal8: result, indexedPixels: quant.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() });
+			resolve(quant.quantizeImage());
 		});
 	};
 
