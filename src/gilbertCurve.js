@@ -118,15 +118,19 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			if (nMaxColors > 4 && Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-				if (nMaxColors > 32)
+				if (nMaxColors > 32 && saliencies[bidx] < .9)
 					kappa = beta * normalDistribution(beta, 2) * saliencies[bidx];
 				else {
 					if (weight >= .0015 && saliencies[bidx] < .6)
 						c1 = pixel;
 					if (saliencies[bidx] < .6)
-						kappa = beta * normalDistribution(beta, 1.75) * saliencies[bidx];
-					else if (Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff))
-						kappa = beta * (!sortedByYDiff && weight < .0025 ? .55 : .5) / saliencies[bidx];
+						kappa = beta * normalDistribution(beta, weight < .0008 ? 2.5 : 1.75) * saliencies[bidx];
+					else if (nMaxColors >= 32 || Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff)) {
+						if (saliencies[bidx] < .9)
+							kappa = beta * (!sortedByYDiff && weight < .0025 ? .55 : .5) / saliencies[bidx];
+						else
+							kappa = beta * normalDistribution(beta, !sortedByYDiff && weight < .0025 ? .55 : .5) / saliencies[bidx];
+					}
 				}
 
 				c2 = new BlueNoise(null, {weightB: kappa}).diffuse(c1, qPixel, strength, x, y);
@@ -409,6 +413,10 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				beta += .1;
 			if (nMaxColors >= 64 && (weight > .012 && weight < .0125) || (weight > .025 && weight < .03))
 				beta *= 2;
+			else if (nMaxColors < 64 && weight < .0008)
+				beta = 2.5;
+			else if (nMaxColors > 32 && weight < .015)
+				beta = .55;
 		}
 		else
 			beta *= .95;
