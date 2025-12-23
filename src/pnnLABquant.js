@@ -438,7 +438,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}	
 		bins[j].cnt = quanFn(bins[j].cnt);
 		
-		var texicab = proportional > .0275;
+		var texicab = quan_rt < 2;
 		
 		if (this.hasSemiTransparency)
 			ratio = .5;
@@ -501,7 +501,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 					b1 = heap[1] = heap[heap[0]--];
 				else /* Too old error value */
 				{
-					find_nn(bins, b1, texicab && proportional < 1);
+					find_nn(bins, b1, texicab);
 					tb.tm = i;
 				}
 				/* Push slot down */
