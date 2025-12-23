@@ -438,7 +438,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}	
 		bins[j].cnt = quanFn(bins[j].cnt);
 		
-		var texicab = quan_rt < 2;
+		var texicab = proportional > .0225;
 		
 		if (this.hasSemiTransparency)
 			ratio = .5;
