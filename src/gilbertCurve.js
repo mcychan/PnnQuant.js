@@ -114,7 +114,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			g1 = (c2 >>> 8) & 0xff,
 			b1 = (c2 >>> 16) & 0xff,
 			a1 = (c2 >>> 24) & 0xff;
-		if (nMaxColors < 3 || margin > 6) {
+		if (margin > 6 || (nMaxColors <= 32 && weight > .007)) {
 			if (nMaxColors > 4 && Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
 				var kappa = saliencies[bidx] < .4 ? beta * .4 * saliencies[bidx] : beta * .4 / saliencies[bidx];
 				var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
@@ -413,9 +413,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				beta += .1;
 			if (nMaxColors >= 64 && (weight > .012 && weight < .0125) || (weight > .025 && weight < .03))
 				beta *= 2;
-			else if (nMaxColors < 64 && weight < .0008)
-				beta = 2.5;
-			else if (nMaxColors > 32 && weight < .015)
+			else if (nMaxColors > 32 && nMaxColors < 64 && weight < .015)
 				beta = .55;
 		}
 		else
