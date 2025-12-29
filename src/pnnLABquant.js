@@ -5,10 +5,37 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 (function () {
 	"use strict";
+
+	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
+	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
+	var random = new Random(), ratio = 1.0, weight;
+	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
+
+	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
+	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
+
+	var coeffs = [
+		[0.299, 0.587, 0.114],
+		[-0.14713, -0.28886, 0.436],
+		[0.615, -0.51499, -0.10001]
+	];
+
 	if (!Math.clamp) {
 		Math.clamp = function (a,b,c) {
 			return this.max(b, this.min(c, a));
 		};
+	}
+	
+	function Lab() {
+		this.alpha = 255;
+		this.A = this.B = this.L = 0;
+	}
+		
+	function Pnnbin() {
+		this.ac = this.Lc = this.Ac = this.Bc = 0;
+		this.cnt = 0;
+		this.nn = this.fw = this.bk = this.tm = this.mtm = 0;
+		this.err = 0.0;
 	}
 
 	function Random() {
@@ -19,41 +46,6 @@ Copyright (c) 2018-2025 Miller Cy Chan
 
 	function sqr(value) {
 		return value * value;
-	}
-
-	function PnnLABQuant(opts) {
-		this.opts = opts;
-		this.hasSemiTransparency = false;
-		this.m_transparentPixelIndex = -1;
-		this.m_transparentColor = 0xffffff;
-		this.palette = [];
-		this.saliencies = null;
-	}
-
-	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
-	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
-	var random = new Random(), ratio = 1.0, weight;
-	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
-
-	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
-	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
-	
-	function Lab() {
-		this.alpha = 255;
-		this.A = this.B = this.L = 0;
-	}
-
-	var coeffs = [
-		[0.299, 0.587, 0.114],
-		[-0.14713, -0.28886, 0.436],
-		[0.615, -0.51499, -0.10001]
-	];
-
-	function Pnnbin() {
-		this.ac = this.Lc = this.Ac = this.Bc = 0;
-		this.cnt = 0;
-		this.nn = this.fw = this.bk = this.tm = this.mtm = 0;
-		this.err = 0.0;
 	}
 
 	function pivotXyzComponent(component) {
@@ -109,12 +101,12 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		b = Math.clamp(Math.round(b * 0xff), 0, 0xff) | 0;
 		return (a << 24) | (b << 16) | (g << 8) | r;
 	}
-	
+
 	function deg2Rad(deg)
 	{
 		return Math.fround(deg * (Math.PI / 180.0));
 	}
-	
+
 	function L_prime_div_k_L_S_L(lab1, lab2)
 	{
 		var k_L = 1.0;
@@ -139,7 +131,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		CPrime2.value = Math.sqrt((a2Prime.value * a2Prime.value) + (lab2.B * lab2.B));
 		var deltaCPrime = CPrime2.value - CPrime1.value;
 		var barCPrime = (CPrime1.value + CPrime2.value) / 2.0;
-	
+
 		var S_C = 1 + (0.045 * barCPrime);
 		return Math.fround(deltaCPrime / (k_C * S_C));
 	}
@@ -291,7 +283,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 				nerr += (1 - ratio) * nerr2 * Math.abs(lab2.L - lab1.L);
 				if (nerr >= err)
 					continue;
-	
+
 				nerr += (1 - ratio) * nerr2 * Math.sqrt(sqr(lab2.A - lab1.A) + sqr(lab2.B - lab1.B));
 			}
 
@@ -325,7 +317,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		bin1.err = Math.fround(err);
 		bin1.nn = nn;
 	}
-	
+
 	function getQuanFn(nMaxColors, quan_rt) {
 		if (quan_rt > 0) {
 			if (quan_rt > 1)
@@ -340,216 +332,6 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 		return function (cnt) { return cnt; };
 	}
-	
-	PnnLABQuant.prototype.pnnquan = function (pixels, nMaxColors) {
-		var quan_rt = 1;
-		var bins = new Array(65536);
-		var saliencies = nMaxColors >= 128 ? null : new Float32Array(pixels.length);
-		var saliencyBase = .1;
-
-		/* Build histogram */
-		for (var i = 0; i < pixels.length; ++i) {
-			// !!! Can throw gamma correction in here, but what to do about perceptual
-			// !!! nonuniformity then?
-			var r = (pixels[i] & 0xff),
-			g = (pixels[i] >>> 8) & 0xff,
-			b = (pixels[i] >>> 16) & 0xff,
-			a = (pixels[i] >>> 24) & 0xff;
-
-			if (a <= alphaThreshold) {
-				r = this.m_transparentColor & 0xff;
-				g = (this.m_transparentColor >>> 8) & 0xff;
-				b = (this.m_transparentColor >>> 16) & 0xff;
-				a = (this.m_transparentColor >>> 24) & 0xff;
-			}
-			
-			var index = getARGBIndex(a, r, g, b, this.hasSemiTransparency, this.m_transparentPixelIndex >= 0);
-			var lab1 = getLab(a, r, g, b);
-			
-			if (bins[index] == null)
-				bins[index] = new Pnnbin();
-			var tb = bins[index];
-			tb.ac += a;
-			tb.Lc += lab1.L;
-			tb.Ac += lab1.A;
-			tb.Bc += lab1.B;
-			tb.cnt += 1.0;
-			if (saliencies != null)
-				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
-		}
-		this.saliencies = saliencies;
-
-		/* Cluster nonempty bins at one end of array */
-		var maxbins = 0;
-		for (var i = 0; i < bins.length; ++i) {
-			if (bins[i] == null)
-				continue;
-
-			var d = 1.0 / bins[i].cnt;
-			bins[i].ac *= d;
-			bins[i].Lc *= d;
-			bins[i].Ac *= d;
-			bins[i].Bc *= d;
-
-			bins[maxbins++] = bins[i];
-		}
-		
-		var proportional = sqr(nMaxColors) / maxbins;
-		if ((this.m_transparentPixelIndex >= 0 || this.hasSemiTransparency) && nMaxColors < 32)
-			quan_rt = -1;
-		
-		weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
-		if ((nMaxColors < 16 && weight < .0075) || weight < .001 || (weight > .0015 && weight < .0022))
-			quan_rt = 2;
-		if (weight < .04 && PG < 1 && PG >= coeffs[0][1]) {
-			if (nMaxColors >= 64)
-				quan_rt = 0;
-		}
-		if (nMaxColors > 16 && nMaxColors < 64) {
-			var weightB = nMaxColors / 8000.0;
-			if (Math.abs(weightB - weight) < .001)
-				quan_rt = 2;
-		}
-		
-		if (pixelMap.size <= nMaxColors) {
-			/* Fill palette */
-			var palette = new Uint32Array(pixelMap.size);
-			var k = 0;
-			pixelMap.forEach(function (value, pixel) {
-				palette[k++] = pixel;
-
-				if (k > 1 && ((pixel >>> 24) & 0xff) == 0) {
-					palette[k - 1] = palette[0]; palette[0] = pixel;
-				}
-			});
-
-			this.palette = palette;
-			return;
-		}
-		
-		var quanFn = getQuanFn(nMaxColors, quan_rt);
-		
-		var j = 0;
-		for (; j < maxbins - 1; ++j) {
-			bins[j].fw = j + 1;
-			bins[j + 1].bk = j;
-			
-			bins[j].cnt = quanFn(bins[j].cnt);
-		}	
-		bins[j].cnt = quanFn(bins[j].cnt);
-		
-		var texicab = proportional > .0225 && !this.hasSemiTransparency;
-		
-		if (this.hasSemiTransparency)
-			ratio = .5;
-		else if (quan_rt != 0 && nMaxColors < 64) {
-			if (proportional > .018 && proportional < .022)
-				ratio = Math.min(1.0, proportional + weight * Math.exp(3.13));
-			else if (proportional > .1)
-				ratio = Math.min(1.0, 1.0 - weight);
-			else if (proportional > .04)
-				ratio = Math.min(1.0, weight * Math.exp(1.56));
-			else if (proportional > .025 && (weight < .002 || weight > .0022))
-				ratio = Math.min(1.0, proportional + weight * Math.exp(3.66));
-			else
-				ratio = Math.min(1.0, proportional + weight * Math.exp(1.718));
-		}
-		else if (nMaxColors > 256)
-			ratio = Math.min(1.0, 1 - 1.0 / proportional);
-		else
-			ratio = Math.min(1.0, 1 - weight * .7);
-		
-		if (!this.hasSemiTransparency && quan_rt < 0)
-			ratio = Math.min(1.0, weight * Math.exp(3.13));
-		
-		var h, l, l2;
-		/* Initialize nearest neighbors and build heap of them */
-		var heap = new Uint32Array(bins.length + 1);
-		for (var i = 0; i < maxbins; ++i) {
-			find_nn(bins, i, texicab);
-			/* Push slot on heap */
-			var err = bins[i].err;
-			for (l = ++heap[0]; l > 1; l = l2)
-			{
-				l2 = l >> 1;
-				if (bins[h = heap[l2]].err <= err)
-					break;
-				heap[l] = h;
-			}
-			heap[l] = i;
-		}
-		
-		if (quan_rt > 0 && nMaxColors < 64 && proportional > .035 && proportional < .1) {
-			var dir = proportional > .04 ? 1 : -1;
-			var margin = dir > 0 ? .002 : .0025;
-			var delta = weight > margin && weight < .003 ? 1.872 : 1.632;
-			ratio = Math.min(1.0, proportional + dir * weight * Math.exp(delta));
-		}
-
-		/* Merge bins which increase error the least */
-		var extbins = maxbins - nMaxColors;
-		for (var i = 0; i < extbins;) {
-			var tb;
-			/* Use heap to find which bins to merge */
-			for (; ; ) {
-				var b1 = heap[1];
-				tb = bins[b1]; /* One with least error */
-				/* Is stored error up to date? */
-				if ((tb.tm >= tb.mtm) && (bins[tb.nn].mtm <= tb.tm))
-					break;
-				if (tb.mtm == 0xFFFF) /* Deleted node */
-					b1 = heap[1] = heap[heap[0]--];
-				else /* Too old error value */
-				{
-					find_nn(bins, b1, texicab);
-					tb.tm = i;
-				}
-				/* Push slot down */
-				var err = bins[b1].err;
-				for (l = 1; (l2 = l + l) <= heap[0]; l = l2) {
-					if ((l2 < heap[0]) && (bins[heap[l2]].err > bins[heap[l2 + 1]].err))
-						++l2;
-					if (err <= bins[h = heap[l2]].err)
-						break;
-					heap[l] = h;
-				}
-				heap[l] = b1;
-			}
-
-			/* Do a merge */
-			var nb = bins[tb.nn];
-			var n1 = tb.cnt;
-			var n2 = nb.cnt;
-			var d = 1.0 / (n1 + n2);
-			tb.ac = Math.fround(d * (n1 * tb.ac + n2 * nb.ac));
-			tb.Lc = Math.fround(d * (n1 * tb.Lc + n2 * nb.Lc));
-			tb.Ac = Math.fround(d * (n1 * tb.Ac + n2 * nb.Ac));
-			tb.Bc = Math.fround(d * (n1 * tb.Bc + n2 * nb.Bc));
-			tb.cnt += n2;
-			tb.mtm = ++i;
-
-			/* Unchain deleted bin */
-			bins[nb.bk].fw = nb.fw;
-			bins[nb.fw].bk = nb.bk;
-			nb.mtm = 0xFFFF;
-		}
-
-		/* Fill palette */
-		if (extbins < 0)
-			this.palette = new Uint32Array(maxbins);
-		
-		var k = 0;
-		for (var i = 0; k < this.palette.length; ++k) {
-			var lab1 = new Lab();
-			lab1.alpha = (this.hasSemiTransparency || this.m_transparentPixelIndex >= 0) ? 
-				(Math.clamp(Math.round(bins[i].ac), 0, 0xff) | 0) : 0xff,
-			lab1.L = bins[i].Lc; lab1.A = bins[i].Ac; lab1.B = bins[i].Bc;
-
-			this.palette[k] = LAB2RGB(lab1);
-
-			i = bins[i].fw;
-		}
-	};
 	
 	function nearestColorIndex(palette, pixel, pos) {
 		var nearest = nearestMap.get(pixel);
@@ -636,7 +418,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	}
 
 	function closestColorIndex(palette, pixel, pos) {
-		if (PG < coeffs[0][1] && TELL_BLUE_NOISE[pos & 4095] > -88)
+		if (PG < coeffs[0][1] && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > -88)
 			return nearestColorIndex(palette, pixel, pos);
 
 		var a = (pixel >>> 24) & 0xff;
@@ -715,129 +497,348 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];
 	}
+			
+	class PnnLABQuant {
+		#hasSemiTransparency = false; #palette = []; #saliencies = null;
+		#transparentPixelIndex = -1; #transparentColor = 0xffffff;
 
-	PnnLABQuant.prototype.quantizeImage = function () {
-		var pixels = this.opts.pixels, width = this.opts.width, height = this.opts.height,
-			nMaxColors = this.opts.colors, dither = this.opts.dithering;
-		if (this.opts.alphaThreshold)
-			alphaThreshold = this.opts.alphaThreshold;
-
-		this.clear();
-
-		hasAlpha = false;
-		var semiTransCount = 0;
-		for (var i = 0; i < pixels.length; ++i) {
-			var a = (pixels[i] >>> 24) & 0xff;
-			if (this.m_transparentPixelIndex > -1 && a == 0)
-				pixels[i] = this.m_transparentColor;
-
-			if (a < 0xE0) {
-				if (a == 0) {
-					this.m_transparentPixelIndex = i;
-					hasAlpha = true;
-					if (nMaxColors > 2)
-						this.m_transparentColor = pixels[i];
-					else
-						pixels[i] = this.m_transparentColor;
-				}
-				else if (a > alphaThreshold)
-					++semiTransCount;
-			}
+		constructor(opts) {
+			this.opts = opts;
 		}
-
-		this.hasSemiTransparency = hasSemiTransparency = semiTransCount > 0;
-
-		if (nMaxColors <= 32)
-			PR = PG = PB = PA = 1;
-		else {
-			PR = coeffs[0][0]; PG = coeffs[0][1]; PB = coeffs[0][2];
-		}
-
-		transparentColor = this.m_transparentColor;
-
-		this.palette = new Uint32Array(nMaxColors);
-		if (nMaxColors > 2)
-			this.pnnquan(pixels, nMaxColors);
-		else {
-			weight = 1;
-			if (this.m_transparentPixelIndex >= 0) {
-				this.palette[0] = this.m_transparentColor;
-				this.palette[1] = (0xff << 24);
-			}
-			else {
-				this.palette[0] = (0xff << 24);
-				this.palette[1] = 0xffffffff;
-			}
-		}
-
-		if (hasSemiTransparency)
-			weight *= -1;
-
-		if (this.opts.dithering && this.saliencies == null && (nMaxColors <= 256 || weight > .99)) {
-			var saliencies = new Float32Array(pixels.length);
+		
+		#pnnquan(pixels, nMaxColors) {
+			var quan_rt = 1;
+			var bins = new Array(65536);
+			var saliencies = nMaxColors >= 128 ? null : new Float32Array(pixels.length);
 			var saliencyBase = .1;
 
+			/* Build histogram */
 			for (var i = 0; i < pixels.length; ++i) {
+				// !!! Can throw gamma correction in here, but what to do about perceptual
+				// !!! nonuniformity then?
 				var r = (pixels[i] & 0xff),
 				g = (pixels[i] >>> 8) & 0xff,
 				b = (pixels[i] >>> 16) & 0xff,
 				a = (pixels[i] >>> 24) & 0xff;
 
+				if (a <= alphaThreshold) {
+					r = this.#transparentColor & 0xff;
+					g = (this.#transparentColor >>> 8) & 0xff;
+					b = (this.#transparentColor >>> 16) & 0xff;
+					a = (this.#transparentColor >>> 24) & 0xff;
+				}
+				
+				var index = getARGBIndex(a, r, g, b, this.#hasSemiTransparency, this.#transparentPixelIndex >= 0);
 				var lab1 = getLab(a, r, g, b);
-
-				saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
+				
+				if (bins[index] == null)
+					bins[index] = new Pnnbin();
+				var tb = bins[index];
+				tb.ac += a;
+				tb.Lc += lab1.L;
+				tb.Ac += lab1.A;
+				tb.Bc += lab1.B;
+				tb.cnt += 1.0;
+				if (saliencies != null)
+					saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 			}
-			this.saliencies = saliencies;
-		}
+			this.#saliencies = saliencies;
 
-		if (this.m_transparentPixelIndex >= 0 && this.palette.length > 2) {
-			var k = nearestColorIndex(this.palette, pixels[this.m_transparentPixelIndex], this.m_transparentPixelIndex);
-			this.palette[k] = this.m_transparentColor;
+			/* Cluster nonempty bins at one end of array */
+			var maxbins = 0;
+			for (var i = 0; i < bins.length; ++i) {
+				if (bins[i] == null)
+					continue;
+
+				var d = 1.0 / bins[i].cnt;
+				bins[i].ac *= d;
+				bins[i].Lc *= d;
+				bins[i].Ac *= d;
+				bins[i].Bc *= d;
+
+				bins[maxbins++] = bins[i];
+			}
+			
+			var proportional = sqr(nMaxColors) / maxbins;
+			if ((this.#transparentPixelIndex >= 0 || this.#hasSemiTransparency) && nMaxColors < 32)
+				quan_rt = -1;
+			
+			weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
+			if ((nMaxColors < 16 && weight < .0075) || weight < .001 || (weight > .0015 && weight < .0022))
+				quan_rt = 2;
+			if (weight < .04 && PG < 1 && PG >= coeffs[0][1]) {
+				if (nMaxColors >= 64)
+					quan_rt = 0;
+			}
+			if (nMaxColors > 16 && nMaxColors < 64) {
+				var weightB = nMaxColors / 8000.0;
+				if (Math.abs(weightB - weight) < .001)
+					quan_rt = 2;
+			}
+			
+			if (pixelMap.size <= nMaxColors) {
+				/* Fill palette */
+				var palette = new Uint32Array(pixelMap.size);
+				var k = 0;
+				pixelMap.forEach(function (value, pixel) {
+					palette[k++] = pixel;
+
+					if (k > 1 && ((pixel >>> 24) & 0xff) == 0) {
+						palette[k - 1] = palette[0]; palette[0] = pixel;
+					}
+				});
+
+				this.#palette = palette;
+				return;
+			}
+			
+			var quanFn = getQuanFn(nMaxColors, quan_rt);
+			
+			var j = 0;
+			for (; j < maxbins - 1; ++j) {
+				bins[j].fw = j + 1;
+				bins[j + 1].bk = j;
+				
+				bins[j].cnt = quanFn(bins[j].cnt);
+			}	
+			bins[j].cnt = quanFn(bins[j].cnt);
+			
+			var texicab = proportional > .0225 && !this.#hasSemiTransparency;
+			
+			if (this.#hasSemiTransparency)
+				ratio = .5;
+			else if (quan_rt != 0 && nMaxColors < 64) {
+				if (proportional > .018 && proportional < .022)
+					ratio = Math.min(1.0, proportional + weight * Math.exp(3.13));
+				else if (proportional > .1)
+					ratio = Math.min(1.0, 1.0 - weight);
+				else if (proportional > .04)
+					ratio = Math.min(1.0, weight * Math.exp(1.56));
+				else if (proportional > .025 && (weight < .002 || weight > .0022))
+					ratio = Math.min(1.0, proportional + weight * Math.exp(3.66));
+				else
+					ratio = Math.min(1.0, proportional + weight * Math.exp(1.718));
+			}
+			else if (nMaxColors > 256)
+				ratio = Math.min(1.0, 1 - 1.0 / proportional);
+			else
+				ratio = Math.min(1.0, 1 - weight * .7);
+			
+			if (!this.#hasSemiTransparency && quan_rt < 0)
+				ratio = Math.min(1.0, weight * Math.exp(3.13));
+			
+			var h, l, l2;
+			/* Initialize nearest neighbors and build heap of them */
+			var heap = new Uint32Array(bins.length + 1);
+			for (var i = 0; i < maxbins; ++i) {
+				find_nn(bins, i, texicab);
+				/* Push slot on heap */
+				var err = bins[i].err;
+				for (l = ++heap[0]; l > 1; l = l2)
+				{
+					l2 = l >> 1;
+					if (bins[h = heap[l2]].err <= err)
+						break;
+					heap[l] = h;
+				}
+				heap[l] = i;
+			}
+			
+			if (quan_rt > 0 && nMaxColors < 64 && proportional > .035 && proportional < .1) {
+				var dir = proportional > .04 ? 1 : -1;
+				var margin = dir > 0 ? .002 : .0025;
+				var delta = weight > margin && weight < .003 ? 1.872 : 1.632;
+				ratio = Math.min(1.0, proportional + dir * weight * Math.exp(delta));
+			}
+
+			/* Merge bins which increase error the least */
+			var extbins = maxbins - nMaxColors;
+			for (var i = 0; i < extbins;) {
+				var tb;
+				/* Use heap to find which bins to merge */
+				for (; ; ) {
+					var b1 = heap[1];
+					tb = bins[b1]; /* One with least error */
+					/* Is stored error up to date? */
+					if ((tb.tm >= tb.mtm) && (bins[tb.nn].mtm <= tb.tm))
+						break;
+					if (tb.mtm == 0xFFFF) /* Deleted node */
+						b1 = heap[1] = heap[heap[0]--];
+					else /* Too old error value */
+					{
+						find_nn(bins, b1, texicab);
+						tb.tm = i;
+					}
+					/* Push slot down */
+					var err = bins[b1].err;
+					for (l = 1; (l2 = l + l) <= heap[0]; l = l2) {
+						if ((l2 < heap[0]) && (bins[heap[l2]].err > bins[heap[l2 + 1]].err))
+							++l2;
+						if (err <= bins[h = heap[l2]].err)
+							break;
+						heap[l] = h;
+					}
+					heap[l] = b1;
+				}
+
+				/* Do a merge */
+				var nb = bins[tb.nn];
+				var n1 = tb.cnt;
+				var n2 = nb.cnt;
+				var d = 1.0 / (n1 + n2);
+				tb.ac = Math.fround(d * (n1 * tb.ac + n2 * nb.ac));
+				tb.Lc = Math.fround(d * (n1 * tb.Lc + n2 * nb.Lc));
+				tb.Ac = Math.fround(d * (n1 * tb.Ac + n2 * nb.Ac));
+				tb.Bc = Math.fround(d * (n1 * tb.Bc + n2 * nb.Bc));
+				tb.cnt += n2;
+				tb.mtm = ++i;
+
+				/* Unchain deleted bin */
+				bins[nb.bk].fw = nb.fw;
+				bins[nb.fw].bk = nb.bk;
+				nb.mtm = 0xFFFF;
+			}
+
+			/* Fill palette */
+			if (extbins < 0)
+				this.#palette = new Uint32Array(maxbins);
+			
+			var k = 0;
+			for (var i = 0; k < this.#palette.length; ++k) {
+				var lab1 = new Lab();
+				lab1.alpha = (this.#hasSemiTransparency || this.#transparentPixelIndex >= 0) ? 
+					(Math.clamp(Math.round(bins[i].ac), 0, 0xff) | 0) : 0xff,
+				lab1.L = bins[i].Lc; lab1.A = bins[i].Ac; lab1.B = bins[i].Bc;
+
+				this.#palette[k] = LAB2RGB(lab1);
+
+				i = bins[i].fw;
+			}
+		}		
+
+		quantizeImage() {
+			var pixels = this.opts.pixels, width = this.opts.width, height = this.opts.height,
+				nMaxColors = this.opts.colors, dither = this.opts.dithering;
+			if (this.opts.alphaThreshold)
+				alphaThreshold = this.opts.alphaThreshold;
+
+			this.clear();
+
+			hasAlpha = false;
+			var semiTransCount = 0;
+			for (var i = 0; i < pixels.length; ++i) {
+				var a = (pixels[i] >>> 24) & 0xff;
+				if (this.#transparentPixelIndex > -1 && a == 0)
+					pixels[i] = this.#transparentColor;
+
+				if (a < 0xE0) {
+					if (a == 0) {
+						this.#transparentPixelIndex = i;
+						hasAlpha = true;
+						if (nMaxColors > 2)
+							this.#transparentColor = pixels[i];
+						else
+							pixels[i] = this.#transparentColor;
+					}
+					else if (a > alphaThreshold)
+						++semiTransCount;
+				}
+			}
+
+			this.#hasSemiTransparency = hasSemiTransparency = semiTransCount > 0;
+
+			if (nMaxColors <= 32)
+				PR = PG = PB = PA = 1;
+			else {
+				PR = coeffs[0][0]; PG = coeffs[0][1]; PB = coeffs[0][2];
+			}
+
+			transparentColor = this.#transparentColor;
+
+			this.#palette = new Uint32Array(nMaxColors);
+			if (nMaxColors > 2)
+				this.#pnnquan(pixels, nMaxColors);
+			else {
+				weight = 1;
+				if (this.#transparentPixelIndex >= 0) {
+					this.#palette[0] = this.#transparentColor;
+					this.#palette[1] = (0xff << 24);
+				}
+				else {
+					this.#palette[0] = (0xff << 24);
+					this.#palette[1] = 0xffffffff;
+				}
+			}
+
+			if (hasSemiTransparency)
+				weight *= -1;
+
+			if (this.opts.dithering && this.#saliencies == null && (nMaxColors <= 256 || weight > .99)) {
+				var saliencies = new Float32Array(pixels.length);
+				var saliencyBase = .1;
+
+				for (var i = 0; i < pixels.length; ++i) {
+					var r = (pixels[i] & 0xff),
+					g = (pixels[i] >>> 8) & 0xff,
+					b = (pixels[i] >>> 16) & 0xff,
+					a = (pixels[i] >>> 24) & 0xff;
+
+					var lab1 = getLab(a, r, g, b);
+
+					saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
+				}
+				this.#saliencies = saliencies;
+			}
+
+			if (this.#transparentPixelIndex >= 0 && this.#palette.length > 2) {
+				var k = nearestColorIndex(this.#palette, pixels[this.#transparentPixelIndex], this.#transparentPixelIndex);
+				this.#palette[k] = this.#transparentColor;
+			}
+			
+			if (this.opts.dithering)
+				return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.#saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: 1.0 };
+			
+			var delta = sqr(nMaxColors) / pixelMap.size;
+			var weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
+			return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.#saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
 		}
 		
-		if (this.opts.dithering)
-			return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: 1.0 };
+		getPalette() {
+			return this.#palette.buffer;
+		}
 		
-		var delta = sqr(nMaxColors) / pixelMap.size;
-		var weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
-		return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
-	};
-	
-	PnnLABQuant.prototype.getPalette = function () {
-		return this.palette.buffer;
-	};
-	
-	PnnLABQuant.prototype.getImgType = function () {
-		return this.opts.colors > 256 || this.hasSemiTransparency ? "image/png" : "image/gif";
-	};
-	
-	PnnLABQuant.prototype.getTransparentIndex = function () {
-		return this.m_transparentPixelIndex > -1 ? 0 : -1;
-	};
-	
-	PnnLABQuant.prototype.getDitherFn = function () {
-		if (this.m_transparentPixelIndex > -1 || this.palette.length < 4)
-			return nearestColorIndex;
-		return closestColorIndex;
-	};
-	
-	PnnLABQuant.prototype.getColorIndex = function (a, r, g, b) {
-		return getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
-	};
-	
-	PnnLABQuant.prototype.getResult = function () {
-		var quant = this;
-		return new Promise(function (resolve, reject) {
-			resolve(quant.quantizeImage());
-		});
-	};
-	
-	PnnLABQuant.prototype.clear = function () {
-		closestMap = new Map();
-		pixelMap = new Map();
-		nearestMap = new Map();
-		random = new Random();
-	};
+		getImgType() {
+			return this.opts.colors > 256 || this.#hasSemiTransparency ? "image/png" : "image/gif";
+		}
+		
+		getTransparentIndex() {
+			return this.#transparentPixelIndex > -1 ? 0 : -1;
+		}
+		
+		getDitherFn() {
+			if (this.#transparentPixelIndex > -1 || this.#palette.length < 4)
+				return nearestColorIndex;
+			return closestColorIndex;
+		}
+		
+		getColorIndex(a, r, g, b) {
+			return getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		}
+		
+		getResult() {
+			var quant = this;
+			return new Promise(function (resolve, reject) {
+				resolve(quant.quantizeImage());
+			});
+		}
+		
+		clear() {
+			closestMap = new Map();
+			pixelMap = new Map();
+			nearestMap = new Map();
+			random = new Random();
+		}
+	}
 
 	// expose
 	this.PnnLABQuant = PnnLABQuant;
@@ -848,4 +849,3 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	}
 
 }).call(this);
-

@@ -1,4 +1,4 @@
-var worker = (typeof Worker !== "undefined") ? new Worker("./js/worker.js") : null;
+var worker = new Worker('js/worker.js');
 var gl = webgl_detect();
 var pngOnly = location.search.toLowerCase().indexOf('png') > -1;
 
@@ -156,28 +156,8 @@ function quantizeImage(gl, result, width) {
 	console.timeEnd("palette");
 }
 
-async function getResult(opts) {
-	var quant = opts.isHQ ? new PnnLABQuant(opts) : new PnnQuant(opts);	
-	opts.paletteOnly = true;
-
-	const result = await quant.getResult();
-	if (opts.dithering || opts.colors <= 32)
-		return Promise.all([new GilbertCurve(opts).getResult()]);
-
-	const gc = await new GilbertCurve(opts).getResult();
-	return Promise.all([new BlueNoise(opts).getResult()]);
-}
-
 function doProcess(gl, opts) {
-	if(worker != null)
-		worker.postMessage(opts);
-	else {
-		setTimeout(async function(){
-			const result = await getResult(opts);
-			quantizeImage(gl, Object.assign.apply(Object, result), opts.width);
-			allowChange(document.querySelector("#orig"));
-		}, 0);
-	}
+	worker.postMessage(opts);	
 }
 
 function webgl_detect() {
