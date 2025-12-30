@@ -1,7 +1,6 @@
 importScripts('gilbertCurve.min.js');
 importScripts('blueNoise.min.js');
-importScripts('pnnquant.min.js');
-importScripts('pnnLABquant.min.js');
+importScripts('pnnquant.min.js', 'pnnLABquant.min.js');
 
 var _quant;
 
