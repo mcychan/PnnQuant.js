@@ -22,18 +22,12 @@ var opts = {
 
 let bestQuality = false;
 var quant = bestQuality ? new PnnLABQuant(opts) : new PnnQuant(opts);
+var result = quant.quantizeImage();
+var gc = new GilbertCurve(opts, result);
+if(opts.dithering || opts.colors <= 32)
+	return { img8: gc.dither(), pal8: quant.getPalette(), indexedPixels: gc.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() };
 
-/*  reduce image  */
-var img8 = quant.quantizeImage();      /*  Uint32Array  */
-var pal8 = quant.getPalette();         /*  RGBA 32 bits of ArrayBuffer  */
-var indexedPixels = quant.getIndexedPixels();     /*  colors > 256 ? Uint16Array : Uint8Array  */
-```
-
-To dither with Generalized Hilbert ("gilbert") space-filling curve as follows:
-
-```javascript
-opts.paletteOnly = true;
-opts.palette = pal8 = quant.quantizeImage();
-var hc = new GilbertCurve(opts);
-return { img8: hc.dither(), pal8: pal8, indexedPixels: hc.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() };
+result.indexedPixels = gc.dither();
+var bn = new BlueNoise(opts, result);
+return { img8: bn.dither(), pal8: _quant.getPalette(), indexedPixels: bn.getIndexedPixels(), transparent: quant.getTransparentIndex(), type: quant.getImgType() };
 ```
