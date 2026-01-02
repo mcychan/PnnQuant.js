@@ -348,6 +348,9 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	}
 
 	function closestColorIndex(palette, pixel, pos) {
+		if (PG < coeffs[0][1] && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > -88)
+			return nearestColorIndex(palette, pixel, pos);
+
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold)
 			return nearestColorIndex(palette, pixel, pos);
