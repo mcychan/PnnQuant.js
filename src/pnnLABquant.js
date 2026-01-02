@@ -1,6 +1,6 @@
 /* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
 Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
-Copyright (c) 2018-2025 Miller Cy Chan
+Copyright (c) 2018-2026 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function () {
@@ -348,9 +348,6 @@ Copyright (c) 2018-2025 Miller Cy Chan
 	}
 
 	function closestColorIndex(palette, pixel, pos) {
-		if (PG < coeffs[0][1] && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > -88)
-			return nearestColorIndex(palette, pixel, pos);
-
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold)
 			return nearestColorIndex(palette, pixel, pos);
