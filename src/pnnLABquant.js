@@ -423,7 +423,8 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			idx = 0;
 
 		var MAX_ERR = palette.length;
-		if (closest[idx + 2] >= MAX_ERR || (hasAlpha && closest[idx] == 0))
+		var a0 = (palette[closest[idx]] >>> 24) & 0xff;
+		if (closest[idx + 2] >= MAX_ERR || closest[idx] == 0 || a0 < a)
 			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];
 	}
@@ -816,7 +817,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		}
 		
 		getDitherFn() {
-			if (this.#transparentPixelIndex > -1 || this.#palette.length < 4)
+			if (this.#palette.length < 4)
 				return nearestColorIndex;
 			return closestColorIndex;
 		}
