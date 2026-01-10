@@ -237,7 +237,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				var acceptedDiff = Math.max(2, this.#nMaxColors - this.#margin);
 				if (this.#saliencies != null && (this.#Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || this.#U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
 					var strength = 1 / 3.0;
-					c2 = new BlueNoise(null, {weightB: 1 / this.#saliencies[bidx]}).diffuse(pixel, this.#palette[qPixels[bidx]], strength, x, y);
+					c2 = new BlueNoise(null, {weightB: 1 / this.#saliencies[bidx]}).diffuse(pixel, this.#palette[this.#qPixels[bidx]], strength, x, y);
 					this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 				}
 			}
