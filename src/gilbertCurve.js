@@ -1,5 +1,5 @@
 /* Generalized Hilbert ("gilbert") space-filling curve for rectangular domains of arbitrary (non-power of two) sizes.
-Copyright (c) 2022 - 2025 Miller Cy Chan
+Copyright (c) 2022 - 2026 Miller Cy Chan
 * A general rectangle with a known orientation is split into three regions ("up", "right", "down"), for which the function calls itself recursively, until a trivial path can be produced. */
 
 (function(){
@@ -237,7 +237,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 				var acceptedDiff = Math.max(2, this.#nMaxColors - this.#margin);
 				if (this.#saliencies != null && (this.#Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || this.#U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
 					var strength = 1 / 3.0;
-					c2 = new BlueNoise(null, {weightB: 1 / saliencies[bidx]}).diffuse(pixel, this.#palette[qPixels[bidx]], strength, x, y);
+					c2 = new BlueNoise(null, {weightB: 1 / this.#saliencies[bidx]}).diffuse(pixel, this.#palette[qPixels[bidx]], strength, x, y);
 					this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 				}
 			}
@@ -303,6 +303,9 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 						return 1;
 					return 0;
 				});
+				
+			if (this.opts.dithering)
+				this.#qPixels[bidx] = this.#palette[this.#qPixels[bidx]];
 		}
 
 		#generate2d(x, y, ax, ay, bx, by) {
@@ -357,14 +360,6 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			this.#generate2d(x, y, bx2, by2, ax2, ay2);
 			this.#generate2d(x + bx2, y + by2, ax, ay, bx - bx2, by - by2);
 			this.#generate2d(x + (ax - dax) + (bx2 - dbx), y + (ay - day) + (by2 - dby), -bx2, -by2, -(ax - ax2), -(ay - ay2));
-		}
-		
-		#processImagePixels() {
-			var qPixel32s = new Uint32Array(this.#qPixels.length);
-			for (var i = 0; i < this.#qPixels.length; ++i)
-				qPixel32s[i] = this.#palette[this.#qPixels[i]];
-
-			return qPixel32s;
 		}
 
 		#initWeights(size)
@@ -434,10 +429,7 @@ Copyright (c) 2022 - 2025 Miller Cy Chan
 			else
 				this.#generate2d(0, 0, 0, this.#height, this.#width, 0);
 
-			if (!this.opts.dithering)
-				return this.#qPixels;
-			
-			return this.#processImagePixels();
+			return this.#qPixels;
 		}
 		
 		getIndexedPixels() {
