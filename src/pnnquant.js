@@ -1,13 +1,13 @@
 /* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
 Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
-Copyright (c) 2018-2025 Miller Cy Chan
+Copyright (c) 2018-2026 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
 (function(){
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var ratio = .5, weight;
-	var closestMap = new Map(), nearestMap = new Map();
+	var closestMap = new Array(65536), nearestMap = new Uint16Array(65536);
 	
 	var coeffs = [
 		[0.299, 0.587, 0.114],
@@ -52,16 +52,17 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			a = (pixel >>> 24) & 0xff;
 		}
 
-		var nearest = nearestMap.get(pixel);
-		if (nearestMap.has(pixel))
-			return nearest;
-
-		if (palette.length > 2 && hasAlpha && a > alphaThreshold)
-			k = 1;
-
 		var r = (pixel & 0xff),
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
+
+		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var nearest = nearestMap[offset];
+		if (nearest > 0)
+			return nearest - 1;
+
+		if (palette.length > 2 && hasAlpha && a > alphaThreshold)
+			k = 1;
 
 		var pr = PR, pg = PG, pb = PB;
 		if (palette.length > 2 && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > -88) {
@@ -94,7 +95,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			mindist = curdist;
 			k = i;
 		}
-		nearestMap.set(pixel, k);
+		nearestMap[offset] = k + 1;
 		return k;
 	}
 
@@ -107,8 +108,9 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
 
-		var closest = closestMap.get(pixel);
-		if (!closestMap.has(pixel))
+		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var closest = closestMap[offset];
+		if (closestMap == null)
 		{
 			closest = new Uint32Array(4);
 			closest[2] = closest[3] = 0xFFFF;
@@ -157,7 +159,7 @@ Copyright (c) 2018-2025 Miller Cy Chan
 			if (closest[3] == 0xFFFF)
 				closest[1] = closest[0];
 			
-			closestMap.set(pixel, closest);
+			closestMap[offset] = closest;
 		}
 
 		var MAX_ERR = palette.length << 2;
@@ -502,8 +504,8 @@ Copyright (c) 2018-2025 Miller Cy Chan
 		}
 	
 		clear() {
-			closestMap = new Map();
-			nearestMap = new Map();
+			closestMap = new Array(65536);
+			nearestMap = new Uint16Array(65536);
 		}
 	}
 	
