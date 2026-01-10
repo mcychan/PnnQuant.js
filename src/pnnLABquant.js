@@ -9,7 +9,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var random = new Random(), ratio = 1.0, weight;
-	var closestMap = new Array(65536), pixelMap = new Map(), nearestMap = new Uint16Array(65536);
+	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
 	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
@@ -264,24 +264,23 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	}
 	
 	function nearestColorIndex(palette, pixel, pos) {
+		var nearest = nearestMap.get(pixel);
+		if (nearestMap.has(pixel))
+			return nearest;
+
 		var k = 0;
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold) {
 			pixel = transparentColor;
 			a = 0;
-		}		
+		}
+
+		if (palette.length > 2 && hasAlpha && a > alphaThreshold)
+			k = 1;
 
 		var r = (pixel & 0xff),
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
-		
-		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
-		var nearest = nearestMap[offset];
-		if (nearest > 0)
-			return nearest - 1;
-		
-		if (palette.length > 2 && hasAlpha && a > alphaThreshold)
-			k = 1;
 
 		var mindist = 1e100;
 		var lab1 = getLab(a, r, g, b);
@@ -344,7 +343,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			mindist = curdist;
 			k = i;
 		}
-		nearestMap[offset] = k + 1;
+		nearestMap.set(pixel, k);
 		return k;
 	}
 
@@ -355,16 +354,15 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold)
 			return nearestColorIndex(palette, pixel, pos);
-		
-		var r = (pixel & 0xff),
-			g = (pixel >>> 8) & 0xff,
-			b = (pixel >>> 16) & 0xff;
 
-		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
-		var closest = closestMap[offset];
-		if (closestMap == null) {
+		var closest = closestMap.get(pixel);
+		if (!closestMap.has(pixel)) {
 			closest = new Uint32Array(4);
 			closest[2] = closest[3] = 0xffffffff;
+
+			var r = (pixel & 0xff),
+			g = (pixel >>> 8) & 0xff,
+			b = (pixel >>> 16) & 0xff;
 
 			for (var k = 0; k < palette.length; ++k) {
 				var r2 = (palette[k] & 0xff),
@@ -417,7 +415,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			if (closest[3] == 0xffffffff)
 				closest[1] = closest[0];
 			
-			closestMap[offset] = closest;
+			closestMap.set(pixel, closest);
 		}
 
 		var idx = 1;
@@ -836,9 +834,9 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		}
 		
 		clear() {
-			closestMap = new Array(65536);
+			closestMap = new Map();
 			pixelMap = new Map();
-			nearestMap = new Uint16Array(65536);
+			nearestMap = new Map();
 			random = new Random();
 		}
 	}
