@@ -18,7 +18,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			
 	class GilbertCurve {
 		#width; #height; #weight; #pixels; #palette; #saliencies; #nMaxColors; #beta = 1;
-		#qPixels; #errorq = []; #weights = []; #lookup;
+		#qPixels; #qPixel32s; #errorq = []; #weights = []; #lookup;
 		#BLOCK_SIZE = 343.0; #DITHER_MAX = 9; #ditherMax; #dither; #hasAlpha; #sortedByYDiff; #margin; #thresold;
 			
 		constructor(opts, args) {
@@ -303,6 +303,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 						return 1;
 					return 0;
 				});
+				
+			this.#qPixel32s[bidx] = this.#palette[this.#qPixels[bidx]];
 		}
 
 		#generate2d(x, y, ax, ay, bx, by) {
@@ -357,14 +359,6 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			this.#generate2d(x, y, bx2, by2, ax2, ay2);
 			this.#generate2d(x + bx2, y + by2, ax, ay, bx - bx2, by - by2);
 			this.#generate2d(x + (ax - dax) + (bx2 - dbx), y + (ay - day) + (by2 - dby), -bx2, -by2, -(ax - ax2), -(ay - ay2));
-		}
-		
-		#processImagePixels() {
-			var qPixel32s = new Uint32Array(this.#qPixels.length);
-			for (var i = 0; i < this.#qPixels.length; ++i)
-				qPixel32s[i] = this.#palette[this.#qPixels[i]];
-
-			return qPixel32s;
 		}
 
 		#initWeights(size)
@@ -425,6 +419,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			
 			this.#beta = beta;
 			this.#qPixels = this.#nMaxColors > 256 ? new Uint16Array(this.#pixels.length) : new Uint8Array(this.#pixels.length);
+			this.#qPixel32s = new Uint32Array(this.#qPixels.length);
 
 			if (!this.#sortedByYDiff)
 				this.#initWeights(this.#DITHER_MAX);
@@ -434,10 +429,9 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			else
 				this.#generate2d(0, 0, 0, this.#height, this.#width, 0);
 
-			if (!this.opts.dithering)
-				return this.#qPixels;
-			
-			return this.#processImagePixels();
+			if (this.opts.dithering || this.opts.colors <= 32)
+				return this.#qPixel32s;
+			return this.#qPixels;
 		}
 		
 		getIndexedPixels() {
