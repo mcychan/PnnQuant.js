@@ -18,7 +18,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			
 	class GilbertCurve {
 		#width; #height; #weight; #pixels; #palette; #saliencies; #nMaxColors; #beta = 1;
-		#qPixels; #qPixel32s; #errorq = []; #weights = []; #lookup;
+		#qPixels; #qPixel32s; #errorq = []; #weights = [];
 		#BLOCK_SIZE = 343.0; #DITHER_MAX = 9; #ditherMax; #dither; #hasAlpha; #sortedByYDiff; #margin; #thresold;
 			
 		constructor(opts, args) {
@@ -42,7 +42,6 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			this.#ditherMax = this.#DITHER_MAX = this.#weight < .015 ? (this.#weight > .0025) ? 25 : 16 : 9;
 			
 			this.#thresold = this.#DITHER_MAX > 9 ? -112 : -64;
-			this.#lookup = new Uint16Array(65536);
 		}
 
 		#Y_Diff(R, G, B, R2, G2, B2)
@@ -183,10 +182,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				a1 = a_pix;
 			}
 
-			var offset = getColorIndex(a1, r1, g1, b1);
-			if (this.#lookup[offset] == 0)
-				this.#lookup[offset] = ditherFn(this.#palette, c2, bidx) + 1;
-			return this.#lookup[offset] - 1;
+			return ditherFn(this.#palette, c2, bidx);
 		}
 
 		#diffusePixel(x, y)
@@ -229,10 +225,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 					this.#qPixels[bidx] = this.#ditherPixel(x, y, c2, this.#beta);
 			}
 			else if (this.#nMaxColors <= 32 && a_pix > 0xF0) {
-				var offset = getColorIndex(a_pix, r_pix, g_pix, b_pix);
-				if (this.#lookup[offset] == 0)
-					this.#lookup[offset] = ditherFn(this.#palette, c2, bidx) + 1;
-				this.#qPixels[bidx] = this.#lookup[offset] - 1;
+				this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 				
 				var acceptedDiff = Math.max(2, this.#nMaxColors - this.#margin);
 				if (this.#saliencies != null && (this.#Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || this.#U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
