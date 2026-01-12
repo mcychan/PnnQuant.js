@@ -275,7 +275,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
 		
-		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var offset = palette.length > 32 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 		var nearest = nearestMap[offset];
 		if (nearest > 0)
 			return nearest - 1;
@@ -359,8 +359,8 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		var r = (pixel & 0xff),
 			g = (pixel >>> 8) & 0xff,
 			b = (pixel >>> 16) & 0xff;
-					
-		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+
+		var offset = palette.length > 32 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 		var closest = closestMap.get(offset);
 		if (!closestMap.has(pixel)) {
 			closest = new Uint32Array(4);
@@ -416,7 +416,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 
 			if (closest[3] == 0xffffffff)
 				closest[1] = closest[0];
-			
+
 			closestMap.set(offset, closest);
 		}
 

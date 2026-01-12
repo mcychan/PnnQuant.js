@@ -279,7 +279,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 			if (unaccepted) {
 				if (this.#saliencies != null)
-					this.#qPixels[bidx] = this.#ditherPixel(x, y, c2, 1.25);
+					this.#qPixels[bidx] = this.#ditherPixel(x, y, c2, this.#beta);
 				else if (this.#Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > 3 && this.#U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > 3) {
 					var strength = 1 / 3.0;
 					c2 = new BlueNoise(null, {weightB: strength}).diffuse(pixel, this.#palette[this.#qPixels[bidx]], strength, x, y);

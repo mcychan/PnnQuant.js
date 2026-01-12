@@ -56,7 +56,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
 
-		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var offset = palette.length > 32 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 		var nearest = nearestMap[offset];
 		if (nearest > 0)
 			return nearest - 1;
@@ -108,7 +108,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
 
-		var offset = getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var offset = palette.length > 32 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 		var closest = closestMap[offset];
 		if (closestMap == null)
 		{
@@ -173,7 +173,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			return nearestColorIndex(palette, pixel, pos);
 		return closest[idx];
 	}
-		
+
 	class PnnQuant {
 		#hasSemiTransparency = false; #palette = [];
 		#transparentPixelIndex = -1; #transparentColor = 0xffffff;
