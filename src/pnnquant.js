@@ -7,7 +7,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var ratio = .5, weight;
-	var closestMap = new Array(65536), nearestMap = new Uint16Array(65536);
+	var closestMap = [], nearestMap = [];
 	
 	var coeffs = [
 		[0.299, 0.587, 0.114],
@@ -158,7 +158,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 
 			if (closest[3] == 0xFFFF)
 				closest[1] = closest[0];
-			
+
 			closestMap[offset] = closest;
 		}
 
@@ -504,8 +504,8 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		}
 	
 		clear() {
-			closestMap = new Array(65536);
-			nearestMap = new Uint16Array(65536);
+			closestMap = [];
+			nearestMap = [];
 		}
 	}
 	
