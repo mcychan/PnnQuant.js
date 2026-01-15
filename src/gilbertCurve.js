@@ -130,7 +130,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				g1 = (c2 >>> 8) & 0xff,
 				b1 = (c2 >>> 16) & 0xff,
 				a1 = (c2 >>> 24) & 0xff;
-			if (this.#margin > 6 || (this.#nMaxColors <= 32 && this.#weight > .007)) {
+			if (this.#margin > 6 || (this.#nMaxColors <= 32 && this.#weight < .01 && this.#weight > .007)) {
 				if (this.#nMaxColors > 4 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
 					var kappa = this.#saliencies[bidx] < .4 ? beta * .4 * this.#saliencies[bidx] : beta * .4 / this.#saliencies[bidx];
 					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
