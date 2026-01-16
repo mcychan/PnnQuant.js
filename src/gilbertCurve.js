@@ -15,7 +15,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		var c = channel / 255.0;
 		return c < 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
-			
+
 	class GilbertCurve {
 		#width; #height; #weight; #pixels; #palette; #saliencies; #nMaxColors; #beta = 1;
 		#qPixels; #qPixel32s; #errorq = []; #weights = [];
@@ -38,7 +38,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			this.#hasAlpha = this.args.weight < 0;
 			this.#weight = Math.abs(this.args.weight);
 			this.#margin = this.#weight < .0025 ? 12 : this.#weight < .004 ? 8 : 6;
-			this.#sortedByYDiff = this.#nMaxColors >= 128 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
+			this.#sortedByYDiff = this.#nMaxColors >= 128 && this.#weight < .08 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
 			this.#ditherMax = this.#DITHER_MAX = this.#weight < .015 ? (this.#weight > .0025) ? 25 : 16 : 9;
 			
 			this.#thresold = this.#DITHER_MAX > 9 ? -112 : -64;
