@@ -38,9 +38,9 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			this.#hasAlpha = this.args.weight < 0;
 			this.#weight = Math.abs(this.args.weight);
 			this.#margin = this.#weight < .0025 ? 12 : this.#weight < .004 ? 8 : 6;
-			this.#sortedByYDiff = this.#nMaxColors >= 128 && this.#weight < .08 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
+			this.#sortedByYDiff = this.#nMaxColors >= 128 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
 			this.#ditherMax = this.#DITHER_MAX = this.#weight < .015 ? (this.#weight > .0025) ? 25 : 16 : 9;
-			
+
 			this.#thresold = this.#DITHER_MAX > 9 ? -112 : -64;
 		}
 
@@ -289,13 +289,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 			this.#errorq.push(error);
 			if (this.#sortedByYDiff)
-				this.#errorq.sort(function(o1, o2) {
-					if (o2.yDiff < o1.yDiff)
-						return -1;
-					if (o2.yDiff > o1.yDiff)
-						return 1;
-					return 0;
-				});
+				this.#errorq.sort((o1, o2) => Math.sign(o2.yDiff - o1.yDiff));
 				
 			this.#qPixel32s[bidx] = this.#palette[this.#qPixels[bidx]];
 		}
