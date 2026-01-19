@@ -24,23 +24,53 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		constructor(opts, args) {
 			this.opts = opts;
 			this.args = args;
-			
-			this.ditherFn = this.args.ditherFn;
+
 			this.getColorIndex = this.args.getColorIndex;
 			this.#width = this.opts.width;
 			this.#height = this.opts.height;
 			this.#pixels = this.opts.pixels;
 			this.#palette = new Uint32Array(this.args.pal8);
+			this.ditherFn = this.args.ditherFn;
+			this.#hasAlpha = this.args.weight < 0;
 			this.#saliencies = this.args.saliencies;
 			this.#dither = this.opts.dithering;
-			this.#nMaxColors = this.#palette.length;
-
-			this.#hasAlpha = this.args.weight < 0;
 			this.#weight = Math.abs(this.args.weight);
 			this.#margin = this.#weight < .0025 ? 12 : this.#weight < .004 ? 8 : 6;
-			this.#sortedByYDiff = this.#nMaxColors >= 128 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
-			this.#ditherMax = this.#DITHER_MAX = this.#weight < .015 ? (this.#weight > .0025) ? 25 : 16 : 9;
+			this.#nMaxColors = this.#palette.length;
+			this.#sortedByYDiff = this.#nMaxColors > 128 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
 
+			var beta = this.#nMaxColors > 4 ? (.6 - .00625 * this.#nMaxColors) : 1;
+			if (this.#nMaxColors > 4) {
+				var boundary = .005 - .0000625 * this.#nMaxColors;
+				beta = Math.fround(this.#weight > boundary ? .25 : Math.min(1.5, beta + this.#nMaxColors * this.#weight));
+				if (this.#nMaxColors > 16 && this.#nMaxColors <= 32 && this.#weight < .003)
+					beta += .075;
+				else if (this.#weight < .0015 || (this.#nMaxColors > 32 && this.#nMaxColors < 256))
+					beta += .1;
+				if (this.#nMaxColors >= 64 && (this.#weight > .012 && this.#weight < .0125) || (this.#weight > .025 && this.#weight < .03))
+					beta += .05;
+				else if (this.#nMaxColors > 32 && this.#nMaxColors < 64 && this.#weight < .015)
+					beta = .55;
+			}
+			else
+				beta *= .95;
+
+			if (this.#nMaxColors > 64 || (this.#nMaxColors > 4 && this.#weight > .02))
+				beta *= .4;
+			if (this.#nMaxColors > 64 && this.#weight < .02)
+				beta = .2;
+			this.#beta = beta;
+
+			this.#DITHER_MAX = this.#weight < .015 ? (this.#weight > .0025) ? 25 : 16 : 9;
+			var edge = this.#hasAlpha ? 1 : Math.exp(this.#weight) - .25;
+			var deviation = !this.#hasAlpha && this.#weight > .002 ? -.25 : 1;
+			var ditherMax = (this.#hasAlpha || this.#DITHER_MAX > 9) ? Math.pow((Math.sqrt(this.#DITHER_MAX) + edge * deviation), 2) : (this.#DITHER_MAX * (this.#saliencies != null ? 2 : Math.E));
+			var density = this.#nMaxColors > 16 ? 3200 : 1500;
+			if (this.#nMaxColors / this.#weight > 5000 && (this.#weight > .045 || (this.#weight > .01 && this.#nMaxColors < 64)))
+				ditherMax = Math.pow(5 + edge, 2);
+			else if (this.#weight < .03 && this.#palette.length / this.#weight < density && this.#nMaxColors >= 16 && this.#nMaxColors < 256)
+				ditherMax = Math.pow(5 + edge, 2);
+			this.#ditherMax = ditherMax | 0;
 			this.#thresold = this.#DITHER_MAX > 9 ? -112 : -64;
 		}
 
@@ -70,7 +100,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		}
 
 		static ErrorBox = class ErrorBox {
-		    constructor(pixel) {
+			constructor(pixel) {
 				var r = (pixel & 0xff),
 					g = (pixel >>> 8) & 0xff,
 					b = (pixel >>> 16) & 0xff,
@@ -79,7 +109,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				this.p = [r, g, b, a];
 			}
 		};
-		
+
 		#normalDistribution(x, peak)
 		{
 			var mean = .5, stdDev = .1;
@@ -95,7 +125,6 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		#ditherPixel(x, y, c2, beta)
 		{
 			const { ditherFn, getColorIndex } = this;
-			
 			var bidx = x + y * this.#width;
 			var pixel = this.#pixels[bidx];
 			var r0 = (pixel & 0xff),
@@ -174,13 +203,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				b1 = b_pix;
 				a1 = a_pix;
 			}
-			if (beta > 1 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#DITHER_MAX) {
+			if (beta > 1 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#DITHER_MAX)
 				c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-				r1 = r_pix;
-				g1 = g_pix;
-				b1 = b_pix;
-				a1 = a_pix;
-			}
 
 			return ditherFn(this.#palette, c2, bidx);
 		}
@@ -188,12 +212,13 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		#diffusePixel(x, y)
 		{
 			const { ditherFn, getColorIndex } = this;
-			
+
 			var bidx = x + y * this.#width;
 			var pixel = this.#pixels[bidx];
 			var error = new GilbertCurve.ErrorBox(pixel);
-			var i = this.#sortedByYDiff ? this.#weights.length - 1 : 0;
+
 			var maxErr = this.#DITHER_MAX - 1;
+			var i = this.#sortedByYDiff ? this.#weights.length - 1 : 0;
 			for (var c = 0; c < this.#errorq.length; ++c) {
 				var eb = this.#errorq[c];
 				if(i < 0 || i >= this.#weights.length)
@@ -373,38 +398,6 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 		dither()
 		{
-			var edge = this.#hasAlpha ? 1 : Math.exp(this.#weight) - .25;
-			var deviation = !this.#hasAlpha && this.#weight > .002 ? -.25 : 1;
-			var ditherMax = (this.#hasAlpha || this.#DITHER_MAX > 9) ? Math.pow((Math.sqrt(this.#DITHER_MAX) + edge * deviation), 2) : (this.#DITHER_MAX * (this.#saliencies != null ? 2 : Math.E));
-			var density = this.#nMaxColors > 16 ? 3200 : 1500;
-			if (this.#nMaxColors / this.#weight > 5000 && (this.#weight > .045 || (this.#weight > .01 && this.#nMaxColors < 64)))
-				ditherMax = Math.pow(5 + edge, 2);
-			else if (this.#weight < .03 && this.#palette.length / this.#weight < density && this.#nMaxColors >= 16 && this.#nMaxColors < 256)
-				ditherMax = Math.pow(5 + edge, 2);
-			this.#ditherMax = ditherMax | 0;
-
-			var beta = this.#nMaxColors > 4 ? (.6 - .00625 * this.#nMaxColors) : 1;
-			if (this.#nMaxColors > 4) {
-				var boundary = .005 - .0000625 * this.#nMaxColors;
-				beta = Math.fround(this.#weight > boundary ? .25 : Math.min(1.5, beta + this.#nMaxColors * this.#weight));
-				if (this.#nMaxColors > 16 && this.#nMaxColors <= 32 && this.#weight < .003)
-					beta += .075;
-				else if (this.#weight < .0015 || (this.#nMaxColors > 32 && this.#nMaxColors < 256))
-					beta += .1;
-				if (this.#nMaxColors >= 64 && (this.#weight > .012 && this.#weight < .0125) || (this.#weight > .025 && this.#weight < .03))
-					beta += .05;
-				else if (this.#nMaxColors > 32 && this.#nMaxColors < 64 && this.#weight < .015)
-					beta = .55;
-			}
-			else
-				beta *= .95;
-			
-			if (this.#nMaxColors > 64 || (this.#nMaxColors > 4 && this.#weight > .02))
-				beta *= .4;
-			if (this.#nMaxColors > 64 && this.#weight < .02)
-				beta = .2;
-			
-			this.#beta = beta;
 			this.#qPixels = this.#nMaxColors > 256 ? new Uint16Array(this.#pixels.length) : new Uint8Array(this.#pixels.length);
 			this.#qPixel32s = new Uint32Array(this.#qPixels.length);
 

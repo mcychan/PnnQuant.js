@@ -6,7 +6,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 (function () {
 	"use strict";
 
-	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
+	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, isNano = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var random = new Random(), ratio = 1.0, weight;
 	var closestMap = [], pixelMap = new Map(), nearestMap = [], saliencies;
@@ -275,7 +275,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
 		
-		var offset = weight > .015 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var offset = !isNano ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 		var nearest = nearestMap[offset];
 		if (nearest > 0)
 			return nearest - 1;
@@ -360,7 +360,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		g = (pixel >>> 8) & 0xff,
 		b = (pixel >>> 16) & 0xff;
 		
-		var offset = weight > .015 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var offset = !isNano ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 		var nearest = nearestMap[offset];
 		if (nearest > 0)
 			return nearest - 1;
@@ -419,7 +419,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	}
 
 	function closestColorIndex(palette, pixel, pos) {
-		if (PG < coeffs[0][1] && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > -88)
+		if (PG < 1 && weight > .1 && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > 0)
 			return hybridColorIndex(palette, pixel, pos);
 
 		var a = (pixel >>> 24) & 0xff;
@@ -430,7 +430,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			g = (pixel >>> 8) & 0xff,
 			b = (pixel >>> 16) & 0xff;
 
-		var offset = weight > .015 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
+		var offset = !isNano ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
 		var closest = closestMap[offset];
 		if (closest == null) {
 			closest = new Uint32Array(4);
@@ -636,6 +636,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 				quan_rt = -1;
 			
 			weight = Math.min(0.9, nMaxColors * 1.0 / maxbins);
+			isNano = weight <= .15;
 			if ((nMaxColors < 16 && weight < .0075) || weight < .001 || (weight > .0015 && weight < .0022))
 				quan_rt = 2;
 			if (weight < .04 && PG < 1 && PG >= coeffs[0][1]) {
