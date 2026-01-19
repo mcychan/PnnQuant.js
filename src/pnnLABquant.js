@@ -419,7 +419,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	}
 
 	function closestColorIndex(palette, pixel, pos) {
-		if (PG < 1 && weight > .1 && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > 0)
+		if (PG < 1 && weight > .15 && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > 0)
 			return hybridColorIndex(palette, pixel, pos);
 
 		var a = (pixel >>> 24) & 0xff;
