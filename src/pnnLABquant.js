@@ -40,7 +40,9 @@ Copyright (c) 2018-2026 Miller Cy Chan
 
 	function Random() {
 		this.nextInt = function (max) {
-			return Math.floor(Math.random() * (max + 1));
+			const array = new Uint32Array(1);
+			crypto.getRandomValues(array);
+			return Math.floor((array[0] / (0xFFFFFFFF + 1)) * (max + 1));
 		};
 	}
 
