@@ -22,8 +22,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 	const right = i => (i + 1) << 1;
 
 	class PriorityQueue {
+		#heap = [];
 		constructor(comparator) {
-			this.#heap = [];
 			this.#comparator = comparator;
 		}
 		size() {
