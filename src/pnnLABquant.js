@@ -9,7 +9,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, isNano = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var random, ratio = 1.0, weight;
-	var closestMap = [], pixelMap = new Map(), nearestMap = [], saliencies;
+	var closestMap = new Map(), pixelMap = new Map(), nearestMap = [], saliencies;
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
 	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
@@ -419,7 +419,9 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			crypto.getRandomValues(this.#values);
 		}
 		nextInt(max) {
-			return Math.floor((this.#values[this.#cnt++ % this.#values.length] / (0xFFFF + 1)) * (max + 1));
+			if (this.#cnt >= this.#values.length)
+				this.#cnt = 0;
+			return Math.floor((this.#values[this.#cnt++] / (0xFFFF + 1)) * (max + 1));
 		};
 	}
 
@@ -436,10 +438,10 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			b = (pixel >>> 16) & 0xff;
 
 		var offset = !isNano ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
-		var closest = closestMap[offset];
-		if (closest == null) {
-			closest = new Uint32Array(4);
-			closest[2] = closest[3] = 0xffffffff;
+		var closest = closestMap.get(pixel);
+		if (!closestMap.has(pixel)) {
+			closest = new Int32Array(4);
+			closest[2] = closest[3] = 0xfffffff;
 
 			for (var k = 0; k < palette.length; ++k) {
 				var r2 = (palette[k] & 0xff),
@@ -489,10 +491,10 @@ Copyright (c) 2018-2026 Miller Cy Chan
 				}
 			}
 
-			if (closest[3] == 0xffffffff)
+			if (closest[3] == 0xfffffff)
 				closest[1] = closest[0];
 
-			closestMap[offset] = closest;
+			closestMap.set(pixel, closest);
 		}
 
 		var idx = 1;
@@ -911,7 +913,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		}
 		
 		clear() {
-			closestMap = [];
+			closestMap = new Map();
 			pixelMap = new Map();
 			nearestMap = [];
 		}
