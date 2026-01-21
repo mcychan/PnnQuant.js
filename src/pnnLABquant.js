@@ -8,7 +8,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, isNano = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
-	var random = new Random(), ratio = 1.0, weight;
+	var random, ratio = 1.0, weight;
 	var closestMap = [], pixelMap = new Map(), nearestMap = [], saliencies;
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
@@ -36,14 +36,6 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		this.cnt = 0;
 		this.nn = this.fw = this.bk = this.tm = this.mtm = 0;
 		this.err = 0.0;
-	}
-
-	function Random() {
-		this.nextInt = function (max) {
-			const array = new Uint32Array(1);
-			crypto.getRandomValues(array);
-			return Math.floor((array[0] / (0xFFFFFFFF + 1)) * (max + 1));
-		};
 	}
 
 	function sqr(value) {
@@ -420,6 +412,17 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		return k;
 	}
 
+	class Random {
+		#cnt = 0; #values = [];
+		constructor() {
+			this.#values = new Uint16Array(8192);
+			crypto.getRandomValues(this.#values);
+		}
+		nextInt(max) {
+			return Math.floor((this.#values[this.#cnt++ % this.#values.length] / (0xFFFF + 1)) * (max + 1));
+		};
+	}
+
 	function closestColorIndex(palette, pixel, pos) {
 		if (PG < 1 && weight > .15 && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > 0)
 			return hybridColorIndex(palette, pixel, pos);
@@ -509,6 +512,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 
 		constructor(opts) {
 			this.opts = opts;
+			random = new Random();
 		}
 		
 		#find_nn(bins, idx, texicab) {
@@ -910,7 +914,6 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			closestMap = [];
 			pixelMap = new Map();
 			nearestMap = [];
-			random = new Random();
 		}
 	}
 
