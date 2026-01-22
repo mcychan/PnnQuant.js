@@ -16,6 +16,76 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		return c < 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
 
+	const top = 0;
+	const parent = i => ((i + 1) >>> 1) - 1;
+	const left = i => (i << 1) + 1;
+	const right = i => (i + 1) << 1;
+
+	class PriorityQueue {
+		#comparator; #stack = [];
+		constructor(comparator = null) {
+			this.#comparator = comparator;
+		}
+		get(index) {
+			return this.#stack[index];
+		}
+		size() {
+			return this.#stack.length;
+		}
+		isEmpty() {
+			return this.size() == 0;
+		}
+		peek() {
+			return this.#stack[top];
+		}
+		push(...values) {
+			values.forEach(value => {
+				this.#stack.push(value);
+				if (this.#comparator != null)
+					this.#shiftUp();
+			});
+			return this.size();
+		}
+		shift() {
+			if (this.#comparator == null) {
+				this.#stack.shift();
+				return;
+			}
+			const poppedValue = this.peek();
+			const bottom = this.size() - 1;
+			if (bottom > top)
+				this.#swap(top, bottom);
+
+			this.#stack.pop();
+			this.#shiftDown();
+			return poppedValue;
+		}
+		#greater(i, j) {
+			return this.#comparator(this.#stack[i], this.#stack[j]);
+		}
+		#swap(i, j) {
+			[this.#stack[i], this.#stack[j]] = [this.#stack[j], this.#stack[i]];
+		
+		}
+		#shiftUp() {
+			let node = this.size() - 1;
+			while (node > top && this.#greater(node, parent(node))) {
+				this.#swap(node, parent(node));
+				node = parent(node);
+			}
+		}
+		#shiftDown() {
+			let node = top;
+			while ((left(node) < this.size() && this.#greater(left(node), node)) ||
+			 (right(node) < this.size() && this.#greater(right(node), node))
+			) {
+				let maxChild = (right(node) < this.size() && this.#greater(right(node), left(node))) ? right(node) : left(node);
+				this.#swap(node, maxChild);
+				node = maxChild;
+			}
+		}
+	}
+
 	class GilbertCurve {
 		#width; #height; #weight; #pixels; #palette; #saliencies; #nMaxColors; #beta = 1;
 		#qPixels; #qPixel32s; #errorq = []; #weights = [];
@@ -38,6 +108,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			this.#margin = this.#weight < .0025 ? 12 : this.#weight < .004 ? 8 : 6;
 			this.#nMaxColors = this.#palette.length;
 			this.#sortedByYDiff = this.#nMaxColors > 128 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
+			this.#errorq = this.#sortedByYDiff ? new PriorityQueue((o1, o2) => Math.sign(o2.yDiff - o1.yDiff)) : new PriorityQueue();
 
 			var beta = this.#nMaxColors > 4 ? (.6 - .00625 * this.#nMaxColors) : 1;
 			if (this.#nMaxColors > 4) {
@@ -219,8 +290,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 			var maxErr = this.#DITHER_MAX - 1;
 			var i = this.#sortedByYDiff ? this.#weights.length - 1 : 0;
-			for (var c = 0; c < this.#errorq.length; ++c) {
-				var eb = this.#errorq[c];
+			for (var c = 0; c < this.#errorq.size(); ++c) {
+				var eb = this.#errorq.get(c);
 				if(i < 0 || i >= this.#weights.length)
 					break;
 
@@ -262,10 +333,10 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			else
 				this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 
-			if (this.#errorq.length >= this.#DITHER_MAX)
+			if (this.#errorq.size() >= this.#DITHER_MAX)
 				this.#errorq.shift();
-			else if (this.#errorq.length > 0)
-				this.#initWeights(this.#errorq.length);
+			else if (!this.#errorq.isEmpty())
+				this.#initWeights(this.#errorq.size());
 
 			c2 = this.#palette[this.#qPixels[bidx]];
 			var r2 = (c2 & 0xff),
@@ -313,9 +384,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			}
 
 			this.#errorq.push(error);
-			if (this.#sortedByYDiff)
-				this.#errorq.sort((o1, o2) => Math.sign(o2.yDiff - o1.yDiff));
-				
+
 			this.#qPixel32s[bidx] = this.#palette[this.#qPixels[bidx]];
 		}
 
@@ -413,11 +482,11 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				return this.#qPixel32s;
 			return this.#qPixels;
 		}
-		
+
 		getIndexedPixels() {
 			return this.#qPixels;
 		}
-		
+
 		getResult() {
 			var gc = this;
 			return new Promise(function(resolve, reject) {
