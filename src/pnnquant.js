@@ -7,7 +7,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var ratio = .5, weight;
-	var closestMap = new Map(), nearestMap = [];
+	var closestMap = new Map(), nearestMap = new Map();
 
 	var coeffs = [
 		[0.299, 0.587, 0.114],
@@ -57,9 +57,9 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		b = (pixel >>> 16) & 0xff;
 
 		var offset = weight > .015 ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
-		var nearest = nearestMap[offset];
-		if (nearest > 0)
-			return nearest - 1;
+		var nearest = nearestMap.get(offset);
+		if (nearestMap.has(offset))
+			return nearest;
 
 		if (palette.length > 2 && hasAlpha && a > alphaThreshold)
 			k = 1;
@@ -95,7 +95,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			mindist = curdist;
 			k = i;
 		}
-		nearestMap[offset] = k + 1;
+		nearestMap.set(offset, k);
 		return k;
 	}
 
@@ -505,7 +505,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	
 		clear() {
 			closestMap = new Map();
-			nearestMap = [];
+			nearestMap = new Map();
 		}
 	}
 	

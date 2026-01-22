@@ -9,7 +9,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, isNano = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var random, ratio = 1.0, weight;
-	var closestMap = new Map(), pixelMap = new Map(), nearestMap = [], saliencies;
+	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map(), saliencies;
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
 	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
@@ -270,9 +270,9 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		b = (pixel >>> 16) & 0xff;
 		
 		var offset = !isNano ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
-		var nearest = nearestMap[offset];
-		if (nearest > 0)
-			return nearest - 1;
+		var nearest = nearestMap.get(offset);
+		if (nearestMap.has(offset))
+			return nearest;
 		
 		if (palette.length > 2 && hasAlpha && a > alphaThreshold)
 			k = 1;
@@ -338,77 +338,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			mindist = curdist;
 			k = i;
 		}
-		nearestMap[offset] = k + 1;
-		return k;
-	}
-
-	function hybridColorIndex(palette, pixel, pos) {
-		var k = 0;
-		var a = (pixel >>> 24) & 0xff;
-		if (a <= alphaThreshold) {
-			pixel = transparentColor;
-			a = 0;
-		}
-
-		var r = (pixel & 0xff),
-		g = (pixel >>> 8) & 0xff,
-		b = (pixel >>> 16) & 0xff;
-		
-		var offset = !isNano ? pixel : getARGBIndex(a, r, g, b, hasSemiTransparency, hasAlpha);
-		var nearest = nearestMap[offset];
-		if (nearest > 0)
-			return nearest - 1;
-
-		var mindist = 1e100;
-		var lab1 = getLab(a, r, g, b);
-		for (var i = k; i < palette.length; ++i) {
-			var r2 = (palette[i] & 0xff),
-			g2 = (palette[i] >>> 8) & 0xff,
-			b2 = (palette[i] >>> 16) & 0xff,
-			a2 = (palette[i] >>> 24) & 0xff;
-			var curdist = hasSemiTransparency ? sqr(a2 - a) / Math.exp(1.5) : 0;
-			if (curdist > mindist)
-				continue;
-			
-			var lab2 = getLab(a2, r2, g2, b2);
-			if (Math.abs(lab2.L - lab1.L) < palette.length || saliencies[pos] < .2 || saliencies[pos] > .8) {
-				curdist += sqr(lab2.L - lab1.L);
-				if (curdist > mindist)
-					continue;
-				
-				curdist += sqr(lab2.A - lab1.A);
-				if (curdist > mindist)
-					continue;
-				
-				curdist += sqr(lab2.B - lab1.B);
-			}
-			else {
-				var deltaL_prime_div_k_L_S_L = L_prime_div_k_L_S_L(lab1, lab2);
-				curdist += sqr(deltaL_prime_div_k_L_S_L);
-				if (curdist > mindist)
-					continue;
-
-				var a1Prime = {}, a2Prime = {}, CPrime1 = {}, CPrime2 = {};
-				var deltaC_prime_div_k_L_S_L = C_prime_div_k_L_S_L(lab1, lab2, a1Prime, a2Prime, CPrime1, CPrime2);
-				curdist += sqr(deltaC_prime_div_k_L_S_L);
-				if (curdist > mindist)
-					continue;
-
-				var barCPrime = {}, barhPrime = {};
-				var deltaH_prime_div_k_L_S_L = H_prime_div_k_L_S_L(lab1, lab2, a1Prime.value, a2Prime.value, CPrime1.value, CPrime2.value, barCPrime, barhPrime);
-				curdist += sqr(deltaH_prime_div_k_L_S_L);
-				if (curdist > mindist)
-					continue;
-
-				curdist += R_T(barCPrime.value, barhPrime.value, deltaC_prime_div_k_L_S_L, deltaH_prime_div_k_L_S_L);
-			}
-			
-			if (curdist > mindist)
-				continue;
-			mindist = curdist;
-			k = i;
-		}
-		nearestMap[offset] = k + 1;
+		nearestMap.set(offset, k);
 		return k;
 	}
 
@@ -426,9 +356,6 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	}
 
 	function closestColorIndex(palette, pixel, pos) {
-		if (PG < 1 && weight > .15 && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > 0)
-			return hybridColorIndex(palette, pixel, pos);
-
 		var a = (pixel >>> 24) & 0xff;
 		if (a <= alphaThreshold)
 			return nearestColorIndex(palette, pixel, pos);
@@ -915,7 +842,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		clear() {
 			closestMap = new Map();
 			pixelMap = new Map();
-			nearestMap = [];
+			nearestMap = new Map();
 		}
 	}
 
