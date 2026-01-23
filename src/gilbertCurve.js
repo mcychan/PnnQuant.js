@@ -129,10 +129,15 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			if (this.#nMaxColors > 64 || (this.#nMaxColors > 4 && this.#weight > .02))
 				beta *= .4;
 			if (this.#nMaxColors > 64 && this.#weight < .02)
-				beta = .2;
+				beta = .18;
 			this.#beta = beta;
 
 			this.#DITHER_MAX = this.#weight < .015 ? (this.#weight > .0025) ? 25 : 16 : 9;
+			if (this.#weight > .99) {
+				this.#beta = this.#weight;
+				this.#DITHER_MAX = 25;
+			}
+
 			var edge = this.#hasAlpha ? 1 : Math.exp(this.#weight) - .25;
 			var deviation = !this.#hasAlpha && this.#weight > .002 ? -.25 : 1;
 			var ditherMax = (this.#hasAlpha || this.#DITHER_MAX > 9) ? Math.pow((Math.sqrt(this.#DITHER_MAX) + edge * deviation), 2) : (this.#DITHER_MAX * (this.#saliencies != null ? 2 : Math.E));
