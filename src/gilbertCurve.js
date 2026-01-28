@@ -278,7 +278,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				a1 = (c2 >>> 24) & 0xff;
 			}
 
-			if (!this.#sortedByYDiff && this.#nMaxColors > 32 && (this.#nMaxColors <= 64 || weight >= .02) && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#margin - 1) {
+			if (!this.#sortedByYDiff && this.#nMaxColors > 32 && (this.#nMaxColors <= 64 || this.#weight >= .02) && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#margin - 1) {
 				c2 = new BlueNoise(null, {weightB: beta * this.#normalDistribution(beta, this.#nMaxColors / 128.0) * this.#saliencies[bidx]}).diffuse(c2, qPixel, strength, x, y);
 				r1 = (c2 & 0xff);
 				g1 = (c2 >>> 8) & 0xff;
