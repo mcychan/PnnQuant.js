@@ -219,7 +219,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				c2 = new BlueNoise(null, {weightB: beta * 2 / this.#saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 			else if (this.#nMaxColors <= 4 || this.#Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) < (2 * acceptedDiff)) {
 				if (this.#nMaxColors <= 128 || BlueNoise.TELL_BLUE_NOISE[bidx & 4095] > 0) {
-					if (this.#nMaxColors > 32) {
+					if (this.#nMaxColors > 64) {
 						var kappa = this.#saliencies[bidx] < .6 ? beta * .15 / this.#saliencies[bidx] : beta * .4 / this.#saliencies[bidx];
 						c2 = new BlueNoise(null, {weightB: kappa}).diffuse(pixel, qPixel, strength, x, y);
 					}
@@ -246,12 +246,12 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 					var kappa = this.#saliencies[bidx] < .4 ? beta * .4 * this.#saliencies[bidx] : beta * .4 / this.#saliencies[bidx];
 					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 					if (this.#nMaxColors > 32 && this.#saliencies[bidx] < .9)
-						kappa = beta * this.#normalDistribution(beta, 2) * this.#saliencies[bidx];
+						kappa = beta * this.#normalDistribution(this.#saliencies[bidx], 2);
 					else {
 						if (this.#weight >= .0015 && this.#saliencies[bidx] < .6)
 							c1 = pixel;
 						if (this.#saliencies[bidx] < .6)
-							kappa = beta * this.#normalDistribution(beta, this.#weight < .0008 ? 2.5 : 1.75) * this.#saliencies[bidx];
+							kappa = beta * this.#normalDistribution(this.#saliencies[bidx], this.#weight < .0008 ? 2.5 : 1.75);
 						else if (this.#nMaxColors >= 32 || this.#Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff)) {
 							if (this.#saliencies[bidx] < .9)
 								kappa = beta * (!this.#sortedByYDiff && this.#weight < .0025 ? .55 : .5) / this.#saliencies[bidx];
@@ -278,12 +278,12 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				a1 = (c2 >>> 24) & 0xff;
 			}
 
-			if (!this.#sortedByYDiff && this.#nMaxColors > 32 && (this.#nMaxColors <= 64 || this.#weight >= .02) && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#margin - 1) {
-				c2 = new BlueNoise(null, {weightB: beta * this.#normalDistribution(beta, this.#nMaxColors / 128.0) * this.#saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
-				r1 = (c2 & 0xff);
-				g1 = (c2 >>> 8) & 0xff;
-				b1 = (c2 >>> 16) & 0xff;
-				a1 = (c2 >>> 24) & 0xff;
+			if (this.#DITHER_MAX < 16 && this.#nMaxColors > 4 && this.#saliencies[bidx] < .6 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#margin - 1) {
+				c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
+				r1 = r_pix;
+				g1 = g_pix;
+				b1 = b_pix;
+				a1 = a_pix;
 			}
 			if (beta > 1 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#DITHER_MAX)
 				c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
