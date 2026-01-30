@@ -253,10 +253,10 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 						if (this.#saliencies[bidx] < .6)
 							kappa = beta * this.#normalDistribution(this.#saliencies[bidx], this.#weight < .0008 ? 2.5 : 1.75);
 						else if (this.#nMaxColors >= 32 || this.#Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff)) {
-							if (this.#saliencies[bidx] < .9)
+							if (this.#saliencies[bidx] > .15 && this.#saliencies[bidx] < .9)
 								kappa = beta * (!this.#sortedByYDiff && this.#weight < .0025 ? .55 : .5) / this.#saliencies[bidx];
 							else
-								kappa = beta * this.#normalDistribution(beta, !this.#sortedByYDiff && this.#weight < .0025 ? .55 : .5) / this.#saliencies[bidx];
+								kappa = beta * this.#normalDistribution(this.#saliencies[bidx], !this.#sortedByYDiff && this.#weight < .0025 ? 1.82 : 2);
 						}
 					}
 
