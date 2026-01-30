@@ -223,7 +223,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 						var kappa = this.#saliencies[bidx] < .6 ? beta * .15 / this.#saliencies[bidx] : beta * .4 / this.#saliencies[bidx];
 						c2 = new BlueNoise(null, {weightB: kappa}).diffuse(pixel, qPixel, strength, x, y);
 					}
-					else if (this.#saliencies[bidx] < .9)
+					else
 						c2 = new BlueNoise(null, {weightB: beta * .5 / this.#saliencies[bidx]}).diffuse(pixel, qPixel, strength, x, y);
 				}
 				var r1 = (c2 & 0xff),
