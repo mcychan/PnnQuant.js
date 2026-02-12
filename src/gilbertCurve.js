@@ -264,7 +264,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				}
 			}
 			else if (this.#nMaxColors > 4 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
-				if ((this.#nMaxColors <= 32 && this.#weight >= .004) || this.#saliencies[bidx] < beta)
+				if (this.#nMaxColors <= 32 && this.#weight >= .004)
 					c2 = new BlueNoise(null, {weightB: beta * this.#normalDistribution(this.#saliencies[bidx], .25)}).diffuse(c2, qPixel, strength, x, y);
 				else
 					c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
@@ -276,6 +276,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 			if (this.#DITHER_MAX < 16 && this.#nMaxColors > 4 && this.#saliencies[bidx] < .6 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > this.#margin - 1)
 				c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
+			if (this.#nMaxColors > 32 && this.#saliencies[bidx] > .99)
+				c2 = new BlueNoise(null, {weightB: beta * this.#normalDistribution(this.#saliencies[bidx], .25) * beta}).diffuse(c2, qPixel, strength, x, y);
 
 			return ditherFn(this.#palette, c2, bidx);
 		}
@@ -315,7 +317,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 			var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 			if (this.#saliencies != null && this.#dither && !this.#sortedByYDiff && (!this.#hasAlpha || a0 < a_pix)) {
-				if (this.#nMaxColors > 32 && this.#saliencies[bidx] > .99)
+				if (this.#nMaxColors >= 256 && this.#saliencies[bidx] > .99)
 					this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 				else
 					this.#qPixels[bidx] = this.#ditherPixel(x, y, c2, this.#beta);
