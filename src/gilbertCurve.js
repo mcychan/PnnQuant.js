@@ -236,8 +236,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				g1 = (c2 >>> 8) & 0xff,
 				b1 = (c2 >>> 16) & 0xff,
 				a1 = (c2 >>> 24) & 0xff;
-			if (this.#margin > 6 || (this.#nMaxColors <= 32 && this.#weight < .01 && this.#weight > .007)) {
-				if (this.#nMaxColors > 4 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
+			if (this.#nMaxColors > 4 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
+				if (this.#margin > 6 || (this.#nMaxColors <= 32 && this.#weight < .01 && this.#weight > .007)) {
 					var kappa = this.#saliencies[bidx] < .4 ? beta * .4 * this.#saliencies[bidx] : beta * .4 / this.#saliencies[bidx];
 					var c1 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
 					if (this.#nMaxColors > 32 && this.#saliencies[bidx] < .9)
@@ -257,14 +257,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 					}
 
 					c2 = new BlueNoise(null, {weightB: kappa}).diffuse(c1, qPixel, strength, x, y);
-					r1 = (c2 & 0xff);
-					g1 = (c2 >>> 8) & 0xff;
-					b1 = (c2 >>> 16) & 0xff;
-					a1 = (c2 >>> 24) & 0xff;
 				}
-			}
-			else if (this.#nMaxColors > 4 && this.#Y_Diff(r0, g0, b0, r1, g1, b1) > (beta * acceptedDiff)) {
-				if (this.#nMaxColors <= 32 && this.#weight >= .004)
+				else if (this.#nMaxColors <= 32 && this.#weight >= .004)
 					c2 = new BlueNoise(null, {weightB: beta * this.#normalDistribution(this.#saliencies[bidx], .25)}).diffuse(c2, qPixel, strength, x, y);
 				else
 					c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
