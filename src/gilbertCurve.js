@@ -123,7 +123,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				else if (this.#nMaxColors > 32 && this.#nMaxColors < 64 && this.#weight < .015)
 					beta = .55;
 				else if (this.#nMaxColors > 16 && this.#nMaxColors <= 32 && this.#weight >= .005)
-					beta = .55;
+					beta += .1;
 			}
 			else
 				beta *= .95;
@@ -245,7 +245,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 					else {
 						if (this.#weight >= .0015 && this.#saliencies[bidx] < .6)
 							c1 = pixel;
-						if (this.#saliencies[bidx] < .6)
+						if (this.#weight >= .0005 && this.#saliencies[bidx] < .6)
 							kappa = beta * this.#normalDistribution(this.#saliencies[bidx], this.#weight < .0008 ? 2.5 : 1.75);
 						else if (this.#nMaxColors >= 32 || this.#Y_Diff(r_pix, g_pix, b_pix, r1, g1, b1) > (beta * Math.PI * acceptedDiff)) {
 							var ub = 1 - this.#nMaxColors / 320.0;
