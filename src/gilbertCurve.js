@@ -123,7 +123,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				else if (this.#nMaxColors > 32 && this.#nMaxColors < 64 && this.#weight < .015)
 					beta = .55;
 				else if (this.#nMaxColors > 16 && this.#nMaxColors <= 32 && this.#weight >= .005)
-					beta += .1;
+					beta += .05 + this.#weight * this.#nMaxColors;
 			}
 			else
 				beta *= .95;
