@@ -16,8 +16,8 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		return c < 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
 
-	const top = 0;
-	const parent = i => ((i + 1) >>> 1) - 1;
+	const first = 0;
+	const prev = i => ((i + 1) >>> 1) - 1;
 	const left = i => (i << 1) + 1;
 	const right = i => (i + 1) << 1;
 
@@ -36,7 +36,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			return this.size() == 0;
 		}
 		peek() {
-			return this.#stack[top];
+			return this.#stack[first];
 		}
 		push(...values) {
 			values.forEach(value => {
@@ -52,9 +52,9 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				return;
 			}
 			const poppedValue = this.peek();
-			const bottom = this.size() - 1;
-			if (bottom > top)
-				this.#swap(top, bottom);
+			const last = this.size() - 1;
+			if (last > first)
+				this.#swap(first, last);
 
 			this.#stack.pop();
 			this.#shiftDown();
@@ -69,13 +69,13 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 		}
 		#shiftUp() {
 			let node = this.size() - 1;
-			while (node > top && this.#greater(node, parent(node))) {
-				this.#swap(node, parent(node));
-				node = parent(node);
+			while (node > first && this.#greater(node, prev(node))) {
+				this.#swap(node, prev(node));
+				node = prev(node);
 			}
 		}
 		#shiftDown() {
-			let node = top;
+			let node = first;
 			while ((left(node) < this.size() && this.#greater(left(node), node)) ||
 			 (right(node) < this.size() && this.#greater(right(node), node))
 			) {

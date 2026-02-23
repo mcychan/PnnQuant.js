@@ -9,7 +9,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	var alphaThreshold = 0xF, hasAlpha = false, hasSemiTransparency = false, isNano = false, transparentColor;
 	var PR = 0.299, PG = 0.587, PB = 0.114, PA = .3333;
 	var random, ratio = 1.0, weight;
-	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map(), saliencies;
+	var closestMap = new Map(), pixelMap = new Map(), nearestMap = new Map();
 
 	var XYZ_WHITE_REFERENCE_X = 95.047, XYZ_WHITE_REFERENCE_Y = 100, XYZ_WHITE_REFERENCE_Z = 108.883;
 	var XYZ_EPSILON = 0.008856, XYZ_KAPPA = 903.3;
@@ -436,7 +436,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 	}
 
 	class PnnLABQuant {
-		#hasSemiTransparency = false; #palette = [];
+		#hasSemiTransparency = false; #palette = []; #saliencies;
 		#transparentPixelIndex = -1; #transparentColor = 0xffffff;
 
 		constructor(opts) {
@@ -517,7 +517,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		#pnnquan(pixels, nMaxColors) {
 			var quan_rt = 1;
 			var bins = new Array(65536);
-			saliencies = nMaxColors >= 128 ? null : new Float32Array(pixels.length);
+			this.#saliencies = nMaxColors >= 128 ? null : new Float32Array(pixels.length);
 			var saliencyBase = .1;
 
 			/* Build histogram */
@@ -547,8 +547,8 @@ Copyright (c) 2018-2026 Miller Cy Chan
 				tb.Ac += lab1.A;
 				tb.Bc += lab1.B;
 				tb.cnt += 1.0;
-				if (saliencies != null)
-					saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
+				if (this.#saliencies != null)
+					this.#saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 			}
 
 			/* Cluster nonempty bins at one end of array */
@@ -781,8 +781,8 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			if (hasSemiTransparency)
 				weight *= -1;
 
-			if (this.opts.dithering && saliencies == null && (nMaxColors <= 256 || weight > .99)) {
-				saliencies = new Float32Array(pixels.length);
+			if (this.opts.dithering && this.#saliencies == null && (nMaxColors <= 256 || weight > .99)) {
+				this.#saliencies = new Float32Array(pixels.length);
 				var saliencyBase = .1;
 
 				for (var i = 0; i < pixels.length; ++i) {
@@ -793,7 +793,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 
 					var lab1 = getLab(a, r, g, b);
 
-					saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
+					this.#saliencies[i] = saliencyBase + (1 - saliencyBase) * lab1.L / 100 * a / 255;
 				}
 			}
 
@@ -803,11 +803,11 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			}
 			
 			if (this.opts.dithering)
-				return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: 1.0 };
+				return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.#saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: 1.0 };
 			
 			var delta = sqr(nMaxColors) / pixelMap.size;
 			var weightB = delta > 0.023 ? 1.0 : Math.fround(37.013 * delta + 0.906);
-			return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
+			return { getColorIndex: this.getColorIndex, ditherFn: this.getDitherFn(), pal8: this.getPalette(), saliencies: this.#saliencies, transparent: this.getTransparentIndex(), type: this.getImgType(), weight: weight, weightB: weightB };
 		}
 		
 		getPalette() {
@@ -823,7 +823,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 		}
 		
 		getDitherFn() {
-			if (this.#palette.length < 4)
+			if (this.#palette.length <= 4)
 				return nearestColorIndex;
 			return closestColorIndex;
 		}
