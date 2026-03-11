@@ -311,7 +311,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				a0 = (pixel >>> 24) & 0xff;
 
 			var c2 = (a_pix << 24) | (b_pix << 16) | (g_pix << 8) | r_pix;
-			if (this.#saliencies != null && this.#dither && !this.#sortedByYDiff && (!this.#hasAlpha || a0 < a_pix)) {
+			if (this.#saliencies != null && this.#dither && !this.#sortedByYDiff && (!this.#hasAlpha || Math.abs(a0 - a_pix) < (.5 * this.#margin))) {
 				if (this.#nMaxColors >= 256 && this.#saliencies[bidx] > .99)
 					this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 				else
