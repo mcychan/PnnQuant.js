@@ -284,7 +284,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			g2 = (palette[i] >>> 8) & 0xff,
 			b2 = (palette[i] >>> 16) & 0xff,
 			a2 = (palette[i] >>> 24) & 0xff;
-			var curdist = hasSemiTransparency ? sqr(a2 - a) / Math.exp(1.5) : 0;
+			var curdist = hasSemiTransparency ? sqr(a2 - a) * PnnLABQuant.TRANS_RATE : 0;
 			if (curdist > mindist)
 				continue;
 			
@@ -444,6 +444,10 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			random = new Random();
 		}
 		
+		static get TRANS_RATE() {
+			return 1 - (512 + 101) / 768;
+		}
+		
 		#find_nn(bins, idx, texicab) {
 			var nn = 0;
 			var err = 1e100;
@@ -459,7 +463,7 @@ Copyright (c) 2018-2026 Miller Cy Chan
 
 				var lab2 = new Lab();
 				lab2.alpha = bins[i].ac; lab2.L = bins[i].Lc; lab2.A = bins[i].Ac; lab2.B = bins[i].Bc;
-				var alphaDiff = hasSemiTransparency ? sqr(lab2.alpha - lab1.alpha) / Math.exp(1.5) : 0;
+				var alphaDiff = hasSemiTransparency ? sqr(lab2.alpha - lab1.alpha) * PnnLABQuant.TRANS_RATE : 0;
 				var nerr = nerr2 * alphaDiff;
 				if (nerr >= err)
 					continue;
