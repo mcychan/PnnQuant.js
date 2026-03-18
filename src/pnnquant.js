@@ -65,9 +65,6 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			k = 1;
 
 		var pr = PR, pg = PG, pb = PB;
-		if (palette.length > 2 && BlueNoise.TELL_BLUE_NOISE[pos & 4095] > -88) {
-			pr = coeffs[0][0]; pg = coeffs[0][1]; pb = coeffs[0][2];
-		}
 
 		var mindist = 1e100;
 		for (var i = k; i < palette.length; i++)
@@ -116,9 +113,6 @@ Copyright (c) 2018-2026 Miller Cy Chan
 			closest[2] = closest[3] = 0xFFFF;
 			
 			var pr = PR, pg = PG, pb = PB;
-			if (BlueNoise.TELL_BLUE_NOISE[pos & 4095] > -88) {
-				pr = coeffs[0][0]; pg = coeffs[0][1]; pb = coeffs[0][2];
-			}
 
 			for (var k = 0; k < palette.length; ++k)
 			{
