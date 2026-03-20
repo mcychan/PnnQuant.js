@@ -358,7 +358,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 						unaccepted = true;
 					
 					if (this.#hasAlpha && this.#saliencies == null) {
-						if (Math.abs(error.p[j]) >= (this.#ditherMax * 2))
+						if (Math.abs(error.p[j]) >= (this.#ditherMax * Math.PI))
 							error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (this.#ditherMax - 1);
 						continue;
 					}
