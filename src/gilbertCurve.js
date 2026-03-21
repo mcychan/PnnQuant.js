@@ -347,9 +347,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			error.p[3] = a_pix - a2;
 
 			var denoise = this.#palette.length > 2;
-			var diffuse = BlueNoise.TELL_BLUE_NOISE[bidx & 4095] > this.#thresold;
 			error.yDiff = this.#sortedByYDiff ? this.#Y_Diff(r0, g0, b0, r2, g2, b2) : 1;
-			var illusion = !diffuse && BlueNoise.TELL_BLUE_NOISE[((error.yDiff * 4096) | 0) & 4095] > this.#thresold;
 
 			var unaccepted = false;
 			var errLength = denoise ? error.p.length - 1 : 0;
@@ -357,19 +355,14 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				if (Math.abs(error.p[j]) >= this.#ditherMax) {
 					if (this.#sortedByYDiff && this.#saliencies != null)
 						unaccepted = true;
-					
+
 					if (this.#hasAlpha && this.#saliencies == null) {
 						if (Math.abs(error.p[j]) >= (this.#ditherMax * Math.PI))
 							error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (this.#ditherMax - 1);
 						continue;
 					}
 
-					if (diffuse)
-						error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (this.#ditherMax - 1);
-					else if (illusion)
-						error.p[j] = Math.fround(error.p[j] / maxErr * error.yDiff) * (this.#ditherMax - 1);
-					else
-						error.p[j] /= Math.fround(1 + Math.sqrt(this.#ditherMax));
+					error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (this.#ditherMax - 1);
 				}
 
 				if (this.#sortedByYDiff && this.#saliencies == null && Math.abs(error.p[j]) >= this.#DITHER_MAX)
