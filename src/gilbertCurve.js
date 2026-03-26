@@ -142,7 +142,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 			var edge = this.#hasAlpha ? 1 : Math.exp(this.#weight) - .25;
 			var ditherMax = this.#DITHER_MAX / this.#weight;
-			if (!this.#sortedByYDiff) {
+			if (!this.#sortedByYDiff && !this.#hasAlpha && this.#saliencies != null) {
 				var deviation = !this.#hasAlpha && this.#weight > .002 ? -.25 : 1;
 				ditherMax = (this.#hasAlpha || this.#DITHER_MAX > 9) ? Math.pow((Math.sqrt(this.#DITHER_MAX) + edge * deviation), 2) : (this.#DITHER_MAX * (this.#saliencies != null ? 2 : Math.E));
 			}
