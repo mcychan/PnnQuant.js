@@ -151,7 +151,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				ditherMax = Math.pow(5 + edge, 2);
 			else if (this.#weight < .03 && this.#palette.length / this.#weight < density && this.#nMaxColors >= 16 && this.#nMaxColors < 256)
 				ditherMax = Math.pow(5 + edge, 2);
-			this.#ditherMax = Math.clamp(ditherMax, 0, 0xff) | 0;
+			this.#ditherMax = new Int8Array([ditherMax | 0])[0];
 			this.#thresold = this.#DITHER_MAX > 9 ? -112 : -64;
 		}
 
@@ -360,7 +360,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 						unaccepted = true;
 
 					if (this.#hasAlpha && this.#saliencies == null) {
-						if (Math.abs(error.p[j]) >= (this.#ditherMax * Math.PI) || error.p[3] < 0)
+						if (Math.abs(error.p[j]) >= (this.#ditherMax * Math.PI) || error.p[3] < 1)
 							error.p[j] = Math.fround(Math.tanh(error.p[j] / maxErr * 20)) * (this.#ditherMax - 1);
 						continue;
 					}
