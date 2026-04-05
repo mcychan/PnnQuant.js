@@ -141,11 +141,10 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			}
 
 			var edge = this.#hasAlpha ? 1 : Math.exp(this.#weight) - .25;
-			var ditherMax = this.#DITHER_MAX / this.#weight;
-			if (!this.#sortedByYDiff && !this.#hasAlpha && this.#saliencies != null) {
-				var deviation = !this.#hasAlpha && this.#weight > .0025 ? -.25 : 1;
-				ditherMax = (this.#hasAlpha || this.#DITHER_MAX > 9) ? Math.pow((Math.sqrt(this.#DITHER_MAX) + edge * deviation), 2) : (this.#DITHER_MAX * (this.#saliencies != null ? 2 : Math.E));
-			}
+			var deviation = !this.#hasAlpha && this.#weight > .0025 ? -.25 : 1;
+			var ditherMax = (this.#hasAlpha || this.#DITHER_MAX > 9) ? Math.pow((Math.sqrt(this.#DITHER_MAX) + edge * deviation), 2) : (this.#DITHER_MAX * (this.#saliencies != null ? 2 : Math.E));
+			if (this.#hasAlpha || (this.#saliencies != null && this.#sortedByYDiff))
+				ditherMax = this.#DITHER_MAX / this.#weight;
 			var density = this.#nMaxColors > 16 ? 3200 : 1500;
 			if (this.#nMaxColors / this.#weight > 5000 && (this.#weight > .045 || (this.#weight > .01 && this.#nMaxColors < 64)))
 				ditherMax = Math.pow(5 + edge, 2);
