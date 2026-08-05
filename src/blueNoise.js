@@ -1,10 +1,12 @@
 /**
  * Alan Wolfe, Nathan Morrical, Tomas Akenine-Möller, Ravi Ramamoorthi:
  * Scalar Spatiotemporal Blue Noise Masks. CoRR abs/2112.09629 (2021)
- * Copyright (c) 2022 - 2025 Miller Cy Chan */	
+ * Copyright (c) 2022 - 2026 Miller Cy Chan */	
 
 (function(){
 	class BlueNoise {
+		static BLUE_NOISE_SIZE = 64;
+
 		// Reference mask from: https://tellusim.com/download/noise/64x64_l64_s16.png
 		// Made from: https://github.com/Tellusim/BlueNoise
 		static TELL_BLUE_NOISE = [
@@ -235,7 +237,78 @@
 	
 			return qPixel32s;
 		}
-		
+
+		// Convert signed-byte blue-noise value (-128 … 127) → float [0, 1]
+		// (the +0.5 / 256 form is the conventional unbiased mapping)
+		#blueNoiseByteToFloat(v)
+		{
+			return Math.fround((v + 0.5) * (1.0 / 256.0));
+		}
+
+		#getTemporalBlueNoise(x, y, frameIndex)
+		{
+			// simple temporal offset (replace with a better 3-D sequence if you have one)
+			var ox = (x + (frameIndex * 13)) & (BlueNoise.BLUE_NOISE_SIZE - 1);
+			var oy = (y + (frameIndex * 29)) & (BlueNoise.BLUE_NOISE_SIZE - 1);
+			var index = oy * BlueNoise.BLUE_NOISE_SIZE + ox;
+			var raw = (index < BlueNoise.TELL_BLUE_NOISE.length) ? BlueNoise.TELL_BLUE_NOISE[index] : BlueNoise.TELL_BLUE_NOISE[index & 4095];
+			return this.#blueNoiseByteToFloat(raw);               // returns [0,1]
+		}
+
+		#getLuminanceFromSaliency(saliency, alpha, saliencyBase)
+		{
+			// Avoid division by zero for fully transparent pixels
+			if (alpha == 0) {
+				return 0.0;
+			}
+
+			var alphaNormalized = alpha / 255.0;
+			var scale = (1.0 - saliencyBase) * alphaNormalized;
+
+			if (scale <= 0.0) {
+				return 0.0;
+			}
+
+			// Invert the formula to isolate L
+			var L = Math.fround((saliency - saliencyBase) / scale);
+
+			// Clamp L to the valid CIELAB Lightness range [0.0, 1.0]
+			return Math.clamp(L, 0.0, 1.0);
+		}
+
+		ditherPixel(pixel, x, y, baseSpread, frameIndex)
+		{
+			var r0 = (pixel & 0xff),
+					g0 = (pixel >>> 8) & 0xff,
+					b0 = (pixel >>> 16) & 0xff,
+					a0 = (pixel >>> 24) & 0xff;
+
+			// Saliency-weighted offset (same logic as original)
+			var weight = this.args.saliency;
+
+			var luminance = this.#getLuminanceFromSaliency(weight, a0, 0.1);
+			// Taper noise to 0 when luminance approaches 1.0 (pure white sky)
+			// Smoothstep / quadratic decay in the top 15% brightness range [0.85, 1.0]
+			var highlightDampener = 1.0;
+			if (luminance > 0.85) {
+				// Smoothly drop from 1.0 (at 0.85) to 0.0 (at 1.0)
+				var t = (luminance - 0.85) / 0.15;
+				highlightDampener = (1.0 - t) * (1.0 - t);
+			}
+
+			// Blue-noise sample centered to [-0.5, 0.5]
+			var noise = this.#getTemporalBlueNoise(x, y, frameIndex) - 0.5;
+			var offset = noise * baseSpread * weight * highlightDampener;
+
+			// Apply noise and clamp safely to RGB limits
+			var r_pix = Math.clamp(r0 + offset, 0, 255);
+			var g_pix = Math.clamp(g0 + offset, 0, 255);
+			var b_pix = Math.clamp(b0 + offset, 0, 255);
+			var a_pix = a0;
+
+			return (a_pix << 24) | (b_pix << 16) | (g_pix <<  8) | r_pix;
+		}
+
 		getIndexedPixels() {
 			return this.qPixels;
 		}

@@ -88,6 +88,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 
 	class GilbertCurve {
 		#width; #height; #weight; #pixels; #palette; #saliencies; #nMaxColors; #beta = 1;
+		#noiseDampener = 0.8; #baseSpread;
 		#qPixels; #qPixel32s; #errorq = []; #weights = [];
 		#BLOCK_SIZE = 343.0; #DITHER_MAX = 9; #ditherMax; #dither; #hasAlpha; #sortedByYDiff; #margin; #thresold;
 			
@@ -107,6 +108,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			this.#weight = Math.abs(this.args.weight);
 			this.#margin = this.#weight < .0025 ? 12 : this.#weight < .004 ? 8 : 6;
 			this.#nMaxColors = this.#palette.length;
+			this.#baseSpread = Math.fround(255.0 / Math.cbrt(this.#nMaxColors) * this.#noiseDampener);
 			this.#sortedByYDiff = this.#nMaxColors > 128 && this.#weight >= .02 && (!this.#hasAlpha || this.#weight < .18);
 			this.#errorq = this.#sortedByYDiff ? new PriorityQueue((o1, o2) => Math.sign(o2.yDiff - o1.yDiff)) : new PriorityQueue();
 
@@ -326,8 +328,13 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				
 				var acceptedDiff = Math.max(2, this.#nMaxColors - this.#margin);
 				if (this.#saliencies != null && (this.#Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > acceptedDiff || this.#U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > (2 * acceptedDiff))) {
-					var strength = 1 / 3.0;
-					c2 = new BlueNoise(null, {weightB: 1 / this.#saliencies[bidx]}).diffuse(pixel, this.#palette[this.#qPixels[bidx]], strength, x, y);
+					if (this.#dither) {
+						c2 = new BlueNoise(this.opts, {saliency: (this.#saliencies != null) ? this.#saliencies[bidx] : 1.0}).ditherPixel(pixel, x, y, this.#baseSpread, 0);
+					}
+					else {
+						var strength = 1 / 3.0;
+						c2 = new BlueNoise(null, {weightB: 1 / this.#saliencies[bidx]}).diffuse(pixel, this.#palette[this.#qPixels[bidx]], strength, x, y);
+					}
 					this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 				}
 			}
@@ -377,8 +384,13 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 				if (this.#saliencies != null)
 					this.#qPixels[bidx] = this.#ditherPixel(x, y, c2, this.#beta);
 				else if (this.#Y_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > 3 && this.#U_Diff(r0, g0, b0, r_pix, g_pix, b_pix) > 3) {
-					var strength = 1 / 3.0;
-					c2 = new BlueNoise(null, {weightB: strength}).diffuse(pixel, this.#palette[this.#qPixels[bidx]], strength, x, y);
+					if (this.#dither) {
+						c2 = new BlueNoise(null, {saliency: (this.#saliencies != null) ? this.#saliencies[bidx] : 1.0}).ditherPixel(pixel, x, y, this.#baseSpread, 0);
+					}
+					else {
+						var strength = 1 / 3.0;
+						c2 = new BlueNoise(null, {weightB: strength}).diffuse(pixel, this.#palette[this.#qPixels[bidx]], strength, x, y);
+					}
 					this.#qPixels[bidx] = ditherFn(this.#palette, c2, bidx);
 				}
 			}
@@ -470,8 +482,7 @@ Copyright (c) 2022 - 2026 Miller Cy Chan
 			this.#qPixels = this.#nMaxColors > 256 ? new Uint16Array(this.#pixels.length) : new Uint8Array(this.#pixels.length);
 			this.#qPixel32s = new Uint32Array(this.#qPixels.length);
 
-			if (!this.#sortedByYDiff)
-				this.#initWeights(this.#DITHER_MAX);
+			this.#initWeights(this.#DITHER_MAX);
 
 			if (this.#width >= this.#height)
 				this.#generate2d(0, 0, this.#width, 0, 0, this.#height);
